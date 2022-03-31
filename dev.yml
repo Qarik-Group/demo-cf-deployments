@@ -10,52 +10,122 @@ kit:
     - postgres-db
     - aws-blobstore
     - small-footprint
+    - ssh-proxy-on-routers
+    - no-tcp-routers
+    #- autoscaler
     #- apps-trust-redis-dev-crt
     #- routing-api-username
     #- nfs-volume-services
     #- nfs-dev-version
-
     #- compiled-releases
     #- enable-service-discovery
-
-	  # Windows feature
+    # Windows features
     - windows-dev-bosh-dns-alias
     - windows-releases
     - windows-diego-cells
-		#- windows-ofline-2019fs
+    #- windows-ofline-2019fs
     #- windows-remove-default-network
     #- windows-smoke-tests
-
     #- prometheus-integration
 
 params:
   # Cloud Foundry base domain
   base_domain: codex.starkandwayne.com
+	system_domain: system.codex.starkandwayne.com
+  apps_domains: apps.codex.starkandwayne.com
 
-  # External PostgreSQL configuration
-  external_db_host: snw-dev-cf-db.cmziohdu4x1g.us-west-2.rds.amazonaws.com
-  external_db_password: ((external_db_password))
-  external_db_username: ((external_db_user)) 
+	# External PostgreSQL configuration
+  external_db_hostw:     snw-dev-cf-db.cmziohdu4x1g.us-west-2.rds.amazonaws.com
+  external_db_username:  ((external_db_user)) 
+	#external_db_password: ((external_db_password))
 
+  # CF Databases
+	#uaadb_password:          ((uaa_db_password))
+	#ccdb_password:           ((cloud_controller_db_password))
+	#diegodb_password:        ((diego_db_password))
+	#policyserverdb_password: ((network_policy_db_password))
+	#silkdb_password:         ((network_connectivity_db_password))
+	#routingapidb_password:   ((routing_api_db_password))
+	#locketdb_password:       ((locket_db_password))
+	#credhubdb_password:      ((credhub_db_password))
+
+	# External Blobstore
   blobstore_s3_region: us-west-2
-  # Skip SSL validation since we use self-signed certs
-  skip_ssl_validation: true
+  skip_ssl_validation: true # Skip SSL validation since we use self-signed certs
+	blobstore_app_packages_directory: codex-uswest2-dev-app-packages
+	blobstore_buildpacks_directory:   codex-uswest2-dev-buildpacks
+	blobstore_droplets_directory:     codex-uswest2-dev-droplets
+	blobstore_resources_directory:    codex-uswest2-dev-resources
 
-  # Manually configured parameters
-  blobstore_bucket_prefix: uswest2demo
-  blobstore_bucket_suffix: dev
+	# Skip SSL validation since we use self-signed certs
+	skip_ssl_validation: true
 
-  # Scaling Parameters
-  diego_cell_instances: 2
-
-  # Windows features
+	# Instances Scaling
+	api_instances: 1
+	cc_worker_instances: 1
+	credhub_instances: 1
+	diego_api_instances:  1
+	doppler_instances: 1
+	log_api_instances: 1
+	nats_instances: 1
+	router_instances: 1
+	scheduler_instances: 1
+	tcp_router_instances: 0
+	uaa_instances: 1
+	diego_cell_instances: 1
+	windows_diego_cell_instances: 1 # Required for Windows, 3 one for each az
+	windows_diego_cell_vm_type: diego-cell # Required for Windows
   #windows2019_cell_vm_type: cell
   #windows2019_cell_instances: 2
-  windows_diego_cell_vm_type: cell
-  windows_diego_cell_instances: 2
+
+	# Cloud Config instance vm_type mappings
+	api_vm_type:        api
+	cc_worker_vm_type:  cc-worker
+	credhub_vm_type:    credhub
+	diego_api_vm_type:  diego-api
+	diego_cell_vm_type: diego-cell
+	doppler_vm_type:    doppler
+	nats_vm_type:       nats
+	log_api_vm_type:    log-api
+	router_vm_type:     router
+	errand_vm_type:     errand
+	scheduler_vm_type:  scheduler
+	tcp_router_vm_type: tcp-router
+	uaa_vm_type:        uaa
+
+instance_groups:
+- name: router
+  vm_extensions:
+    - dev-elb
+    #- dev-alb
+    #- dev-nlb
+- name: diego-cell
+	update:
+		max_in_flight: 3
+-  name: uaa
+   jobs:
+	- name: uaa
+		properties:
+			uaa:
+				clients:
+					stratos_apps:
+						authorized-grant-types: authorization_code,client_credentials,refresh_token
+						redirect-uri: https://apps.dev.codex.starkandwayne.com/pp/vl/auth/sso_login_callback
+						autoapprove: true # Bypass users approval
+						# The following properties copied from those of the default 'Cf ' client:
+						access-token-validity: 1200
+						authorities: uaa.none
+						override: true
+						refresh-token-validity: 2592000
+						scope: network.admin,network.write, cloud_controller.read,cloud_controller.write,openid,password.write,cloud_controller.admin,scim.read,scim.write.doppler.firehose,uaa.user,routing.router_groups.read,routing.router_groups.write,cloud_controller.admin_read_only,cloud_controller.global_auditor,perm.admin,clients.read
+						secret: "((stratos_client_secret))"
 
 stemcells:
 - alias: default
   os: ubuntu-bionic
   version: latest
+
+variables:
+- name: stratos_client_secret
+  type: password
 
