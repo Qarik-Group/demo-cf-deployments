@@ -1,0 +1,61 @@
+---
+genesis:
+  env:         dev
+  min_version: 2.8.4
+
+kit:
+  name: cf
+  version: 2.2.0-rc.8
+  features: 
+    - postgres-db
+    - aws-blobstore
+    - small-footprint
+    #- apps-trust-redis-dev-crt
+    #- routing-api-username
+    #- nfs-volume-services
+    #- nfs-dev-version
+
+    #- compiled-releases
+    #- enable-service-discovery
+
+	  # Windows feature
+    - windows-dev-bosh-dns-alias
+    - windows-releases
+    - windows-diego-cells
+		#- windows-ofline-2019fs
+    #- windows-remove-default-network
+    #- windows-smoke-tests
+
+    #- prometheus-integration
+
+params:
+  # Cloud Foundry base domain
+  base_domain: codex.starkandwayne.com
+
+  # External PostgreSQL configuration
+  external_db_host: snw-dev-cf-db.cmziohdu4x1g.us-west-2.rds.amazonaws.com
+  external_db_password: ((external_db_password))
+  external_db_username: ((external_db_user)) 
+
+  blobstore_s3_region: us-west-2
+  # Skip SSL validation since we use self-signed certs
+  skip_ssl_validation: true
+
+  # Manually configured parameters
+  blobstore_bucket_prefix: uswest2demo
+  blobstore_bucket_suffix: dev
+
+  # Scaling Parameters
+  diego_cell_instances: 2
+
+  # Windows features
+  #windows2019_cell_vm_type: cell
+  #windows2019_cell_instances: 2
+  windows_diego_cell_vm_type: cell
+  windows_diego_cell_instances: 2
+
+stemcells:
+- alias: default
+  os: ubuntu-bionic
+  version: latest
+

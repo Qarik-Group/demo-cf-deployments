@@ -1,0 +1,29 @@
+---
+instance_groups:
+- name: uaa
+  jobs:
+    name: uaa
+    properties:
+      login:
+        oauth:
+          providers:
+            okta:
+              type: oidc1.0
+                originKey: okta
+                  discoveryUrl: https://dev.oktapreview.com/oauth2/aus...38/.well-known/openid-configuration
+                  issuer: https://dev.oktapreview.com/oauth2/aus...38
+                  attributeMappings:
+                    external_groups: ["groups"]
+                    email: email
+                    given_name: name
+                    user_name: email
+                  # offline access allows for refresh tokens, groups will return whitelisted groups that a user belongs to.
+                  scopes:
+                    openid
+                    email
+                    groups
+                    profile
+                    offline_access
+                  linkText: Okta Login
+                  showLinkText: true
+                  relyingPartyId: 00a...h8

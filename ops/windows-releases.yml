@@ -1,0 +1,18 @@
+- type: replace
+  path: /releases/name=windowsfs?
+  value:
+    name: "windowsfs"
+    version: "2.34.0"
+    url: "https://bosh.io/d/github.com/cloudfoundry/windowsfs-online-release?v=2.34.0"
+    sha1: "1552b6b04341985a996a9c89c7bcf5448e5d665d"
+#- type: replace
+#  path: /releases/name=windows2019fs?
+#  value:
+#    name: windowfs
+#    version: 2.34.0
+---
+releases:
+- name: "windowsfs"
+  version: "2.34.0"
+  url: "https://bosh.io/d/github.com/cloudfoundry/windowsfs-online-release?v=2.34.0"
+  sha1: "1552b6b04341985a996a9c89c7bcf5448e5d665d"
