@@ -299,7 +299,7 @@ addons:
         targets:
         - deployment: ((deployment_name))
           domain: bosh
-          instance_group: scheduler
+          instance_group: router
           network: ((cf_core_network))
           query: '*'
       - domain: tps.service.cf.internal
@@ -330,6 +330,13 @@ addons:
           instance_group: nats
           network: ((cf_core_network))
           query: _
+      - domain: smbtestserver.service.cf.internal
+        targets:
+        - deployment: cf
+          domain: bosh
+          instance_group: smbtestserver
+          network: default
+          query: '*'
     release: bosh-dns-aliases
   name: bosh-dns-aliases
 - include:
@@ -376,14 +383,14 @@ azs:
     availability_zone: us-west-2c
   name: z3
 bosh-variables:
-  app_package_directory_key: uswest2demo-app-packages-dev
-  buildpack_directory_key: uswest2demo-buildpacks-dev
+  app_package_directory_key: codex-uswest2-dev-app-packages
+  buildpack_directory_key: codex-uswest2-dev-buildpacks
   cf_core_network: cf-core
   cf_db_network: cf-core
   cf_edge_network: cf-edge
   cf_runtime_network: cf-runtime
   deployment_name: dev-cf
-  droplet_directory_key: uswest2demo-droplets-dev
+  droplet_directory_key: codex-uswest2-dev-droplets
   external_bbs_database_address: snw-dev-cf-db.cmziohdu4x1g.us-west-2.rds.amazonaws.com
   external_bbs_database_name: diego
   external_bbs_database_password: ((external_db_password))
@@ -431,7 +438,7 @@ bosh-variables:
     aws_secret_access_key: ((blobstore_secret_access_key))
     provider: AWS
     region: us-west-2
-  resource_directory_key: uswest2demo-resources-dev
+  resource_directory_key: codex-uswest2-dev-resources
   system_domain: system.codex.starkandwayne.com
 compilation:
   az: z1
@@ -441,67 +448,78 @@ compilation:
   workers: 5
 disk_types:
 - cloud_properties:
-    type: gp2
+    encrypted: true
+    type: gp3
   disk_size: 2048
   name: default
 - cloud_properties:
-    type: gp2
+    encrypted: true
+    type: gp3
   disk_size: 2048
   name: consul
 - cloud_properties:
-    type: gp2
+    encrypted: true
+    type: gp3
   disk_size: 10240
   name: concourse
 - cloud_properties:
-    type: gp2
+    encrypted: true
+    type: gp3
   disk_size: 4096
   name: postgres
 - cloud_properties:
-    type: gp2
+    encrypted: true
+    type: gp3
   disk_size: 4096
   name: blobstore
 - cloud_properties:
-    type: gp2
+    encrypted: true
+    type: gp3
   disk_size: 1024
   name: vault
 - cloud_properties:
-    type: gp2
+    encrypted: true
+    type: gp3
   disk_size: 65536
   name: bosh
 - cloud_properties:
-    type: gp2
+    encrypted: true
+    type: gp3
   disk_size: 131072
   name: bosh-large
 - cloud_properties:
-    type: gp2
+    encrypted: true
+    type: gp3
   disk_size: 2048
   name: shield
 - cloud_properties:
-    type: gp2
-  disk_size: 51200
-  name: jumpbox
-- cloud_properties:
-    type: gp2
+    encrypted: true
+    type: gp3
   disk_size: 51200
   name: prometheus
 - cloud_properties:
-    type: gp2
+    encrypted: true
+    type: gp3
   disk_size: 4096
   name: rabbitmq
 - cloud_properties:
-    type: gp2
+    encrypted: true
+    type: gp3
   disk_size: 5120
   name: 5GB
 - cloud_properties:
-    type: gp2
+    encrypted: true
+    type: gp3
   disk_size: 10240
   name: 10GB
 - cloud_properties:
-    type: gp2
+    encrypted: true
+    type: gp3
   disk_size: 100240
   name: 100GB
 - cloud_properties:
-    type: gp2
+    encrypted: true
+    type: gp3
   disk_size: 10240
   name: minio
 exodus:
@@ -509,8 +527,10 @@ exodus:
   admin_username: admin
   api_domain: api.system.codex.starkandwayne.com
   app_domains:
-  - run.codex.starkandwayne.com
-  apps_domain: run.codex.starkandwayne.com
+  - apps.codex.starkandwayne.com
+  app_scheduler_client: app_scheduler_client
+  app_scheduler_secret: ((uaa_clients_app_scheduler_secret))
+  apps_domain: apps.codex.starkandwayne.com
   base_domain: codex.starkandwayne.com
   bosh: dev
   cf-deployment-date: 2022-Feb-14 03:48:47 UTC
@@ -518,15 +538,15 @@ exodus:
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.25.0
   cf-deployment-version: 16.25.0
   core_network: cf-core
-  dated: 2022-03-26 19:27:50 +0000
+  dated: 2022-05-13 20:12:10 +0000
   db_network: cf-core
-  deployer: wayneeseguin
+  deployer: ubuntu
   edge_network: cf-edge
-  features: postgres-db,aws-blobstore,small-footprint,nfs-volume-services,nfs-dev-version,windows-diego-cells,smoke-tests-windows,bosh-dns-alias-windows,windows-releases
+  features: postgres-db,aws-blobstore,small-footprint,ssh-proxy-on-routers,app-scheduler-integration,smb-test-server,smb-volume-services,smb-volume-services-releases,windows-dev-bosh-dns-alias,windows-diego-cells,windows-releases,custom-router-group
   is_director: false
-  kit_is_dev: true
+  kit_is_dev: false
   kit_name: cf
-  kit_version: 2.0.0
+  kit_version: 2.2.0-rc.14
   runtime_network: cf-runtime
   system_domain: system.codex.starkandwayne.com
   system_org: system
@@ -534,7 +554,7 @@ exodus:
   use_create_env: false
   vault_base: /secret/dev/cf
   vaulted_uaa_clients: /secret/dev/cf/uaa/client_secrets:firehose
-  version: 2.8.4
+  version: 2.8.5
 features:
   randomize_az_placement: true
 genesis:
@@ -556,7 +576,7 @@ instance_groups:
         enabled: true
       smoke_tests:
         api: https://api.((system_domain))
-        apps_domain: run.codex.starkandwayne.com
+        apps_domain: apps.codex.starkandwayne.com
         cf_dial_timeout_in_seconds: 300
         client: cf_smoke_tests
         client_secret: ((uaa_clients_cf_smoke_tests_secret))
@@ -571,7 +591,7 @@ instance_groups:
   networks:
   - name: ((cf_runtime_network))
   stemcell: default
-  vm_type: minimal
+  vm_type: errand
 - azs:
   - z1
   instances: 1
@@ -622,7 +642,7 @@ instance_groups:
   networks:
   - name: ((cf_core_network))
   stemcell: default
-  vm_type: minimal
+  vm_type: nats
 - azs:
   - z1
   instances: 1
@@ -681,10 +701,36 @@ instance_groups:
     properties:
       ca_cert: ((silk_controller.ca))
       database:
+        ca_cert: |
+          -----BEGIN CERTIFICATE-----
+          MIIEBjCCAu6gAwIBAgIJAMc0ZzaSUK51MA0GCSqGSIb3DQEBCwUAMIGPMQswCQYD
+          VQQGEwJVUzEQMA4GA1UEBwwHU2VhdHRsZTETMBEGA1UECAwKV2FzaGluZ3RvbjEi
+          MCAGA1UECgwZQW1hem9uIFdlYiBTZXJ2aWNlcywgSW5jLjETMBEGA1UECwwKQW1h
+          em9uIFJEUzEgMB4GA1UEAwwXQW1hem9uIFJEUyBSb290IDIwMTkgQ0EwHhcNMTkw
+          ODIyMTcwODUwWhcNMjQwODIyMTcwODUwWjCBjzELMAkGA1UEBhMCVVMxEDAOBgNV
+          BAcMB1NlYXR0bGUxEzARBgNVBAgMCldhc2hpbmd0b24xIjAgBgNVBAoMGUFtYXpv
+          biBXZWIgU2VydmljZXMsIEluYy4xEzARBgNVBAsMCkFtYXpvbiBSRFMxIDAeBgNV
+          BAMMF0FtYXpvbiBSRFMgUm9vdCAyMDE5IENBMIIBIjANBgkqhkiG9w0BAQEFAAOC
+          AQ8AMIIBCgKCAQEArXnF/E6/Qh+ku3hQTSKPMhQQlCpoWvnIthzX6MK3p5a0eXKZ
+          oWIjYcNNG6UwJjp4fUXl6glp53Jobn+tWNX88dNH2n8DVbppSwScVE2LpuL+94vY
+          0EYE/XxN7svKea8YvlrqkUBKyxLxTjh+U/KrGOaHxz9v0l6ZNlDbuaZw3qIWdD/I
+          6aNbGeRUVtpM6P+bWIoxVl/caQylQS6CEYUk+CpVyJSkopwJlzXT07tMoDL5WgX9
+          O08KVgDNz9qP/IGtAcRduRcNioH3E9v981QO1zt/Gpb2f8NqAjUUCUZzOnij6mx9
+          McZ+9cWX88CRzR0vQODWuZscgI08NvM69Fn2SQIDAQABo2MwYTAOBgNVHQ8BAf8E
+          BAMCAQYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUc19g2LzLA5j0Kxc0LjZa
+          pmD/vB8wHwYDVR0jBBgwFoAUc19g2LzLA5j0Kxc0LjZapmD/vB8wDQYJKoZIhvcN
+          AQELBQADggEBAHAG7WTmyjzPRIM85rVj+fWHsLIvqpw6DObIjMWokpliCeMINZFV
+          ynfgBKsf1ExwbvJNzYFXW6dihnguDG9VMPpi2up/ctQTN8tm9nDKOy08uNZoofMc
+          NUZxKCEkVKZv+IL4oHoeayt8egtv3ujJM6V14AstMQ6SwvwvA93EP/Ug2e4WAXHu
+          cbI1NAbUgVDqp+DRdfvZkgYKryjTWd/0+1fS8X1bBZVWzl7eirNVnHbSH2ZDpNuY
+          0SBd8dj5F6ld3t58ydZbrTHze7JJOd8ijySAp4/kiu9UfZWuTPABzDa/DSdz9Dk/
+          zPW4CXXvhLmE02TA9/HeCw3KEHIwicNuEfw=
+          -----END CERTIFICATE-----
         host: ((external_silk_controller_database_address))
         name: ((external_silk_controller_database_name))
         password: ((external_silk_controller_database_password))
         port: ((external_silk_controller_database_port))
+        require_ssl: true
         type: ((external_database_type))
         username: ((external_silk_controller_database_username))
       server_cert: ((silk_controller.certificate))
@@ -740,7 +786,7 @@ instance_groups:
   networks:
   - name: ((cf_core_network))
   stemcell: default
-  vm_type: small
+  vm_type: diego-api
 - azs:
   - z1
   instances: 1
@@ -773,7 +819,37 @@ instance_groups:
       uaa:
         admin:
           client_secret: ((uaa_admin_client_secret))
+        ca_certs:
+        - |
+          -----BEGIN CERTIFICATE-----
+          MIIEBjCCAu6gAwIBAgIJAMc0ZzaSUK51MA0GCSqGSIb3DQEBCwUAMIGPMQswCQYD
+          VQQGEwJVUzEQMA4GA1UEBwwHU2VhdHRsZTETMBEGA1UECAwKV2FzaGluZ3RvbjEi
+          MCAGA1UECgwZQW1hem9uIFdlYiBTZXJ2aWNlcywgSW5jLjETMBEGA1UECwwKQW1h
+          em9uIFJEUzEgMB4GA1UEAwwXQW1hem9uIFJEUyBSb290IDIwMTkgQ0EwHhcNMTkw
+          ODIyMTcwODUwWhcNMjQwODIyMTcwODUwWjCBjzELMAkGA1UEBhMCVVMxEDAOBgNV
+          BAcMB1NlYXR0bGUxEzARBgNVBAgMCldhc2hpbmd0b24xIjAgBgNVBAoMGUFtYXpv
+          biBXZWIgU2VydmljZXMsIEluYy4xEzARBgNVBAsMCkFtYXpvbiBSRFMxIDAeBgNV
+          BAMMF0FtYXpvbiBSRFMgUm9vdCAyMDE5IENBMIIBIjANBgkqhkiG9w0BAQEFAAOC
+          AQ8AMIIBCgKCAQEArXnF/E6/Qh+ku3hQTSKPMhQQlCpoWvnIthzX6MK3p5a0eXKZ
+          oWIjYcNNG6UwJjp4fUXl6glp53Jobn+tWNX88dNH2n8DVbppSwScVE2LpuL+94vY
+          0EYE/XxN7svKea8YvlrqkUBKyxLxTjh+U/KrGOaHxz9v0l6ZNlDbuaZw3qIWdD/I
+          6aNbGeRUVtpM6P+bWIoxVl/caQylQS6CEYUk+CpVyJSkopwJlzXT07tMoDL5WgX9
+          O08KVgDNz9qP/IGtAcRduRcNioH3E9v981QO1zt/Gpb2f8NqAjUUCUZzOnij6mx9
+          McZ+9cWX88CRzR0vQODWuZscgI08NvM69Fn2SQIDAQABo2MwYTAOBgNVHQ8BAf8E
+          BAMCAQYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUc19g2LzLA5j0Kxc0LjZa
+          pmD/vB8wHwYDVR0jBBgwFoAUc19g2LzLA5j0Kxc0LjZapmD/vB8wDQYJKoZIhvcN
+          AQELBQADggEBAHAG7WTmyjzPRIM85rVj+fWHsLIvqpw6DObIjMWokpliCeMINZFV
+          ynfgBKsf1ExwbvJNzYFXW6dihnguDG9VMPpi2up/ctQTN8tm9nDKOy08uNZoofMc
+          NUZxKCEkVKZv+IL4oHoeayt8egtv3ujJM6V14AstMQ6SwvwvA93EP/Ug2e4WAXHu
+          cbI1NAbUgVDqp+DRdfvZkgYKryjTWd/0+1fS8X1bBZVWzl7eirNVnHbSH2ZDpNuY
+          0SBd8dj5F6ld3t58ydZbrTHze7JJOd8ijySAp4/kiu9UfZWuTPABzDa/DSdz9Dk/
+          zPW4CXXvhLmE02TA9/HeCw3KEHIwicNuEfw=
+          -----END CERTIFICATE-----
         clients:
+          app_scheduler_client:
+            authorities: cloud_controller.read,cloud_controller.admin,uaa.resource
+            authorized-grant-types: client_credentials
+            secret: ((uaa_clients_app_scheduler_secret))
           cc-service-dashboards:
             authorities: clients.read,clients.write,clients.admin
             authorized-grant-types: client_credentials
@@ -820,18 +896,18 @@ instance_groups:
             authorities: uaa.resource,cloud_controller.admin_read_only
             authorized-grant-types: client_credentials
             secret: ((uaa_clients_network_policy_secret))
-          nfs-broker-credhub-client:
-            authorities: credhub.read,credhub.write
-            authorized-grant-types: client_credentials
-            secret: ((nfs-broker-credhub-uaa-client-secret))
-          nfs-broker-push-client:
-            authorities: cloud_controller.admin,clients.read
-            authorized-grant-types: client_credentials
-            secret: ((nfs-broker-push-uaa-client-secret))
           routing_api_client:
             authorities: routing.routes.write,routing.routes.read,routing.router_groups.read
             authorized-grant-types: client_credentials
             secret: ((uaa_clients_routing_api_client_secret))
+          smb-broker-client:
+            authorities: cloud_controller.admin,clients.read
+            authorized-grant-types: client_credentials
+            secret: ((smb-broker-uaa-client-secret))
+          smb-broker-credhub-client:
+            authorities: credhub.read,credhub.write
+            authorized-grant-types: client_credentials
+            secret: ((smb-broker-credhub-uaa-client-secret))
           ssh-proxy:
             authorized-grant-types: authorization_code
             autoapprove: true
@@ -839,6 +915,16 @@ instance_groups:
             redirect-uri: https://uaa.((system_domain))/login
             scope: openid,cloud_controller.read,cloud_controller.write,cloud_controller.admin
             secret: ((uaa_clients_ssh-proxy_secret))
+          stratos_apps:
+            access-token-validity: 1200
+            authorities: uaa.none
+            authorized-grant-types: authorization_code,client_credentials,refresh_token
+            autoapprove: true
+            override: true
+            redirect-uri: https://apps.dev.codex.starkandwayne.com/pp/vl/auth/sso_login_callback
+            refresh-token-validity: 2592000
+            scope: network.admin,network.write, cloud_controller.read,cloud_controller.write,openid,password.write,cloud_controller.admin,scim.read,scim.write.doppler.firehose,uaa.user,routing.router_groups.read,routing.router_groups.write,cloud_controller.admin_read_only,cloud_controller.global_auditor,perm.admin,clients.read
+            secret: ((stratos_client_secret))
           tcp_emitter:
             authorities: routing.routes.write,routing.routes.read
             authorized-grant-types: client_credentials
@@ -886,7 +972,7 @@ instance_groups:
         - name: ((external_uaa_database_username))
           password: ((external_uaa_database_password))
           tag: admin
-        tls: disabled
+        tls: enabled
     release: uaa
   - name: route_registrar
     properties:
@@ -925,7 +1011,7 @@ instance_groups:
   networks:
   - name: ((cf_core_network))
   stemcell: default
-  vm_type: minimal
+  vm_type: uaa
 - azs:
   - z1
   instances: 1
@@ -935,10 +1021,10 @@ instance_groups:
     name: cloud_controller_ng
     properties:
       app_domains:
-      - run.codex.starkandwayne.com
+      - apps.codex.starkandwayne.com
       app_ssh:
         host_key_fingerprint: ((diego_ssh_proxy_host_key.public_key_fingerprint))
-      build: cf-genesis-kit v2.2.0-rc.8
+      build: cf-genesis-kit v2.2.0-rc.14
       cc:
         buildpacks:
           buildpack_directory_key: ((buildpack_directory_key))
@@ -1173,10 +1259,35 @@ instance_groups:
         mtls_server_key: ((routing_api_tls.private_key))
         router_groups:
         - name: default-tcp
-          reservable_ports: 1024-1033
+          reservable_ports: 40000-40099
           type: tcp
         skip_consul_lock: true
         sqldb:
+          ca_cert: |
+            -----BEGIN CERTIFICATE-----
+            MIIEBjCCAu6gAwIBAgIJAMc0ZzaSUK51MA0GCSqGSIb3DQEBCwUAMIGPMQswCQYD
+            VQQGEwJVUzEQMA4GA1UEBwwHU2VhdHRsZTETMBEGA1UECAwKV2FzaGluZ3RvbjEi
+            MCAGA1UECgwZQW1hem9uIFdlYiBTZXJ2aWNlcywgSW5jLjETMBEGA1UECwwKQW1h
+            em9uIFJEUzEgMB4GA1UEAwwXQW1hem9uIFJEUyBSb290IDIwMTkgQ0EwHhcNMTkw
+            ODIyMTcwODUwWhcNMjQwODIyMTcwODUwWjCBjzELMAkGA1UEBhMCVVMxEDAOBgNV
+            BAcMB1NlYXR0bGUxEzARBgNVBAgMCldhc2hpbmd0b24xIjAgBgNVBAoMGUFtYXpv
+            biBXZWIgU2VydmljZXMsIEluYy4xEzARBgNVBAsMCkFtYXpvbiBSRFMxIDAeBgNV
+            BAMMF0FtYXpvbiBSRFMgUm9vdCAyMDE5IENBMIIBIjANBgkqhkiG9w0BAQEFAAOC
+            AQ8AMIIBCgKCAQEArXnF/E6/Qh+ku3hQTSKPMhQQlCpoWvnIthzX6MK3p5a0eXKZ
+            oWIjYcNNG6UwJjp4fUXl6glp53Jobn+tWNX88dNH2n8DVbppSwScVE2LpuL+94vY
+            0EYE/XxN7svKea8YvlrqkUBKyxLxTjh+U/KrGOaHxz9v0l6ZNlDbuaZw3qIWdD/I
+            6aNbGeRUVtpM6P+bWIoxVl/caQylQS6CEYUk+CpVyJSkopwJlzXT07tMoDL5WgX9
+            O08KVgDNz9qP/IGtAcRduRcNioH3E9v981QO1zt/Gpb2f8NqAjUUCUZzOnij6mx9
+            McZ+9cWX88CRzR0vQODWuZscgI08NvM69Fn2SQIDAQABo2MwYTAOBgNVHQ8BAf8E
+            BAMCAQYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUc19g2LzLA5j0Kxc0LjZa
+            pmD/vB8wHwYDVR0jBBgwFoAUc19g2LzLA5j0Kxc0LjZapmD/vB8wDQYJKoZIhvcN
+            AQELBQADggEBAHAG7WTmyjzPRIM85rVj+fWHsLIvqpw6DObIjMWokpliCeMINZFV
+            ynfgBKsf1ExwbvJNzYFXW6dihnguDG9VMPpi2up/ctQTN8tm9nDKOy08uNZoofMc
+            NUZxKCEkVKZv+IL4oHoeayt8egtv3ujJM6V14AstMQ6SwvwvA93EP/Ug2e4WAXHu
+            cbI1NAbUgVDqp+DRdfvZkgYKryjTWd/0+1fS8X1bBZVWzl7eirNVnHbSH2ZDpNuY
+            0SBd8dj5F6ld3t58ydZbrTHze7JJOd8ijySAp4/kiu9UfZWuTPABzDa/DSdz9Dk/
+            zPW4CXXvhLmE02TA9/HeCw3KEHIwicNuEfw=
+            -----END CERTIFICATE-----
           host: ((external_routing_api_database_address))
           password: ((external_routing_api_database_password))
           port: ((external_routing_api_database_port))
@@ -1193,10 +1304,36 @@ instance_groups:
     name: policy-server
     properties:
       database:
+        ca_cert: |
+          -----BEGIN CERTIFICATE-----
+          MIIEBjCCAu6gAwIBAgIJAMc0ZzaSUK51MA0GCSqGSIb3DQEBCwUAMIGPMQswCQYD
+          VQQGEwJVUzEQMA4GA1UEBwwHU2VhdHRsZTETMBEGA1UECAwKV2FzaGluZ3RvbjEi
+          MCAGA1UECgwZQW1hem9uIFdlYiBTZXJ2aWNlcywgSW5jLjETMBEGA1UECwwKQW1h
+          em9uIFJEUzEgMB4GA1UEAwwXQW1hem9uIFJEUyBSb290IDIwMTkgQ0EwHhcNMTkw
+          ODIyMTcwODUwWhcNMjQwODIyMTcwODUwWjCBjzELMAkGA1UEBhMCVVMxEDAOBgNV
+          BAcMB1NlYXR0bGUxEzARBgNVBAgMCldhc2hpbmd0b24xIjAgBgNVBAoMGUFtYXpv
+          biBXZWIgU2VydmljZXMsIEluYy4xEzARBgNVBAsMCkFtYXpvbiBSRFMxIDAeBgNV
+          BAMMF0FtYXpvbiBSRFMgUm9vdCAyMDE5IENBMIIBIjANBgkqhkiG9w0BAQEFAAOC
+          AQ8AMIIBCgKCAQEArXnF/E6/Qh+ku3hQTSKPMhQQlCpoWvnIthzX6MK3p5a0eXKZ
+          oWIjYcNNG6UwJjp4fUXl6glp53Jobn+tWNX88dNH2n8DVbppSwScVE2LpuL+94vY
+          0EYE/XxN7svKea8YvlrqkUBKyxLxTjh+U/KrGOaHxz9v0l6ZNlDbuaZw3qIWdD/I
+          6aNbGeRUVtpM6P+bWIoxVl/caQylQS6CEYUk+CpVyJSkopwJlzXT07tMoDL5WgX9
+          O08KVgDNz9qP/IGtAcRduRcNioH3E9v981QO1zt/Gpb2f8NqAjUUCUZzOnij6mx9
+          McZ+9cWX88CRzR0vQODWuZscgI08NvM69Fn2SQIDAQABo2MwYTAOBgNVHQ8BAf8E
+          BAMCAQYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUc19g2LzLA5j0Kxc0LjZa
+          pmD/vB8wHwYDVR0jBBgwFoAUc19g2LzLA5j0Kxc0LjZapmD/vB8wDQYJKoZIhvcN
+          AQELBQADggEBAHAG7WTmyjzPRIM85rVj+fWHsLIvqpw6DObIjMWokpliCeMINZFV
+          ynfgBKsf1ExwbvJNzYFXW6dihnguDG9VMPpi2up/ctQTN8tm9nDKOy08uNZoofMc
+          NUZxKCEkVKZv+IL4oHoeayt8egtv3ujJM6V14AstMQ6SwvwvA93EP/Ug2e4WAXHu
+          cbI1NAbUgVDqp+DRdfvZkgYKryjTWd/0+1fS8X1bBZVWzl7eirNVnHbSH2ZDpNuY
+          0SBd8dj5F6ld3t58ydZbrTHze7JJOd8ijySAp4/kiu9UfZWuTPABzDa/DSdz9Dk/
+          zPW4CXXvhLmE02TA9/HeCw3KEHIwicNuEfw=
+          -----END CERTIFICATE-----
         host: ((external_policy_server_database_address))
         name: ((external_policy_server_database_name))
         password: ((external_policy_server_database_password))
         port: ((external_policy_server_database_port))
+        require_ssl: true
         type: ((external_database_type))
         username: ((external_policy_server_database_username))
       enable_space_developer_self_service: true
@@ -1246,7 +1383,7 @@ instance_groups:
   stemcell: default
   vm_extensions:
   - 50GB_ephemeral_disk
-  vm_type: small
+  vm_type: api
 - azs:
   - z1
   instances: 1
@@ -1309,7 +1446,7 @@ instance_groups:
   networks:
   - name: ((cf_core_network))
   stemcell: default
-  vm_type: minimal
+  vm_type: cc-worker
 - azs:
   - z1
   instances: 1
@@ -1540,9 +1677,8 @@ instance_groups:
   networks:
   - name: ((cf_core_network))
   stemcell: default
-  vm_extensions:
-  - diego-ssh-proxy-network-properties
-  vm_type: minimal
+  vm_extensions: []
+  vm_type: scheduler
 - azs:
   - z1
   instances: 1
@@ -1595,6 +1731,39 @@ instance_groups:
         key: ((loggr_udp_forwarder_tls.private_key))
         server_name: loggr_udp_forwarder_metrics
     release: loggregator-agent
+  - name: ssh_proxy
+    properties:
+      backends:
+        tls:
+          ca_certificates:
+          - ((diego_instance_identity_ca.ca))
+          client_certificate: ((ssh_proxy_backends_tls.certificate))
+          client_private_key: ((ssh_proxy_backends_tls.private_key))
+          enabled: true
+      bpm:
+        enabled: true
+      diego:
+        ssh_proxy:
+          bbs:
+            ca_cert: ((diego_bbs_client.ca))
+            client_cert: ((diego_bbs_client.certificate))
+            client_key: ((diego_bbs_client.private_key))
+          disable_healthcheck_server: true
+          enable_cf_auth: true
+          host_key: ((diego_ssh_proxy_host_key.private_key))
+          uaa:
+            ca_cert: ((uaa_ssl.ca))
+          uaa_secret: ((uaa_clients_ssh-proxy_secret))
+      enable_consul_service_registration: false
+      logging:
+        format:
+          timestamp: rfc3339
+      loggregator:
+        ca_cert: ((loggregator_tls_agent.ca))
+        cert: ((loggregator_tls_agent.certificate))
+        key: ((loggregator_tls_agent.private_key))
+        use_v2_api: true
+    release: diego
   name: router
   networks:
   - name: ((cf_edge_network))
@@ -1603,7 +1772,8 @@ instance_groups:
     serial: true
   vm_extensions:
   - cf-router-network-properties
-  vm_type: minimal
+  - diego-ssh-proxy-network-properties
+  vm_type: router
 - azs:
   - z1
   instances: 1
@@ -1636,7 +1806,7 @@ instance_groups:
   stemcell: default
   vm_extensions:
   - cf-tcp-router-network-properties
-  vm_type: minimal
+  vm_type: tcp-router
 - azs:
   - z1
   instances: 1
@@ -1739,10 +1909,10 @@ instance_groups:
   networks:
   - name: ((cf_core_network))
   stemcell: default
-  vm_type: minimal
+  vm_type: doppler
 - azs:
   - z1
-  instances: 3
+  instances: 2
   jobs:
   - name: bosh-dns-adapter
     properties:
@@ -1900,25 +2070,24 @@ instance_groups:
         key: ((loggr_udp_forwarder_tls.private_key))
         server_name: loggr_udp_forwarder_metrics
     release: loggregator-agent
-  - name: nfsv3driver
+  - name: smbdriver
     properties:
-      nfsv3driver:
-        tls:
-          ca_cert: ((nfsv3driver_cert.ca))
-          client_cert: ((nfsv3driver_client_cert.certificate))
-          client_key: ((nfsv3driver_client_cert.private_key))
-          server_cert: ((nfsv3driver_cert.certificate))
-          server_key: ((nfsv3driver_cert.private_key))
-    release: nfs-volume
-  - name: mapfs
-    release: mapfs
+      tls:
+        ca_cert: ((smbdriver_cert.ca))
+        client_cert: ((smbdriver_client_cert.certificate))
+        client_key: ((smbdriver_client_cert.private_key))
+        server_cert: ((smbdriver_cert.certificate))
+        server_key: ((smbdriver_cert.private_key))
+    release: smb-volume
   name: diego-cell
   networks:
   - name: ((cf_runtime_network))
   stemcell: default
+  update:
+    max_in_flight: 3
   vm_extensions:
   - 100GB_ephemeral_disk
-  vm_type: small-highmem
+  vm_type: diego-cell
 - azs:
   - z1
   instances: 1
@@ -2021,7 +2190,7 @@ instance_groups:
   networks:
   - name: ((cf_core_network))
   stemcell: default
-  vm_type: minimal
+  vm_type: log-api
 - azs:
   - z1
   instances: 1
@@ -2056,14 +2225,14 @@ instance_groups:
             - read
             path: /*
           - actors:
-            - uaa-client:nfs-broker-credhub-client
+            - uaa-client:smb-broker-credhub-client
             operations:
             - read
             - write
             - delete
             - read_acl
             - write_acl
-            path: /nfsbroker/*
+            path: /smbbroker/*
         ca_certificate: |
           ((credhub_tls.ca))
         data_storage:
@@ -2090,7 +2259,7 @@ instance_groups:
   networks:
   - name: ((cf_core_network))
   stemcell: default
-  vm_type: minimal
+  vm_type: credhub
 - azs:
   - z1
   instances: 1
@@ -2103,48 +2272,56 @@ instance_groups:
   networks:
   - name: ((cf_core_network))
   stemcell: default
-  vm_type: minimal
+  vm_type: errand
 - azs:
   - z1
   instances: 1
   jobs:
-  - name: nfsbrokerpush
+  - name: smbtestserver
     properties:
-      nfsbrokerpush:
-        app_domain: ((system_domain))
-        app_name: nfs-broker
-        cf:
-          client_id: nfs-broker-push-client
-          client_secret: ((nfs-broker-push-uaa-client-secret))
-        create_credhub_security_group: true
-        create_sql_security_group: false
-        credhub:
-          uaa_ca_cert: ((uaa_ssl.ca))
-          uaa_client_id: nfs-broker-credhub-client
-          uaa_client_secret: ((nfs-broker-credhub-uaa-client-secret))
-        domain: ((system_domain))
-        organization: system
-        password: ((nfs-broker-password))
-        skip_cert_verify: true
-        space: nfs-broker-space
-        store_id: nfsbroker
-        syslog_url: ""
-        username: nfs-broker
-    provides:
-      nfsbrokerpush:
-        as: ignore-me
-    release: nfs-volume
+      password: ((smb-test-server-password))
+      username: smbtestserver
+    release: smb-volume
+  name: smbtestserver
+  networks:
+  - name: ((cf_runtime_network))
+  persistent_disk_type: 10GB
+  stemcell: default
+  vm_type: medium
+- azs:
+  - z1
+  instances: 1
+  jobs:
+  - name: smbbrokerpush
+    properties:
+      app_domain: ((system_domain))
+      cf:
+        client_id: smb-broker-client
+        client_secret: ((smb-broker-uaa-client-secret))
+      credhub:
+        store_id: smbbroker
+        uaa_client_id: smb-broker-credhub-client
+        uaa_client_secret: ((smb-broker-credhub-uaa-client-secret))
+        url: https://credhub.service.cf.internal:8844
+      domain: ((system_domain))
+      organization: system
+      password: ((smb-broker-password))
+      skip_cert_verify: true
+      space: smb-broker-space
+      syslog_url: ""
+      username: smb-broker
+    release: smb-volume
   - name: cf-cli-7-linux
     release: cf-cli
   lifecycle: errand
-  name: nfs-broker-push
+  name: smb-broker-push
   networks:
   - name: ((cf_runtime_network))
   stemcell: default
   vm_type: minimal
 - azs:
   - z1
-  instances: 3
+  instances: 1
   jobs:
   - name: winc
     release: winc
@@ -2317,48 +2494,23 @@ instance_groups:
   stemcell: windows2019
   vm_extensions:
   - 100GB_ephemeral_disk
-  vm_type: cell
-- azs:
-  - z1
-  instances: 1
-  jobs:
-  - name: smoke_tests_windows
-    properties:
-      bpm:
-        enabled: true
-      smoke_tests:
-        api: https://api.((system_domain))
-        apps_domain: run.codex.starkandwayne.com
-        cf_dial_timeout_in_seconds: 300
-        client: cf_smoke_tests
-        client_secret: ((uaa_clients_cf_smoke_tests_secret))
-        enable_windows_tests: true
-        org: cf_smoke_tests_org
-        skip_ssl_validation: true
-        space: cf_smoke_tests_space
-        windows_stack: windows2016
-    release: cf-smoke-tests
-  - name: cf-cli-7-linux
-    release: cf-cli
-  lifecycle: errand
-  name: smoke-tests-windows
-  networks:
-  - name: cf-runtime
-  stemcell: windows2019
-  vm_type: minimal
+  vm_type: diego-cell
 kit:
   features:
   - postgres-db
   - aws-blobstore
   - small-footprint
-  - nfs-volume-services
-  - nfs-dev-version
+  - ssh-proxy-on-routers
+  - app-scheduler-integration
+  - smb-test-server
+  - smb-volume-services
+  - smb-volume-services-releases
+  - windows-dev-bosh-dns-alias
   - windows-diego-cells
-  - smoke-tests-windows
-  - bosh-dns-alias-windows
   - windows-releases
-  name: dev
-  version: 2.2.0-rc.8
+  - custom-router-group
+  name: cf
+  version: 2.2.0-rc.14
 manifest_version: v16.25.0
 meta:
   app_domains:
@@ -2367,13 +2519,13 @@ meta:
   - z1
   blobstore_bucket_env: dev
   blobstore_bucket_path:
-    app-packages: uswest2demo-app-packages-dev
-    buildpacks: uswest2demo-buildpacks-dev
-    droplets: uswest2demo-droplets-dev
-    resources: uswest2demo-resources-dev
-  blobstore_bucket_prefix: uswest2demo
+    app-packages: dev-cf-app-packages-((cc_directory_key))
+    buildpacks: dev-cf-buildpacks-((cc_directory_key))
+    droplets: dev-cf-droplets-((cc_directory_key))
+    resources: dev-cf-resources-((cc_directory_key))
+  blobstore_bucket_prefix: dev-cf
   blobstore_bucket_prefix_default: dev-cf
-  blobstore_bucket_suffix: dev
+  blobstore_bucket_suffix: ((cc_directory_key))
   blobstore_bucket_type: cf
   branding:
     footer_legal_text: null
@@ -2405,8 +2557,7 @@ meta:
     uaa:
       name: uaa
       user: uaa
-  default_apps_domains:
-  - run.codex.starkandwayne.com
+  default_apps_domains: apps.codex.starkandwayne.com
   default_azs:
   - z1
   - z2
@@ -2526,6 +2677,7 @@ networks:
     range: 10.4.19.0/25
     reserved:
     - 10.4.19.0-10.4.19.3
+    - 10.4.19.17
     static:
     - 10.4.19.4-10.4.19.16
   - azs:
@@ -2626,30 +2778,124 @@ networks:
     static:
     - 10.4.25.6-10.4.25.16
   type: manual
+- name: blacksmith
+  subnets:
+  - azs:
+    - z1
+    cloud_properties:
+      subnet: subnet-062565d28649eeb00
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.26.1
+    range: 10.4.26.0/24
+    reserved:
+    - 10.4.26.0-10.4.26.5
+    - 10.4.26.245-10.4.26.254
+    static:
+    - 10.4.26.6-10.4.26.16
+  - azs:
+    - z2
+    cloud_properties:
+      subnet: subnet-0d10710c119782f5f
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.27.1
+    range: 10.4.27.0/24
+    reserved:
+    - 10.4.27.0-10.4.27.5
+    static:
+    - 10.4.27.6-10.4.27.16
+  - azs:
+    - z3
+    cloud_properties:
+      subnet: subnet-06fb1168c8fba4e45
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.28.1
+    range: 10.4.28.0/24
+    reserved:
+    - 10.4.28.0-10.4.28.5
+    static:
+    - 10.4.28.6-10.4.28.16
+  type: manual
 params:
+  api_instances: 1
+  api_vm_type: api
   app_domains:
-  - run.codex.starkandwayne.com
-  apps_domain: run.codex.starkandwayne.com
+  - apps.codex.starkandwayne.com
+  apps_domain: apps.codex.starkandwayne.com
+  apps_domains: apps.codex.starkandwayne.com
   base_domain: codex.starkandwayne.com
-  blobstore_bucket_prefix: uswest2demo
-  blobstore_bucket_suffix: dev
+  blobstore_app_packages_directory: codex-uswest2-dev-app-packages
+  blobstore_buildpacks_directory: codex-uswest2-dev-buildpacks
+  blobstore_droplets_directory: codex-uswest2-dev-droplets
+  blobstore_resources_directory: codex-uswest2-dev-resources
   blobstore_s3_region: us-west-2
+  cc_worker_instances: 1
+  cc_worker_vm_type: cc-worker
   cf_core_network: cf-core
   cf_db_network: cf-core
   cf_edge_network: cf-edge
   cf_runtime_network: cf-runtime
-  diego_cell_instances: 3
+  credhub_instances: 1
+  credhub_vm_type: credhub
+  diego_api_instances: 1
+  diego_api_vm_type: diego-api
+  diego_cell_instances: 2
+  diego_cell_vm_type: diego-cell
+  doppler_instances: 1
+  doppler_vm_type: doppler
+  errand_vm_type: errand
+  external_db_ca: |
+    -----BEGIN CERTIFICATE-----
+    MIIEBjCCAu6gAwIBAgIJAMc0ZzaSUK51MA0GCSqGSIb3DQEBCwUAMIGPMQswCQYD
+    VQQGEwJVUzEQMA4GA1UEBwwHU2VhdHRsZTETMBEGA1UECAwKV2FzaGluZ3RvbjEi
+    MCAGA1UECgwZQW1hem9uIFdlYiBTZXJ2aWNlcywgSW5jLjETMBEGA1UECwwKQW1h
+    em9uIFJEUzEgMB4GA1UEAwwXQW1hem9uIFJEUyBSb290IDIwMTkgQ0EwHhcNMTkw
+    ODIyMTcwODUwWhcNMjQwODIyMTcwODUwWjCBjzELMAkGA1UEBhMCVVMxEDAOBgNV
+    BAcMB1NlYXR0bGUxEzARBgNVBAgMCldhc2hpbmd0b24xIjAgBgNVBAoMGUFtYXpv
+    biBXZWIgU2VydmljZXMsIEluYy4xEzARBgNVBAsMCkFtYXpvbiBSRFMxIDAeBgNV
+    BAMMF0FtYXpvbiBSRFMgUm9vdCAyMDE5IENBMIIBIjANBgkqhkiG9w0BAQEFAAOC
+    AQ8AMIIBCgKCAQEArXnF/E6/Qh+ku3hQTSKPMhQQlCpoWvnIthzX6MK3p5a0eXKZ
+    oWIjYcNNG6UwJjp4fUXl6glp53Jobn+tWNX88dNH2n8DVbppSwScVE2LpuL+94vY
+    0EYE/XxN7svKea8YvlrqkUBKyxLxTjh+U/KrGOaHxz9v0l6ZNlDbuaZw3qIWdD/I
+    6aNbGeRUVtpM6P+bWIoxVl/caQylQS6CEYUk+CpVyJSkopwJlzXT07tMoDL5WgX9
+    O08KVgDNz9qP/IGtAcRduRcNioH3E9v981QO1zt/Gpb2f8NqAjUUCUZzOnij6mx9
+    McZ+9cWX88CRzR0vQODWuZscgI08NvM69Fn2SQIDAQABo2MwYTAOBgNVHQ8BAf8E
+    BAMCAQYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUc19g2LzLA5j0Kxc0LjZa
+    pmD/vB8wHwYDVR0jBBgwFoAUc19g2LzLA5j0Kxc0LjZapmD/vB8wDQYJKoZIhvcN
+    AQELBQADggEBAHAG7WTmyjzPRIM85rVj+fWHsLIvqpw6DObIjMWokpliCeMINZFV
+    ynfgBKsf1ExwbvJNzYFXW6dihnguDG9VMPpi2up/ctQTN8tm9nDKOy08uNZoofMc
+    NUZxKCEkVKZv+IL4oHoeayt8egtv3ujJM6V14AstMQ6SwvwvA93EP/Ug2e4WAXHu
+    cbI1NAbUgVDqp+DRdfvZkgYKryjTWd/0+1fS8X1bBZVWzl7eirNVnHbSH2ZDpNuY
+    0SBd8dj5F6ld3t58ydZbrTHze7JJOd8ijySAp4/kiu9UfZWuTPABzDa/DSdz9Dk/
+    zPW4CXXvhLmE02TA9/HeCw3KEHIwicNuEfw=
+    -----END CERTIFICATE-----
   external_db_host: snw-dev-cf-db.cmziohdu4x1g.us-west-2.rds.amazonaws.com
   external_db_password: ((external_db_password))
   external_db_port: 5432
   external_db_scheme: postgres
   external_db_username: ((external_db_user))
+  log_api_instances: 1
+  log_api_vm_type: log-api
+  nats_instances: 1
+  nats_vm_type: nats
   network: default
+  router_instances: 1
+  router_vm_type: router
+  scheduler_instances: 1
+  scheduler_vm_type: scheduler
   skip_ssl_validation: true
   system_domain: system.codex.starkandwayne.com
+  tcp_router_vm_type: tcp-router
+  uaa_instances: 1
+  uaa_vm_type: uaa
   uaadb_scheme: postgresql
-  windows_diego_cell_instances: 3
-  windows_diego_cell_vm_type: cell
+  windows_diego_cell_instances: 1
+  windows_diego_cell_vm_type: diego-cell
 releases:
 - name: binary-buildpack
   sha1: 6e1ff3753ac5a86e968546222bbbaaba1264d938
@@ -2771,28 +3017,26 @@ releases:
   sha1: c3d11f473d4518505e2a671d8ad6a553e1b1c1ca
   url: https://bosh.io/d/github.com/bosh-packages/cf-cli-release?v=1.34.0
   version: 1.34.0
-- name: nfs-volume
-  version: 7.1.1+dev.17
-- name: mapfs
-  sha1: 440014423159187727d3622d41e5779f0f25902d
-  url: https://bosh.io/d/github.com/cloudfoundry/mapfs-release?v=1.2.6
-  version: 1.2.6
+- name: smb-volume
+  sha1: 5565d59f1baea51a0acb59256ae2b2118f4631da
+  url: https://bosh.io/d/github.com/cloudfoundry/smb-volume-release?v=3.1.2
+  version: 3.1.2
 - name: hwc-buildpack
   sha1: d23998512071991a9b85470661b77f9be3d41bc8
   url: https://bosh.io/d/github.com/cloudfoundry-incubator/hwc-buildpack-release?v=3.1.19
   version: 3.1.19
 - name: winc
-  sha1: 365690f87e7bea56a6eef15c92e0492165669d03
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/winc-release?v=2.3.0
-  version: 2.3.0
+  sha1: 3f14f65ca0b523bbabb3631820d3388674875110
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/winc-release?v=2.5.0
+  version: 2.5.0
 - name: windows-utilities
   sha1: 7886ffd43b84d4eced06560ba601ce1eb97c6616
   url: https://bosh.io/d/github.com/cloudfoundry-incubator/windows-utilities-release?v=0.14.0
   version: 0.14.0
 - name: windowsfs
-  sha1: 1552b6b04341985a996a9c89c7bcf5448e5d665d
-  url: https://bosh.io/d/github.com/cloudfoundry/windowsfs-online-release?v=2.34.0
-  version: 2.34.0
+  sha1: 36fcc451396ef259150548f5ae1073007a56fc75
+  url: https://bosh.io/d/github.com/cloudfoundry/windowsfs-online-release?v=2.35.0
+  version: 2.35.0
 - name: windows-resize-root-disk
   sha1: 8fe1adc3b6b6b68d8a370c576f649929f5452c6a
   url: https://github.com/starkandwayne/windows-resize-root-disk/releases/download/v1.0/windows-resize-root-disk-release-1.0.tgz
@@ -3610,257 +3854,354 @@ variables:
     exclude_upper: true
     length: 10
   type: password
-- name: nfs-broker-password
+- name: uaa_clients_app_scheduler_secret
   type: password
-- name: nfs-broker-push-uaa-client-secret
+- name: smb-test-server-password
   type: password
-- name: nfs-broker-credhub-password
+- name: smb-broker-password
   type: password
-- name: nfs-broker-credhub-uaa-client-secret
+- name: smb-broker-uaa-client-secret
   type: password
-- name: nfs_ca
+- name: smb-broker-credhub-uaa-client-secret
+  type: password
+- name: smb_ca
   options:
-    common_name: nfs-ca
+    common_name: smb-ca
     is_ca: true
   type: certificate
-- name: nfsv3driver_cert
+- name: smbdriver_cert
   options:
     alternative_names:
     - 127.0.0.1
-    ca: nfs_ca
+    ca: smb_ca
     common_name: 127.0.0.1
     extended_key_usage:
     - server_auth
   type: certificate
-- name: nfsv3driver_client_cert
+- name: smbdriver_client_cert
   options:
     alternative_names:
-    - nfs-client
-    ca: nfs_ca
-    common_name: nfs-client
+    - smb-client
+    ca: smb_ca
+    common_name: smb-client
     extended_key_usage:
     - client_auth
   type: certificate
   update_mode: converge
+- name: stratos_client_secret
+  type: password
 vm_extensions:
 - cloud_properties:
     ephemeral_disk:
       size: 102400
-      type: gp2
+      type: gp3
   name: 100GB_ephemeral_disk
 - cloud_properties:
     ephemeral_disk:
       size: 51200
-      type: gp2
+      type: gp3
   name: 50GB_ephemeral_disk
 - cloud_properties:
     elbs:
     - snw-dev-cf-elb
   name: cf-router-network-properties
-- name: cf-tcp-router-network-properties
+- cloud_properties:
+    elbs:
+    - dev-cf-tcp-lb
+  name: cf-tcp-router-network-properties
 - name: diego-ssh-proxy-network-properties
 vm_types:
 - cloud_properties:
     ephemeral_disk:
-      size: 8192
-      type: gp2
-    instance_type: t3.small
-  name: default
-- cloud_properties:
-    ephemeral_disk:
+      encrypted: true
       size: 32768
-      type: gp2
-    instance_type: t3.medium
-  name: compilation
-- cloud_properties:
-    ephemeral_disk:
-      size: 8192
-      type: gp2
-    instance_type: t3.small
-  name: small
-- cloud_properties:
-    ephemeral_disk:
-      size: 16384
-      type: gp2
-    instance_type: t3.small
-  name: medium
-- cloud_properties:
-    ephemeral_disk:
-      size: 32768
-      type: gp2
-    instance_type: t3.medium
-  name: large
-- cloud_properties:
-    ephemeral_disk:
-      size: 8192
-      type: gp2
-    instance_type: t3.small
-  name: haproxy
-- cloud_properties:
-    ephemeral_disk:
-      size: 32768
-      type: gp2
+      type: gp3
     instance_type: t3.medium
   name: api
 - cloud_properties:
     ephemeral_disk:
-      size: 8192
-      type: gp2
-    instance_type: t3.small
-  name: bbs
-- cloud_properties:
-    ephemeral_disk:
+      encrypted: true
       size: 16384
-      type: gp2
-    instance_type: t3.small
-  name: blobstore
-- cloud_properties:
-    ephemeral_disk:
-      size: 40960
-      type: gp2
-    instance_type: t3.large
-  name: cell
-- cloud_properties:
-    ephemeral_disk:
-      size: 36384
-      type: gp2
-    instance_type: t3.small
-  name: diego
-- cloud_properties:
-    ephemeral_disk:
-      size: 8192
-      type: gp2
-    instance_type: t3.small
-  name: doppler
-- cloud_properties:
-    ephemeral_disk:
-      size: 8192
-      type: gp2
-    instance_type: t3.small
-  name: errand
-- cloud_properties:
-    ephemeral_disk:
-      size: 16384
-      type: gp2
-    instance_type: t3.small
-  name: loggregator
-- cloud_properties:
-    ephemeral_disk:
-      size: 8192
-      type: gp2
-    instance_type: t3.small
-  name: nats
-- cloud_properties:
-    ephemeral_disk:
-      size: 32768
-      type: gp2
-    instance_type: t3.medium
-  name: postgres
-- cloud_properties:
-    ephemeral_disk:
-      size: 8192
-      type: gp2
-    instance_type: t3.small
-  name: router
-- cloud_properties:
-    ephemeral_disk:
-      size: 8192
-      type: gp2
-    instance_type: t3.small
-  name: syslogger
-- cloud_properties:
-    ephemeral_disk:
-      size: 16384
-      type: gp2
-    instance_type: t3.small
-  name: uaa
-- cloud_properties:
-    ephemeral_disk:
-      size: 10240
-      type: gp2
-    instance_type: t3.small
-  name: minimal
-- cloud_properties:
-    ephemeral_disk:
-      size: 10240
-      type: gp2
-    instance_type: t3.medium
-  name: small-cf
-- cloud_properties:
-    ephemeral_disk:
-      size: 24576
-      type: gp2
-    instance_type: t3.large
-  name: small-highmem
-- cloud_properties:
-    ephemeral_disk:
-      size: 10240
-      type: gp2
-    instance_type: t3.small
-  name: blacksmith
-- cloud_properties:
-    ephemeral_disk:
-      size: 10240
-      type: gp2
-    instance_type: t3.medium
-  name: jumpbox
-- cloud_properties:
-    ephemeral_disk:
-      size: 65536
-      type: gp2
-    instance_type: t3.medium
-  name: concourse-worker
-- cloud_properties:
-    ephemeral_disk:
-      size: 81920
-      type: gp2
-    instance_type: t3.large
-  name: thunder-dome
-- cloud_properties:
-    ephemeral_disk:
-      size: 65536
-      type: gp2
-    instance_type: t3.medium
-  name: bosh
-- cloud_properties:
-    ephemeral_disk:
-      size: 16384
-      type: gp2
+      type: gp3
     instance_type: t3.small
   name: as-api
 - cloud_properties:
     ephemeral_disk:
+      encrypted: true
       size: 16384
-      type: gp2
+      type: gp3
     instance_type: t3.small
   name: as-broker
 - cloud_properties:
     ephemeral_disk:
+      encrypted: true
       size: 16384
-      type: gp2
-    instance_type: t3.small
-  name: as-scheduler
-- cloud_properties:
-    ephemeral_disk:
-      size: 16384
-      type: gp2
+      type: gp3
     instance_type: t3.small
   name: as-collector
 - cloud_properties:
     ephemeral_disk:
+      encrypted: true
       size: 16384
-      type: gp2
-    instance_type: t3.small
-  name: as-scaler
-- cloud_properties:
-    ephemeral_disk:
-      size: 16384
-      type: gp2
+      type: gp3
     instance_type: t3.small
   name: as-engine
 - cloud_properties:
     ephemeral_disk:
+      encrypted: true
       size: 16384
-      type: gp2
+      type: gp3
     instance_type: t3.small
   name: as-operator
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 16384
+      type: gp3
+    instance_type: t3.small
+  name: as-scaler
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 16384
+      type: gp3
+    instance_type: t3.small
+  name: as-scheduler
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.small
+  name: bbs
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 16384
+      type: gp3
+    instance_type: t3.medium
+  name: blobstore
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 24576
+      type: gp3
+    instance_type: t3.medium
+  name: bosh
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.medium
+  name: cc-worker
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 65536
+      type: gp3
+    instance_type: t3.medium
+  name: compilation
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 65536
+      type: gp3
+    instance_type: t3.medium
+  name: concourse-worker
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 16384
+      type: gp3
+    instance_type: t3.medium
+  name: credhub
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.medium
+  name: default
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 262144
+      type: gp3
+    instance_type: t3.medium
+  name: diego-cell
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 32768
+      type: gp3
+    instance_type: t3.medium
+  name: diego-api
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 32768
+      type: gp3
+    instance_type: t3.medium
+  name: doppler
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.medium
+  name: errand
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.medium
+  name: haproxy
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 32768
+      type: gp3
+    instance_type: t3.medium
+  name: large
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 16384
+      type: gp3
+    instance_type: t3.medium
+  name: log-api
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 16384
+      type: gp3
+    instance_type: t3.small
+  name: medium
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 10240
+      type: gp3
+    instance_type: t3.medium
+  name: minimal
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.medium
+  name: nats
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 32768
+      type: gp3
+    instance_type: t3.medium
+  name: postgres
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.medium
+  name: router
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.medium
+  name: scheduler
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.small
+  name: small
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 10240
+      type: gp3
+    instance_type: t3.small
+  name: small-cf
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 24576
+      type: gp3
+    instance_type: t3.medium
+  name: small-highmem
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.medium
+  name: syslogger
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.small
+  name: tcp-router
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 81920
+      type: gp3
+    instance_type: t3.medium
+  name: thunder-dome
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 16384
+      type: gp3
+    instance_type: t3.medium
+  name: uaa
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 10240
+      type: gp3
+    instance_type: t3.medium
+  name: blacksmith
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 10240
+      type: gp3
+    instance_type: t3.small
+  name: blacksmith-redis-small
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 10240
+      type: gp3
+    instance_type: t3.medium
+  name: blacksmith-redis-medium
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 10240
+      type: gp3
+    instance_type: t3.large
+  name: blacksmith-redis-large
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 10240
+      type: gp3
+    instance_type: t3.small
+  name: blacksmith-rabbitmq-medium
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 10240
+      type: gp3
+    instance_type: t3.medium
+  name: blacksmith-rabbitmq-large

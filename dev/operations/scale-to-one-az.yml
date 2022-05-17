@@ -1,0 +1,6 @@
+---
+# Use this override to only use a single Availability Zone.
+- type: replace
+  path: /meta/azs?
+  value:
+    - (( grab params.availability_zones[0] || meta.default_azs[0] ))
