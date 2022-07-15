@@ -1,16 +1,19 @@
 pipeline:
   name: cf-platform-pipeline
+
+  debug: true
+
   git:
-    owner: genesis-community
-    repo:  cf-genesis-kit
-    branch: develop
+    owner: starkandwayne
+    repo:  demo-cf-deployments
+    branch: latest-cf-aws-codex
     private_key: (( vault "concourse/main/github:private_key" ))
 
   vault:
-    url:    https://10.4.1.7
-    verify: yes
-    role: (( vault "concourse/genesis/vault:role_id" ))
-    secret: (( vault "concourse/genesis/vault:secret_id" ))
+    url:    https://10.4.1.6
+    verify: no
+    role: (( vault "secret/uswest2demo/full/concourse/approle/concourse:approle-id" ))
+    secret: (( vault "secret/uswest2demo/full/concourse/approle/concourse:approle-secret" ))
   
   slack: 
     channel: '#botspam'
