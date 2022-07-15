@@ -16,7 +16,7 @@ kit:
     - smb-test-server
     - smb-volume-services
     - smb-volume-services-releases
-    #- autoscaler
+    - app-autoscaler-integration
     #- apps-trust-redis-dev-crt
     #- routing-api-username
     #- nfs-volume-services
@@ -34,7 +34,7 @@ kit:
     - custom-router-group
     - add-persistent-isolation-segment-diego-cell
     - add-windows-isolation-segment
-    - app-security-groups
+    #- app-security-groups
 
 params:
   external_db_ca: |
