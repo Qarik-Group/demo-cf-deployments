@@ -34,7 +34,7 @@ kit:
     - custom-router-group
     - add-persistent-isolation-segment-diego-cell
     - add-windows-isolation-segment
-    - app-security-groups
+    #- app-security-groups
 
 params:
   external_db_ca: |

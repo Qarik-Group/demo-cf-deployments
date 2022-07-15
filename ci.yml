@@ -5,7 +5,7 @@ pipeline:
     owner: starkandwayne
     repo:  demo-cf-deployments
     branch: latest-cf-aws-codex
-    private_key: (( vault "concourse/main/github:private_key" ))
+    private_key: (( vault "concourse/demo/cf/github:private_key" ))
 
   vault:
     url:    https://10.4.1.7
