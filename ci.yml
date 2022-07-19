@@ -49,35 +49,6 @@ jobs:
         passed:
         - dev-cf
         trigger: true
-  # DEBUG task, useful to run all sort of commands ;)
-  # - task: debug-only
-  #   config:
-  #     platform: linux
-  #     image_resource:
-  #       name: ""
-  #       source:
-  #         repository: starkandwayne/concourse
-  #         tag: latest
-  #       type: registry-image
-  #     inputs:
-  #       - name: dev-changes
-  #     params:
-  #       VAULT_ADDR: https://10.4.1.7
-  #       VAULT_ROLE_ID: 
-  #       VAULT_SECRET_ID: 
-  #       VAULT_SKIP_VERIFY: "true"
-  #     run:
-  #       path: sh
-  #       args:
-  #       - -c
-  #       - |
-  #         cd dev-changes
-  #         safe target -k $VAULT_ADDR vault
-  #         safe targets
-  #         {
-  #           echo $VAULT_ROLE_ID
-  #           echo $VAULT_SECRET_ID
-  #         } | safe auth approle
   - task: run-cf-cli
     file: dev-changes/tasks/run-cf-cli.yml
     input_mapping:
@@ -118,3 +89,34 @@ groups:
   - ((append))
   - configure-internal-domain
   - configure-isolation-segments
+
+
+  # DEBUG task, useful to run all sort of commands ;)
+  # - task: debug-only
+  #   config:
+  #     platform: linux
+  #     image_resource:
+  #       name: ""
+  #       source:
+  #         repository: starkandwayne/concourse
+  #         tag: latest
+  #       type: registry-image
+  #     inputs:
+  #       - name: dev-changes
+  #     params:
+  #       VAULT_ADDR: https://10.4.1.7
+  #       VAULT_ROLE_ID: 
+  #       VAULT_SECRET_ID: 
+  #       VAULT_SKIP_VERIFY: "true"
+  #     run:
+  #       path: sh
+  #       args:
+  #       - -c
+  #       - |
+  #         cd dev-changes
+  #         safe target -k $VAULT_ADDR vault
+  #         safe targets
+  #         {
+  #           echo $VAULT_ROLE_ID
+  #           echo $VAULT_SECRET_ID
+  #         } | safe auth approle

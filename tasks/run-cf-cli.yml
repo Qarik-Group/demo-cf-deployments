@@ -28,8 +28,8 @@ run:
     safe target $VERIFY $VAULT_ADDR vault
     safe env
     {
-      echo $VAULT_ROLE_ID
-      echo $VAULT_SECRET_ID
+      echo $VAULT_ROLE
+      echo $VAULT_SECRET
     } | safe auth approle
     genesis info dev
     genesis do dev -- login
