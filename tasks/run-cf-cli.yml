@@ -22,11 +22,14 @@ run:
   - |
     cd changes
     echo $VAULT_ADDR
+    echo "VAULT_SKIP_VERIFY value is ... [$VAULT_SKIP_VERIFY]"
     VERIFY=$([ "$VAULT_SKIP_VERIFY" == "true" ] && echo "-k" || echo "")
+    echo "VERIFY value is ... [$VERIFY]"
     safe target $VERIFY $VAULT_ADDR vault
-    safe targets
+    safe env
     {
       echo $VAULT_ROLE_ID
       echo $VAULT_SECRET_ID
     } | safe auth approle
     genesis info dev
+    genesis do dev -- login

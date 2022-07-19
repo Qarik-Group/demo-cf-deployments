@@ -82,7 +82,7 @@ jobs:
       VAULT_ADDR: https://10.4.1.7
       VAULT_ROLE: (( vault "secret/uswest2demo/full/concourse/approle/concourse:approle-id" ))
       VAULT_SECRET: (( vault "secret/uswest2demo/full/concourse/approle/concourse:approle-secret" ))
-      VAULT_SKIP_VERIFY: true
+      VAULT_SKIP_VERIFY: "true"
 
 - name: configure-isolation-segments
   public: true
