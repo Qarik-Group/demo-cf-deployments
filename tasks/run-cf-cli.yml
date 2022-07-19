@@ -18,5 +18,10 @@ run:
   - -ce
   - |
     cd changes
-    ls -ltra
+    safe target -k $VAULT_ADDR vault
+    safe targets
+    {
+      echo $VAULT_ROLE_ID
+      echo $VAULT_SECRET_ID
+    } | safe auth approle
     genesis info dev
