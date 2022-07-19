@@ -404,7 +404,7 @@ bosh-variables:
   cf_db_network: cf-core
   cf_edge_network: cf-edge
   cf_runtime_network: cf-runtime
-  deployment_name: dev-cf
+  deployment_name: uswest2demo-cf
   droplet_directory_key: codex-uswest2-dev-droplets
   external_bbs_database_address: snw-dev-cf-db.cmziohdu4x1g.us-west-2.rds.amazonaws.com
   external_bbs_database_name: diego
@@ -547,19 +547,15 @@ exodus:
   app_scheduler_secret: ((uaa_clients_app_scheduler_secret))
   apps_domain: apps.codex.starkandwayne.com
   base_domain: codex.starkandwayne.com
-  bosh: dev
+  bosh: uswest2demo
   cf-deployment-date: 2022-Feb-14 03:48:47 UTC
   cf-deployment-hotfixes: true
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.25.0
   cf-deployment-version: 16.25.0
   core_network: cf-core
-<<<<<<< HEAD
-  dated: 2022-07-19 09:25:40 +0000
-=======
-  dated: 2022-07-18 07:37:16 +0000
->>>>>>> Push latest CI changes
+  dated: 2022-07-18 08:18:01 +0000
   db_network: cf-core
-  deployer: unknown
+  deployer: ubuntu
   edge_network: cf-edge
   features: postgres-db,aws-blobstore,small-footprint,ssh-proxy-on-routers,app-scheduler-integration,smb-test-server,smb-volume-services,smb-volume-services-releases,windows-dev-bosh-dns-alias,windows-diego-cells,windows-releases,custom-router-group,add-persistent-isolation-segment-diego-cell,add-windows-isolation-segment
   is_director: false
@@ -571,19 +567,19 @@ exodus:
   system_org: system
   system_space: system
   use_create_env: false
-  vault_base: /secret/dev/cf
-  vaulted_uaa_clients: /secret/dev/cf/uaa/client_secrets:firehose
-  version: 2.8.4
+  vault_base: /secret/uswest2demo/cf
+  vaulted_uaa_clients: /secret/uswest2demo/cf/uaa/client_secrets:firehose
+  version: 2.8.5
 features:
   randomize_az_placement: true
 genesis:
   ci_mount: /secret/ci/
-  env: dev
+  env: uswest2demo
   exodus_mount: /secret/exodus/
-  exodus_path: dev/cf
+  exodus_path: uswest2demo/cf
   min_version: 2.8.4
   secrets_mount: /secret/
-  secrets_path: dev/cf
+  secrets_path: uswest2demo/cf
 instance_groups:
 - azs:
   - z1
@@ -1162,7 +1158,7 @@ instance_groups:
       credhub_api:
         ca_cert: ((credhub_tls.ca))
       description: Use `genesis info` on environment file for more details
-      name: Cloud Foundry (dev)
+      name: Cloud Foundry (uswest2demo)
       router:
         route_services_secret: ((router_route_services_secret))
       routing_api:
@@ -3048,14 +3044,14 @@ meta:
   - run.codex.starkandwayne.com
   azs:
   - z1
-  blobstore_bucket_env: dev
+  blobstore_bucket_env: uswest2demo
   blobstore_bucket_path:
-    app-packages: dev-cf-app-packages-((cc_directory_key))
-    buildpacks: dev-cf-buildpacks-((cc_directory_key))
-    droplets: dev-cf-droplets-((cc_directory_key))
-    resources: dev-cf-resources-((cc_directory_key))
-  blobstore_bucket_prefix: dev-cf
-  blobstore_bucket_prefix_default: dev-cf
+    app-packages: uswest2demo-cf-app-packages-((cc_directory_key))
+    buildpacks: uswest2demo-cf-buildpacks-((cc_directory_key))
+    droplets: uswest2demo-cf-droplets-((cc_directory_key))
+    resources: uswest2demo-cf-resources-((cc_directory_key))
+  blobstore_bucket_prefix: uswest2demo-cf
+  blobstore_bucket_prefix_default: uswest2demo-cf
   blobstore_bucket_suffix: ((cc_directory_key))
   blobstore_bucket_type: cf
   branding:
@@ -3093,8 +3089,8 @@ meta:
   - z1
   - z2
   internal_app_domains: []
-  vault: /secret/dev/cf
-name: dev-cf
+  vault: /secret/uswest2demo/cf
+name: uswest2demo-cf
 networks:
 - name: default
   subnets:
