@@ -18,6 +18,7 @@ run:
   - -ce
   - |
     cd changes
+    echo $VAULT_ADDR
     safe target -k $VAULT_ADDR vault
     safe targets
     {
