@@ -9,8 +9,11 @@ image_resource:
 inputs:
 - name: changes
 
-#params:
-#  current_env: ((env)) #passed via vars?
+params:
+  VAULT_ADDR: ((VAULT_ADDR))
+  VAULT_ROLE: ((VAULT_ROLE))
+  VAULT_SECRET: ((VAULT_SECRET))
+  VAULT_SKIP_VERIFY: ((VAULT_SKIP_VERIFY))
 
 run:
   path: sh
@@ -19,7 +22,8 @@ run:
   - |
     cd changes
     echo $VAULT_ADDR
-    safe target -k $VAULT_ADDR vault
+    VERIFY=$([ "$VAULT_SKIP_VERIFY" == true ] && echo "-k" || echo "")
+    safe target $VERIFY $VAULT_ADDR vault
     safe targets
     {
       echo $VAULT_ROLE_ID
