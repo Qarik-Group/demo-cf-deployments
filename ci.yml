@@ -44,13 +44,37 @@ jobs:
       - get: dev-changes
         passed:
         - dev-cf
+  - task: check-changes
+    config:
+      platform: linux
+      image_resource:
+        name: ""
+        source:
+          repository: starkandwayne/concourse
+          tag: latest
+        type: registry-image
+      inputs:
+        - name: dev-changes
+      run:
+        path: sh
+        args:
+        - -c
+        - |
+          cd dev-changes
+          ls -ltra
   - task: create-apps-internal-domain
     file: dev-changes/tasks/run-cf-cli.yml
     input_mapping:
       changes: dev-changes
     vars:
       environment: dev
-      
+
+resources:
+- name: dev-changes
+  source:
+    paths:
+    - ((append))
+    - tasks
 
 groups:
 - name: default
