@@ -32,4 +32,6 @@ run:
       echo $VAULT_SECRET
     } | safe auth approle
     genesis info dev
+    genesis do dev -- setup-cli
     genesis do dev -- login
+    cf target
