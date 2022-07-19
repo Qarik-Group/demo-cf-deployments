@@ -19,4 +19,4 @@ run:
   - |
     cd changes
     ls -ltra
-    safe ls /
+    genesis info dev
