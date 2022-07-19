@@ -45,7 +45,7 @@ jobs:
         passed:
         - dev-cf
   - task: create-apps-internal-domain
-    file: tasks/run-cf-cli.yml
+    file: dev-changes/tasks/run-cf-cli.yml
     input_mapping:
       changes: dev-changes
     vars:
