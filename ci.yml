@@ -35,7 +35,7 @@ pipeline:
       dev -> uswest2demo
 
 jobs:
-- name: internal-domain
+- name: configure-internal-domain
   public: true
   serial: true
   plan:
@@ -43,8 +43,8 @@ jobs:
     - in_parallel:
       - get: dev-changes
         # TODO: uncomment once dev complete
-        # passed:
-        # - dev-cf
+        passed:
+        - dev-cf
   # DEBUG task, useful to run all sort of commands ;)
   # - task: check-changes
   #   config:
@@ -64,7 +64,24 @@ jobs:
   #       - |
   #         cd dev-changes
   #         ls -ltra
-  - task: create-apps-internal-domain
+  - task: run-cf-cli
+    file: dev-changes/tasks/run-cf-cli.yml
+    input_mapping:
+      changes: dev-changes
+    vars:
+      environment: dev
+
+- name: configure-isolation-segments
+  public: true
+  serial: true
+  plan:
+  - do:
+    - in_parallel:
+      - get: dev-changes
+        # TODO: uncomment once dev complete
+        passed:
+        - dev-cf
+  - task: run-cf-cli
     file: dev-changes/tasks/run-cf-cli.yml
     input_mapping:
       changes: dev-changes
@@ -79,11 +96,8 @@ resources:
     - tasks
 
 groups:
-- name: default
+- name: cf-platform-pipeline
   jobs:
-  - dev-cf
-  - uswest2demo-cf
-
-- name: features
-  jobs:
-  - internal-domain
+  - ((append))
+  - configure-internal-domain
+  - configure-isolation-segments
