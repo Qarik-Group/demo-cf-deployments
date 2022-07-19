@@ -41,10 +41,14 @@ jobs:
   plan:
   - do:
     - in_parallel:
-      - get: dev-changes
-        # TODO: uncomment once dev complete
+      - get: uswest2demo-cache
         passed:
         - dev-cf
+        trigger: true
+      - get: dev-changes
+        passed:
+        - dev-cf
+        trigger: true
   # DEBUG task, useful to run all sort of commands ;)
   # - task: debug-only
   #   config:

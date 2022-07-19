@@ -23,7 +23,7 @@ run:
     cd changes
     echo $VAULT_ADDR
     echo "VAULT_SKIP_VERIFY value is ... [$VAULT_SKIP_VERIFY]"
-    VERIFY=$([ "$VAULT_SKIP_VERIFY" == "true" ] && echo "-k" || echo "")
+    VERIFY=$([ "$VAULT_SKIP_VERIFY" ] && echo "-k" || echo "")
     echo "VERIFY value is ... [$VERIFY]"
     safe target $VERIFY $VAULT_ADDR vault
     safe env
