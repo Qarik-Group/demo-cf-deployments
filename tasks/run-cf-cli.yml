@@ -10,7 +10,7 @@ inputs:
 - name: changes
 
 params:
-  COMMAND: ((COMMAND))
+  SCRIPT: ((SCRIPT))
   VAULT_ADDR: ((VAULT_ADDR))
   VAULT_ROLE: ((VAULT_ROLE))
   VAULT_SECRET: ((VAULT_SECRET))
@@ -28,12 +28,13 @@ run:
       echo $VAULT_ROLE
       echo $VAULT_SECRET
     } | safe auth approle
-    echo "Show genesis info"
-    genesis info dev
-    echo "Setting up CLI"
-    genesis do dev -- setup-cli -f
-    echo "Login to CF..."
+    echo ">> Show genesis info"
+    genesis info dev -q
+    echo ">> Setting up CLI"
+    genesis do dev -q -- setup-cli -f
+    echo ">> Login to CF..."
     genesis do dev -q -- login
-    echo "Select 'system' org"
+    echo ">> Select 'system' org"
     cf target -o system
-    $COMMAND
+    echo ">> Running \"$SCRIPT\" against CF..."
+    ./$SCRIPT
