@@ -28,7 +28,7 @@ pipeline:
       ca_cert:  (( vault "secret/uswest2demo/bosh/ssl/ca:certificate" ))
       username: admin
       password: (( vault "secret/uswest2demo/bosh/users/admin:password" ))
-    
+  
   layouts:
     default: |+
       auto *dev
@@ -57,6 +57,29 @@ jobs:
       VAULT_ADDR: https://10.4.1.7
       VAULT_ROLE: (( vault "secret/uswest2demo/full/concourse/approle/concourse:approle-id" ))
       VAULT_SECRET: (( vault "secret/uswest2demo/full/concourse/approle/concourse:approle-secret" ))
+      VAULT_SKIP_VERIFY: "true"
+- name: configure-internal-domain
+  public: true
+  serial: true
+  plan:
+  - do:
+    - in_parallel:
+      - get: uswest2demo-cache
+        passed:
+        - dev-cf
+        trigger: true
+      - get: dev-changes
+        passed:
+        - dev-cf
+        trigger: true
+  - task: run-cf-cli
+    file: dev-changes/tasks/run-cf-cli.yml
+    input_mapping:
+      changes: dev-changes
+    vars:
+      VAULT_ADDR: https://10.4.1.16
+      VAULT_ROLE: (( vault "secret/asd/full/concourse/approle/concourse:approle-id" ))
+      VAULT_SECRET: (( vault "secret/asd/full/concourse/approle/concourse:approle-secret" ))
       VAULT_SKIP_VERIFY: "true"
 
 - name: configure-isolation-segments
