@@ -34,4 +34,5 @@ run:
     echo "Login to CF..."
     genesis do dev -q -- login
     echo "Checking on CF CLI"
-    cf target
+    cf targets
+    cf orgs
