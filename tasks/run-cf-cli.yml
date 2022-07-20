@@ -10,6 +10,7 @@ inputs:
 - name: changes
 
 params:
+  COMMAND: ((COMMAND))
   VAULT_ADDR: ((VAULT_ADDR))
   VAULT_ROLE: ((VAULT_ROLE))
   VAULT_SECRET: ((VAULT_SECRET))
@@ -33,6 +34,6 @@ run:
     genesis do dev -- setup-cli -f
     echo "Login to CF..."
     genesis do dev -q -- login
-    echo "Checking on CF CLI"
-    cf targets
-    cf orgs
+    echo "Select 'system' org"
+    cf target -o system
+    $COMMAND

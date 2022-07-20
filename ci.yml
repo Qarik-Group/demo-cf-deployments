@@ -54,6 +54,7 @@ jobs:
     input_mapping:
       changes: dev-changes
     vars:
+      COMMAND: "cf create-shared-domain apps.internal --internal"
       VAULT_ADDR: https://10.4.1.7
       VAULT_ROLE: (( vault "secret/uswest2demo/full/concourse/approle/concourse:approle-id" ))
       VAULT_SECRET: (( vault "secret/uswest2demo/full/concourse/approle/concourse:approle-secret" ))
