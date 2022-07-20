@@ -30,9 +30,7 @@ run:
     echo "Show genesis info"
     genesis info dev
     echo "Setting up CLI"
-    genesis do dev -- setup-cli << A
-    y
-    A
+    genesis do dev -- setup-cli -f
     echo "Login to CF..."
     genesis do dev -q -- login
     echo "Checking on CF CLI"
