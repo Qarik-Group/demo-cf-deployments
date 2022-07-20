@@ -81,6 +81,7 @@ resources:
   source:
     paths:
     - ((append))
+    - ci.yml
     - tasks
 
 groups:
