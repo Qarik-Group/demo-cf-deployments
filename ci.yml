@@ -84,6 +84,7 @@ resources:
     - ((append))
     - ci.yml
     - tasks
+    - scripts
 
 groups:
 - name: cf-platform-pipeline
