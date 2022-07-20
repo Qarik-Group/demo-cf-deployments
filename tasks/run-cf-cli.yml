@@ -28,8 +28,9 @@ run:
       echo $VAULT_ROLE
       echo $VAULT_SECRET
     } | safe auth approle
+    ls -ltra .genesis
     echo "Setting up CLI"
-    echo "y" | genesis do dev -q -- setup-cli
+    echo "y" | genesis do dev -T -- setup-cli
     echo "Login to CF..."
     genesis do dev -q -- login
     echo "Checking on CF CLI"
