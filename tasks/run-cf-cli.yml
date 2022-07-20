@@ -23,14 +23,16 @@ run:
     cd changes
     VERIFY=$([ "$VAULT_SKIP_VERIFY" ] && echo "-k" || echo "")
     safe target $VERIFY $VAULT_ADDR vault
-    safe env
     {
       echo $VAULT_ROLE
       echo $VAULT_SECRET
     } | safe auth approle
-    ls -ltra .genesis
+    safe env
+    more .genesis/config
+    echo "Show genesis info"
+    genesis info dev
     echo "Setting up CLI"
-    echo "y" | genesis do dev -T -- setup-cli
+    echo "y" | genesis do dev -D -- setup-cli
     echo "Login to CF..."
     genesis do dev -q -- login
     echo "Checking on CF CLI"
