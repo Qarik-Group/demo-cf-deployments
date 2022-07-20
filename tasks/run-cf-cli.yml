@@ -27,12 +27,10 @@ run:
       echo $VAULT_ROLE
       echo $VAULT_SECRET
     } | safe auth approle
-    safe env
-    more .genesis/config
     echo "Show genesis info"
     genesis info dev
     echo "Setting up CLI"
-    genesis do dev -D -- setup-cli
+    echo "y" | genesis do dev -- setup-cli
     echo "Login to CF..."
     genesis do dev -q -- login
     echo "Checking on CF CLI"
