@@ -11,7 +11,7 @@ inputs:
 
 params:
   SCRIPT: ((SCRIPT))
-  SCRIPT_CONFIG: ((SCRIPT_CONFIG))
+  #SCRIPT_CONFIG: ((SCRIPT_CONFIG))
   VAULT_ADDR: ((VAULT_ADDR))
   VAULT_ROLE: ((VAULT_ROLE))
   VAULT_SECRET: ((VAULT_SECRET))
@@ -38,4 +38,4 @@ run:
     echo ">> Select 'system' org"
     cf target -o system
     echo ">> Running \"$SCRIPT\" against CF..."
-    ./$SCRIPT "$SCRIPT_CONFIG"
+    ./$SCRIPT

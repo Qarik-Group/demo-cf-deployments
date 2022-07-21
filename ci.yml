@@ -7,13 +7,15 @@ pipeline:
     branch: latest-cf-aws-codex
     private_key: (( vault "concourse/demo/cf/github:private_key" ))
 
+  tagged: yes
+
   vault:
     url:    https://10.4.1.7
     verify: no
     role: (( vault "secret/uswest2demo/full/concourse/approle/concourse:approle-id" ))
     secret: (( vault "secret/uswest2demo/full/concourse/approle/concourse:approle-secret" ))
   
-  slack: 
+  slack:
     channel: '#botspam'
     webhook: (( vault "concourse/genesis/slack:webhook" ))
 
