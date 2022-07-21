@@ -35,7 +35,7 @@ kit:
     - add-persistent-isolation-segment-diego-cell
     - add-windows-isolation-segment
     #- app-security-groups
-    - cf-mgmt-uaa-client
+    #- cf-mgmt-uaa-client
 
 params:
   external_db_ca: |
