@@ -124,7 +124,6 @@ groups:
   jobs:
   - ((append))
   - configure-internal-domain
-  - configure-isolation-segments
 
 
   # DEBUG task, useful to run all sort of commands ;)
