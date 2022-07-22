@@ -553,11 +553,15 @@ exodus:
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.25.0
   cf-deployment-version: 16.25.0
   core_network: cf-core
+<<<<<<< HEAD
   dated: 2022-07-22 10:59:37 +0000
+=======
+  dated: 2022-07-22 12:15:58 +0000
+>>>>>>> Push latest changes, cf-mgmt client
   db_network: cf-core
-  deployer: unknown
+  deployer: ubuntu
   edge_network: cf-edge
-  features: postgres-db,aws-blobstore,small-footprint,ssh-proxy-on-routers,app-scheduler-integration,smb-test-server,smb-volume-services,smb-volume-services-releases,windows-dev-bosh-dns-alias,windows-diego-cells,windows-releases,custom-router-group,add-persistent-isolation-segment-diego-cell,add-windows-isolation-segment
+  features: postgres-db,aws-blobstore,small-footprint,ssh-proxy-on-routers,app-scheduler-integration,smb-test-server,smb-volume-services,smb-volume-services-releases,windows-dev-bosh-dns-alias,windows-diego-cells,windows-releases,custom-router-group,add-persistent-isolation-segment-diego-cell,add-windows-isolation-segment,cf-mgmt-uaa-client
   is_director: false
   kit_is_dev: false
   kit_name: cf
@@ -569,7 +573,7 @@ exodus:
   use_create_env: false
   vault_base: /secret/dev/cf
   vaulted_uaa_clients: /secret/dev/cf/uaa/client_secrets:firehose
-  version: 2.8.4
+  version: 2.8.5
 features:
   randomize_az_placement: true
 genesis:
@@ -886,6 +890,16 @@ instance_groups:
             refresh-token-validity: 2592000
             scope: network.admin,network.write,cloud_controller.read,cloud_controller.write,openid,password.write,cloud_controller.admin,scim.read,scim.write,doppler.firehose,uaa.user,routing.router_groups.read,routing.router_groups.write,cloud_controller.admin_read_only,cloud_controller.global_auditor,perm.admin,clients.read
             secret: ""
+          cf-mgmt-client:
+            access-token-validity: 1200
+            authorities: uaa.none
+            authorized-grant-types: client_credentials,refresh_token
+            autoapprove: true
+            override: true
+            redirect-uri: https://uaa.((system_domain))/login
+            refresh-token-validity: 2592000
+            scope: cloud_controller.admin,scim.read,scim.write,routing.router_groups.read
+            secret: ((cf_mgmt_client_secret))
           cf_smoke_tests:
             authorities: cloud_controller.admin,clients.read
             authorized-grant-types: client_credentials
@@ -3036,6 +3050,7 @@ kit:
   - custom-router-group
   - add-persistent-isolation-segment-diego-cell
   - add-windows-isolation-segment
+  - cf-mgmt-uaa-client
   name: cf
   version: 2.2.0-rc.14
 manifest_version: v16.25.0
@@ -4417,6 +4432,8 @@ variables:
     - client_auth
   type: certificate
   update_mode: converge
+- name: cf_mgmt_client_secret
+  type: password
 - name: stratos_client_secret
   type: password
 vm_extensions:
