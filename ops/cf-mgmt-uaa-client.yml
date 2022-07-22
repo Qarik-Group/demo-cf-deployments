@@ -8,6 +8,7 @@ instance_groups:
           cf-mgmt-client:
             access-token-validity: 1200
             authorized-grant-types: client_credentials,refresh_token
+            authorities: cloud_controller.admin
             autoapprove: true
             override: true
             redirect-uri: https://uaa.((system_domain))/login

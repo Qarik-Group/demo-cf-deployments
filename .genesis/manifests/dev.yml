@@ -553,11 +553,7 @@ exodus:
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.25.0
   cf-deployment-version: 16.25.0
   core_network: cf-core
-<<<<<<< HEAD
-  dated: 2022-07-22 10:59:37 +0000
-=======
-  dated: 2022-07-22 12:15:58 +0000
->>>>>>> Push latest changes, cf-mgmt client
+  dated: 2022-07-22 13:55:48 +0000
   db_network: cf-core
   deployer: ubuntu
   edge_network: cf-edge
@@ -892,7 +888,7 @@ instance_groups:
             secret: ""
           cf-mgmt-client:
             access-token-validity: 1200
-            authorities: uaa.none
+            authorities: cloud_controller.admin
             authorized-grant-types: client_credentials,refresh_token
             autoapprove: true
             override: true
