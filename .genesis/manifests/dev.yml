@@ -553,9 +553,9 @@ exodus:
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.25.0
   cf-deployment-version: 16.25.0
   core_network: cf-core
-  dated: 2022-07-22 13:55:48 +0000
+  dated: 2022-07-22 14:01:37 +0000
   db_network: cf-core
-  deployer: ubuntu
+  deployer: unknown
   edge_network: cf-edge
   features: postgres-db,aws-blobstore,small-footprint,ssh-proxy-on-routers,app-scheduler-integration,smb-test-server,smb-volume-services,smb-volume-services-releases,windows-dev-bosh-dns-alias,windows-diego-cells,windows-releases,custom-router-group,add-persistent-isolation-segment-diego-cell,add-windows-isolation-segment,cf-mgmt-uaa-client
   is_director: false
@@ -569,7 +569,7 @@ exodus:
   use_create_env: false
   vault_base: /secret/dev/cf
   vaulted_uaa_clients: /secret/dev/cf/uaa/client_secrets:firehose
-  version: 2.8.5
+  version: 2.8.4
 features:
   randomize_az_placement: true
 genesis:
