@@ -541,6 +541,8 @@ exodus:
   admin_password: ((cf_admin_password))
   admin_username: admin
   api_domain: api.system.codex.starkandwayne.com
+  app_autoscaler_client: app_autoscaler_client
+  app_autoscaler_secret: ((uaa_clients_app_autoscaler_secret))
   app_domains:
   - apps.codex.starkandwayne.com
   app_scheduler_client: app_scheduler_client
@@ -553,15 +555,23 @@ exodus:
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.25.0
   cf-deployment-version: 16.25.0
   core_network: cf-core
-  dated: 2022-07-25 07:33:00 +0000
+  dated: 2022-07-25 07:36:39 +0000
   db_network: cf-core
   deployer: unknown
   edge_network: cf-edge
-  features: postgres-db,aws-blobstore,small-footprint,ssh-proxy-on-routers,app-scheduler-integration,smb-test-server,smb-volume-services,smb-volume-services-releases,windows-dev-bosh-dns-alias,windows-diego-cells,windows-releases,custom-router-group,add-persistent-isolation-segment-diego-cell,add-windows-isolation-segment,cf-mgmt-uaa-client
+  features: postgres-db,aws-blobstore,small-footprint,ssh-proxy-on-routers,app-scheduler-integration,smb-test-server,smb-volume-services,smb-volume-services-releases,app-autoscaler-integration,windows-dev-bosh-dns-alias,windows-diego-cells,windows-releases,custom-router-group,add-persistent-isolation-segment-diego-cell,add-windows-isolation-segment,cf-mgmt-uaa-client
   is_director: false
   kit_is_dev: false
   kit_name: cf
   kit_version: 2.2.0-rc.14
+  loggregator_agent_metrics_tls_ca: ((loggregator_agent_metrics_tls.ca))
+  loggregator_agent_metrics_tls_certificate: ((loggregator_agent_metrics_tls.certificate))
+  loggregator_agent_metrics_tls_private_key: ((loggregator_agent_metrics_tls.private_key))
+  loggregator_ca: ((loggregator_ca.certificate))
+  loggregator_tls_agent_cert: ((loggregator_tls_agent.certificate))
+  loggregator_tls_agent_key: ((loggregator_tls_agent.private_key))
+  loggregator_tls_rlp_cert: ((loggregator_tls_rlp.certificate))
+  loggregator_tls_rlp_key: ((loggregator_tls_rlp.private_key))
   runtime_network: cf-runtime
   system_domain: system.codex.starkandwayne.com
   system_org: system
@@ -861,6 +871,10 @@ instance_groups:
           zPW4CXXvhLmE02TA9/HeCw3KEHIwicNuEfw=
           -----END CERTIFICATE-----
         clients:
+          app_autoscaler_client:
+            authorities: cloud_controller.read,cloud_controller.admin,uaa.resource
+            authorized-grant-types: client_credentials
+            secret: ((uaa_clients_app_autoscaler_secret))
           app_scheduler_client:
             authorities: cloud_controller.read,cloud_controller.admin,uaa.resource
             authorized-grant-types: client_credentials
@@ -3040,6 +3054,7 @@ kit:
   - smb-test-server
   - smb-volume-services
   - smb-volume-services-releases
+  - app-autoscaler-integration
   - windows-dev-bosh-dns-alias
   - windows-diego-cells
   - windows-releases
@@ -4428,6 +4443,8 @@ variables:
     - client_auth
   type: certificate
   update_mode: converge
+- name: uaa_clients_app_autoscaler_secret
+  type: password
 - name: cf_mgmt_client_secret
   type: password
 - name: stratos_client_secret
