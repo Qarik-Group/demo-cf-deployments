@@ -16,7 +16,7 @@ kit:
     - smb-test-server
     - smb-volume-services
     - smb-volume-services-releases
-    #- app-autoscaler-integration
+    - app-autoscaler-integration
     #- apps-trust-redis-dev-crt
     #- routing-api-username
     #- nfs-volume-services
