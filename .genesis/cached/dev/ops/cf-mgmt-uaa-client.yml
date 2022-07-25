@@ -5,15 +5,12 @@ instance_groups:
     properties:
       uaa:
         clients:
-          cf-mgmt-client:
-            access-token-validity: 1200
+          cf_mgmt_client:
+            resource_ids: none
             authorized-grant-types: client_credentials,refresh_token
-            authorities: cloud_controller.admin
-            autoapprove: true
-            override: true
-            redirect-uri: https://uaa.((system_domain))/login
-            refresh-token-validity: 2592000
-            scope: cloud_controller.admin,scim.read,scim.write,routing.router_groups.read
+            authorities: routing.router_groups.read,scim.write,scim.read,cloud_controller.admin
+            autoapprove:
+            scope: routing.router_groups.read,scim.write,scim.read,cloud_controller.admin
             secret: ((cf_mgmt_client_secret))
 
 variables:
