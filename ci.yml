@@ -35,6 +35,92 @@ pipeline:
       auto *dev
       dev -> baby-bosh
 
+groups:
+- name: cf-platform-pipeline
+  jobs:
+  - ((append))
+  - configure-internal-domain
+  - delete-orgs
+  - update-space-users
+  - update-space-security-groups
+  - delete-spaces
+  - update-org-quotas
+  - assign-default-security-groups
+  - service-access
+  - share-org-private-domains
+  - update-orgs-metadata
+  - create-spaces
+  - update-spaces-metadata
+  - isolation-segments
+  - update-space-quotas
+  - update-org-users
+  - cleanup-org-users
+  - create-orgs
+  - shared-domains
+  - create-security-groups
+  - create-org-private-domains
+  - update-spaces
+- name: platform-features
+  jobs:
+  - configure-internal-domain
+- name: platform-management
+  jobs:
+  - delete-orgs
+  - update-space-users
+  - update-space-security-groups
+  - delete-spaces
+  - update-org-quotas
+  - assign-default-security-groups
+  - service-access
+  - share-org-private-domains
+  - update-orgs-metadata
+  - create-spaces
+  - update-spaces-metadata
+  - isolation-segments
+  - update-space-quotas
+  - update-org-users
+  - cleanup-org-users
+  - create-orgs
+  - shared-domains
+  - create-security-groups
+  - create-org-private-domains
+  - update-spaces
+
+##### CF-MGMT stuff #####
+##### dev.yml configuration #####
+## CONFIGURATION VARIABLES ##
+git_repo_uri: "https://github.com/starkandwayne/demo-cf-mgmt-deployments"
+git_repo_branch: main
+system_domain: "system.codex.starkandwayne.com"
+user_id: "cf_mgmt_client"
+password: ""
+client_secret: (( vault "secret/dev/bosh/uaa/clients/cf_mgmt_client:secret" )) 
+log_level: INFO
+time-trigger: 15m
+config_dir: config/dev
+ldap_server: ""
+ldap_user: ""
+ldap_password: ""
+
+resources:
+- name: config-repo
+  type: git
+  source:
+    uri: ((git_repo_uri))
+    branch: ((git_repo_branch))
+    # only watch for changes in config directory
+    paths: ["ci", "((config_dir))"]
+- name: time-trigger
+  type: time
+  source:
+    interval: ((time-trigger))
+- name: dev-changes
+  source:
+    paths:
+    - ((append))
+    - tasks
+    - scripts
+
 jobs:
 - name: configure-internal-domain
   public: true
@@ -60,100 +146,338 @@ jobs:
       VAULT_ROLE: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
       VAULT_SECRET: (( vault "secret/exodus/ci/genesis-pipelines:approle-secret" ))
       VAULT_SKIP_VERIFY: "true"
+- name: create-orgs
+  plan:
+  - get: config-repo
+    trigger: true
+  - task: create-orgs
+    file: config-repo/ci/tasks/cf-mgmt.yml
+    params:
+      SYSTEM_DOMAIN: ((system_domain))
+      USER_ID: ((user_id))
+      PASSWORD: ((password))
+      CONFIG_DIR: ((config_dir))
+      CLIENT_SECRET: ((client_secret))
+      LOG_LEVEL: ((log_level))
+      CF_MGMT_COMMAND: create-orgs
 
-resources:
-- name: dev-changes
-  source:
-    paths:
-    - ((append))
-    - tasks
-    - scripts
+- name: shared-domains
+  plan:
+  - get: config-repo
+    trigger: true
+  - task: shared-domains
+    file: config-repo/ci/tasks/cf-mgmt.yml
+    params:
+      SYSTEM_DOMAIN: ((system_domain))
+      USER_ID: ((user_id))
+      PASSWORD: ((password))
+      CONFIG_DIR: ((config_dir))
+      CLIENT_SECRET: ((client_secret))
+      LOG_LEVEL: ((log_level))
+      CF_MGMT_COMMAND: shared-domains
 
-groups:
-- name: cf-platform-pipeline
-  jobs:
-  - ((append))
-  - configure-internal-domain
-- name: platform-features
-  jobs:
-  - configure-internal-domain
+- name: create-security-groups
+  plan:
+  - get: config-repo
+    trigger: true
+  - task: create-security-groups
+    file: config-repo/ci/tasks/cf-mgmt.yml
+    params:
+      SYSTEM_DOMAIN: ((system_domain))
+      USER_ID: ((user_id))
+      PASSWORD: ((password))
+      CONFIG_DIR: ((config_dir))
+      CLIENT_SECRET: ((client_secret))
+      LOG_LEVEL: ((log_level))
+      CF_MGMT_COMMAND: create-security-groups
 
-# - name: configure-security-groups
-#   public: true
-#   serial: true
-#   plan:
-#   - do:
-#     - in_parallel:
-#       - get: uswest2demo-cache
-#         passed:
-#         - dev-cf
-#         trigger: true
-#       - get: dev-changes
-#         passed:
-#         - dev-cf
-#         trigger: true
-#   - task: run-cf-cli
-#     file: dev-changes/tasks/run-cf-cli.yml
-#     input_mapping:
-#       changes: dev-changes
-#     vars:
-#       SCRIPT: scripts/create-app-security-groups.sh
-#       SCRIPT_CONFIG: >
-#         [
-#           {
-#             name: dns
-#             json_file: scripts/asg-dns.json
-#             bindings: []
-#             global: true
-#           },
-#           {
-#             name: credhub_open
-#             json_file: scripts/asg-credhub-open.json
-#             bindings: [
-#               {
-#                 org: system
-#                 space: nfs-broker-space
-#                 lifecycle: running
-#               },
-#               {
-#                 org: system
-#                 space: smb-broker-space
-#                 lifecycle: running
-#               }
-#             ]
-#           }
-#         ]
-#       VAULT_ADDR: https://10.4.1.7
-#       VAULT_ROLE: (( vault "secret/uswest2demo/full/concourse/approle/concourse:approle-id" ))
-#       VAULT_SECRET: (( vault "secret/uswest2demo/full/concourse/approle/concourse:approle-secret" ))
-#       VAULT_SKIP_VERIFY: "true"
+- name: assign-default-security-groups
+  plan:
+  - get: config-repo
+    trigger: true
+    passed: [create-security-groups]
+  - task: assign-default-security-groups
+    file: config-repo/ci/tasks/cf-mgmt.yml
+    params:
+      SYSTEM_DOMAIN: ((system_domain))
+      USER_ID: ((user_id))
+      PASSWORD: ((password))
+      CONFIG_DIR: ((config_dir))
+      CLIENT_SECRET: ((client_secret))
+      LOG_LEVEL: ((log_level))
+      CF_MGMT_COMMAND: assign-default-security-groups
 
-  # DEBUG task, useful to run all sort of commands ;)
-  # - task: debug-only
-  #   config:
-  #     platform: linux
-  #     image_resource:
-  #       name: ""
-  #       source:
-  #         repository: starkandwayne/concourse
-  #         tag: latest
-  #       type: registry-image
-  #     inputs:
-  #       - name: dev-changes
-  #     params:
-  #       VAULT_ADDR: https://10.4.1.7
-  #       VAULT_ROLE_ID: 
-  #       VAULT_SECRET_ID: 
-  #       VAULT_SKIP_VERIFY: "true"
-  #     run:
-  #       path: sh
-  #       args:
-  #       - -c
-  #       - |
-  #         cd dev-changes
-  #         safe target -k $VAULT_ADDR vault
-  #         safe targets
-  #         {
-  #           echo $VAULT_ROLE_ID
-  #           echo $VAULT_SECRET_ID
-  #         } | safe auth approle
+- name: delete-orgs
+  plan:
+  - get: config-repo
+    trigger: true
+    passed: [create-orgs]
+  - get: time-trigger
+    trigger: true
+  - task: delete-orgs
+    file: config-repo/ci/tasks/cf-mgmt.yml
+    params:
+      SYSTEM_DOMAIN: ((system_domain))
+      USER_ID: ((user_id))
+      PASSWORD: ((password))
+      CONFIG_DIR: ((config_dir))
+      CLIENT_SECRET: ((client_secret))
+      LOG_LEVEL: ((log_level))
+      CF_MGMT_COMMAND: delete-orgs
+
+- name: update-orgs-metadata
+  plan:
+  - get: config-repo
+    passed: [create-orgs]
+    trigger: true
+  - task: update-orgs-metadata
+    file: config-repo/ci/tasks/cf-mgmt.yml
+    params:
+      SYSTEM_DOMAIN: ((system_domain))
+      USER_ID: ((user_id))
+      PASSWORD: ((password))
+      CONFIG_DIR: ((config_dir))
+      CLIENT_SECRET: ((client_secret))
+      LOG_LEVEL: ((log_level))
+      CF_MGMT_COMMAND: update-orgs-metadata
+
+- name: create-org-private-domains
+  plan:
+  - get: config-repo
+    passed: [create-orgs]
+    trigger: true
+  - task: create-org-private-domains
+    file: config-repo/ci/tasks/cf-mgmt.yml
+    params:
+      SYSTEM_DOMAIN: ((system_domain))
+      USER_ID: ((user_id))
+      PASSWORD: ((password))
+      CONFIG_DIR: ((config_dir))
+      CLIENT_SECRET: ((client_secret))
+      LOG_LEVEL: ((log_level))
+      CF_MGMT_COMMAND: create-org-private-domains
+
+- name: service-access
+  plan:
+  - get: config-repo
+    passed: [create-orgs]
+    trigger: true
+  - task: service-access
+    file: config-repo/ci/tasks/cf-mgmt.yml
+    params:
+      SYSTEM_DOMAIN: ((system_domain))
+      USER_ID: ((user_id))
+      PASSWORD: ((password))
+      CONFIG_DIR: ((config_dir))
+      CLIENT_SECRET: ((client_secret))
+      LOG_LEVEL: ((log_level))
+      CF_MGMT_COMMAND: service-access
+
+- name: share-org-private-domains
+  plan:
+  - get: config-repo
+    passed: [create-org-private-domains]
+    trigger: true
+  - task: share-org-private-domains
+    file: config-repo/ci/tasks/cf-mgmt.yml
+    params:
+      SYSTEM_DOMAIN: ((system_domain))
+      USER_ID: ((user_id))
+      PASSWORD: ((password))
+      CONFIG_DIR: ((config_dir))
+      CLIENT_SECRET: ((client_secret))
+      LOG_LEVEL: ((log_level))
+      CF_MGMT_COMMAND: share-org-private-domains
+
+- name: create-spaces
+  plan:
+  - get: config-repo
+    passed: [create-orgs, update-org-users]
+    trigger: true
+  - task: create-spaces
+    file: config-repo/ci/tasks/cf-mgmt.yml
+    params:
+      SYSTEM_DOMAIN: ((system_domain))
+      USER_ID: ((user_id))
+      PASSWORD: ((password))
+      CONFIG_DIR: ((config_dir))
+      CLIENT_SECRET: ((client_secret))
+      LOG_LEVEL: ((log_level))
+      CF_MGMT_COMMAND: create-spaces
+
+- name: delete-spaces
+  plan:
+  - get: config-repo
+    passed: [create-orgs, create-spaces]
+    trigger: true
+  - get: time-trigger
+    trigger: true
+  - task: delete-spaces
+    file: config-repo/ci/tasks/cf-mgmt.yml
+    params:
+      SYSTEM_DOMAIN: ((system_domain))
+      USER_ID: ((user_id))
+      PASSWORD: ((password))
+      CONFIG_DIR: ((config_dir))
+      CLIENT_SECRET: ((client_secret))
+      LOG_LEVEL: ((log_level))
+      CF_MGMT_COMMAND: delete-spaces
+
+- name: update-spaces
+  plan:
+  - get: config-repo
+    passed: [create-spaces]
+    trigger: true
+  - get: time-trigger
+    trigger: true
+  - task: update-spaces
+    file: config-repo/ci/tasks/cf-mgmt.yml
+    params:
+      SYSTEM_DOMAIN: ((system_domain))
+      USER_ID: ((user_id))
+      PASSWORD: ((password))
+      CONFIG_DIR: ((config_dir))
+      CLIENT_SECRET: ((client_secret))
+      LOG_LEVEL: ((log_level))
+      CF_MGMT_COMMAND: update-spaces
+
+- name: update-spaces-metadata
+  plan:
+  - get: config-repo
+    passed: [create-spaces]
+    trigger: true
+  - task: update-spaces-metadata
+    file: config-repo/ci/tasks/cf-mgmt.yml
+    params:
+      SYSTEM_DOMAIN: ((system_domain))
+      USER_ID: ((user_id))
+      PASSWORD: ((password))
+      CONFIG_DIR: ((config_dir))
+      CLIENT_SECRET: ((client_secret))
+      LOG_LEVEL: ((log_level))
+      CF_MGMT_COMMAND: update-spaces-metadata
+
+- name: update-space-users
+  plan:
+  - get: config-repo
+    passed: [create-spaces]
+    trigger: true
+  - get: time-trigger
+    trigger: true
+  - task: update-space-users
+    file: config-repo/ci/tasks/cf-mgmt.yml
+    params:
+      SYSTEM_DOMAIN: ((system_domain))
+      USER_ID: ((user_id))
+      PASSWORD: ((password))
+      CONFIG_DIR: ((config_dir))
+      CLIENT_SECRET: ((client_secret))
+      LDAP_USER: ((ldap_user))
+      LDAP_PASSWORD: ((ldap_password))
+      LDAP_SERVER: ((ldap_server))
+      LOG_LEVEL: ((log_level))
+      CF_MGMT_COMMAND: update-space-users
+
+- name: update-space-quotas
+  plan:
+  - get: config-repo
+    passed: [create-spaces]
+    trigger: true
+  - task: update-space-quotas
+    file: config-repo/ci/tasks/cf-mgmt.yml
+    params:
+      SYSTEM_DOMAIN: ((system_domain))
+      USER_ID: ((user_id))
+      PASSWORD: ((password))
+      CONFIG_DIR: ((config_dir))
+      CLIENT_SECRET: ((client_secret))
+      LOG_LEVEL: ((log_level))
+      CF_MGMT_COMMAND: update-space-quotas
+
+- name: update-space-security-groups
+  plan:
+  - get: config-repo
+    passed: [create-spaces,create-security-groups]
+    trigger: true
+  - task: update-space-security-groups
+    file: config-repo/ci/tasks/cf-mgmt.yml
+    params:
+      SYSTEM_DOMAIN: ((system_domain))
+      USER_ID: ((user_id))
+      PASSWORD: ((password))
+      CONFIG_DIR: ((config_dir))
+      CLIENT_SECRET: ((client_secret))
+      LOG_LEVEL: ((log_level))
+      CF_MGMT_COMMAND: update-space-security-groups
+
+- name: update-org-users
+  plan:
+  - get: config-repo
+    passed: [create-orgs]
+    trigger: true
+  - get: time-trigger
+    trigger: true
+  - task: update-org-users
+    file: config-repo/ci/tasks/cf-mgmt.yml
+    params:
+      SYSTEM_DOMAIN: ((system_domain))
+      USER_ID: ((user_id))
+      PASSWORD: ((password))
+      CONFIG_DIR: ((config_dir))
+      CLIENT_SECRET: ((client_secret))
+      LDAP_USER: ((ldap_user))
+      LDAP_PASSWORD: ((ldap_password))
+      LDAP_SERVER: ((ldap_server))
+      LOG_LEVEL: ((log_level))
+      CF_MGMT_COMMAND: update-org-users
+
+- name: update-org-quotas
+  plan:
+  - get: config-repo
+    passed: [create-orgs]
+    trigger: true
+  - task: update-org-quotas
+    file: config-repo/ci/tasks/cf-mgmt.yml
+    params:
+      SYSTEM_DOMAIN: ((system_domain))
+      USER_ID: ((user_id))
+      PASSWORD: ((password))
+      CONFIG_DIR: ((config_dir))
+      CLIENT_SECRET: ((client_secret))
+      LOG_LEVEL: ((log_level))
+      CF_MGMT_COMMAND: update-org-quotas
+
+- name: isolation-segments
+  plan:
+  - get: config-repo
+    trigger: true
+    passed: [create-orgs, create-spaces]
+  - get: time-trigger
+    trigger: true
+  - task: isolation-segments
+    file: config-repo/ci/tasks/cf-mgmt.yml
+    params:
+      SYSTEM_DOMAIN: ((system_domain))
+      USER_ID: ((user_id))
+      CLIENT_SECRET: ((client_secret))
+      CONFIG_DIR: ((config_dir))
+      LOG_LEVEL: ((log_level))
+      CF_MGMT_COMMAND: isolation-segments
+
+- name: cleanup-org-users
+  plan:
+  - get: config-repo
+    passed: [update-org-users,update-space-users]
+    trigger: true
+  - get: time-trigger
+    trigger: true
+  - task: cleanup-org-users
+    file: config-repo/ci/tasks/cf-mgmt.yml
+    params:
+      SYSTEM_DOMAIN: ((system_domain))
+      USER_ID: ((user_id))
+      PASSWORD: ((password))
+      CONFIG_DIR: ((config_dir))
+      CLIENT_SECRET: ((client_secret))
+      LOG_LEVEL: ((log_level))
+      CF_MGMT_COMMAND: cleanup-org-users
