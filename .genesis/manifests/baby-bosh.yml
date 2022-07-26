@@ -476,9 +476,9 @@ exodus:
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.25.0
   cf-deployment-version: 16.25.0
   core_network: cf-core
-  dated: 2022-07-25 15:59:06 +0000
+  dated: 2022-07-26 12:19:58 +0000
   db_network: cf-core
-  deployer: ubuntu
+  deployer: unknown
   edge_network: cf-edge
   features: haproxy,self-signed,postgres-db,small-footprint
   is_director: false
@@ -492,7 +492,7 @@ exodus:
   use_create_env: false
   vault_base: /secret/baby/bosh/cf
   vaulted_uaa_clients: /secret/baby/bosh/cf/uaa/client_secrets:firehose
-  version: 2.8.5
+  version: 2.8.4
 features:
   randomize_az_placement: true
 genesis:
