@@ -1,0 +1,18 @@
+instance_groups:
+- name: uaa
+  jobs:
+  - name: uaa
+    properties:
+      uaa:
+        clients:
+          cf_mgmt_client:
+            resource_ids: none
+            authorized-grant-types: client_credentials,refresh_token
+            authorities: routing.router_groups.read,scim.write,scim.read,cloud_controller.admin
+            autoapprove:
+            scope: routing.router_groups.read,scim.write,scim.read,cloud_controller.admin
+            secret: ((cf_mgmt_client_secret))
+
+variables:
+- name: cf_mgmt_client_secret
+  type: password

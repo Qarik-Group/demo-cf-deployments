@@ -1,0 +1,35 @@
+- type: replace
+  path: /variables/-
+  value:
+    name: smb-test-server-password
+    type: password
+
+- type: replace
+  path: /instance_groups/-
+  value:
+    name: smbtestserver
+    azs: (( grab meta.azs ))
+    instances: 1
+    stemcell: default
+    vm_type: medium
+    persistent_disk_type: 10GB
+    networks:
+    - ((replace))
+    - name: ((cf_runtime_network))
+    jobs:
+    - name: smbtestserver
+      release: smb-volume
+      properties:
+        username: smbtestserver
+        password: ((smb-test-server-password))
+
+- type: replace
+  path: /addons/name=bosh-dns-aliases/jobs/name=bosh-dns-aliases/properties/aliases/domain=smbtestserver.service.cf.internal?
+  value:
+    domain: smbtestserver.service.cf.internal
+    targets:
+    - query: '*'
+      instance_group: smbtestserver
+      deployment: cf
+      network: default
+      domain: bosh

@@ -1,0 +1,399 @@
+---
+- type: replace
+  path: /instance_groups/-
+  value:
+    name: windows-isolated-segment
+    azs:
+    - z1
+    instances: 1
+    vm_type: small-highmem
+    vm_extensions:
+    - 100GB_ephemeral_disk
+    stemcell: windows2019
+    networks:
+    - name: ((cf_runtime_network))
+    jobs:
+    - name: enable_ssh
+      release: windows-utilities
+    - name: winc
+      release: winc
+    - name: winc-network-hns-acls
+      properties:
+        winc_network:
+          dns_servers:
+          - 172.30.0.1
+      release: winc
+    # release controls either online/offline version is applied
+    - name: windows2019fs
+      release: windowsfs
+    - name: groot
+      provides:
+        groot: nil
+      properties:
+        groot:
+          cached_image_uris:
+          - oci:///C:/var/vcap/packages/windows2019fs
+          driver_store: /var/vcap/data/groot
+      release: winc
+    - name: garden-windows
+      properties:
+        garden:
+          destroy_containers_on_start: true
+          image_plugin: /var/vcap/packages/groot/groot.exe
+          image_plugin_extra_args:
+          - --driver-store=/var/vcap/data/groot
+          - --config=/var/vcap/jobs/groot/config/groot.yml
+          listen_address: 127.0.0.1:9241
+          network_plugin: /var/vcap/packages/winc-network-hns-acls/winc-network.exe
+          network_plugin_extra_args:
+          - --configFile=/var/vcap/jobs/winc-network-hns-acls/config/interface.json
+          - --log=/var/vcap/sys/log/winc-network-hns-acls/winc-network.log
+          nstar_bin: /var/vcap/packages/nstar/nstar.exe
+          runtime_plugin: /var/vcap/packages/winc/winc.exe
+      release: garden-runc
+    - name: rep_windows
+      properties:
+        containers:
+          trusted_ca_certificates:
+          - ((diego_instance_identity_ca.ca))
+          - ((credhub_tls.ca))
+          - ((uaa_ssl.ca))
+        declarative_healthcheck_path: /var/vcap/packages/healthcheck_windows/internal
+        diego:
+          executor:
+            instance_identity_ca_cert: ((diego_instance_identity_ca.certificate))
+            instance_identity_key: ((diego_instance_identity_ca.private_key))
+          rep:
+            placement_tags:
+            - windows-isolated-segment
+            open_bindmounts_acl: true
+            preloaded_rootfses:
+            - windows2016:oci:///C:/var/vcap/packages/windows2019fs
+            - windows:oci:///C:/var/vcap/packages/windows2019fs
+        enable_consul_service_registration: false
+        enable_declarative_healthcheck: true
+        logging:
+          format:
+            timestamp: rfc3339
+        loggregator:
+          ca_cert: ((loggregator_tls_agent.ca))
+          cert: ((loggregator_tls_agent.certificate))
+          key: ((loggregator_tls_agent.private_key))
+          use_v2_api: true
+        syslog_daemon_config:
+          enable: false
+        tls:
+          ca_cert: ((diego_rep_agent_v2.ca))
+          cert: ((diego_rep_agent_v2.certificate))
+          key: ((diego_rep_agent_v2.private_key))
+      release: diego
+    - consumes:
+        nats:
+          ip_addresses: false
+        nats-tls:
+          ip_addresses: false
+      name: route_emitter_windows
+      properties:
+        diego:
+          route_emitter:
+            bbs:
+              ca_cert: ((diego_bbs_client.ca))
+              client_cert: ((diego_bbs_client.certificate))
+              client_key: ((diego_bbs_client.private_key))
+            local_mode: true
+            nats:
+              tls:
+                client_cert: ((nats_client_cert.certificate))
+                client_key: ((nats_client_cert.private_key))
+                enabled: true
+        logging:
+          format:
+            timestamp: rfc3339
+        loggregator:
+          ca_cert: ((loggregator_tls_agent.ca))
+          cert: ((loggregator_tls_agent.certificate))
+          key: ((loggregator_tls_agent.private_key))
+          use_v2_api: true
+      release: diego
+    - name: loggregator_agent_windows
+      properties:
+        grpc_port: 3459
+        loggregator:
+          tls:
+            agent:
+              cert: ((loggregator_tls_agent.certificate))
+              key: ((loggregator_tls_agent.private_key))
+            ca_cert: ((loggregator_tls_agent.ca))
+        metrics:
+          ca_cert: ((loggregator_agent_metrics_tls.ca))
+          cert: ((loggregator_agent_metrics_tls.certificate))
+          key: ((loggregator_agent_metrics_tls.private_key))
+          server_name: loggregator_agent_metrics
+        syslog_daemon_config:
+          enable: false
+      release: loggregator-agent
+    - name: loggr-syslog-agent-windows
+      properties:
+        cache:
+          tls:
+            ca_cert: ((syslog_agent_api_tls.ca))
+            cert: ((syslog_agent_api_tls.certificate))
+            cn: binding-cache
+            key: ((syslog_agent_api_tls.private_key))
+        metrics:
+          ca_cert: ((syslog_agent_metrics_tls.ca))
+          cert: ((syslog_agent_metrics_tls.certificate))
+          key: ((syslog_agent_metrics_tls.private_key))
+          server_name: syslog_agent_metrics
+        port: 3460
+        tls:
+          ca_cert: ((loggregator_tls_agent.ca))
+          cert: ((loggregator_tls_agent.certificate))
+          key: ((loggregator_tls_agent.private_key))
+      release: loggregator-agent
+    - name: loggr-forwarder-agent-windows
+      properties:
+        downstream_ingress_ports:
+        - 3459
+        - 3460
+        metrics:
+          ca_cert: ((forwarder_agent_metrics_tls.ca))
+          cert: ((forwarder_agent_metrics_tls.certificate))
+          key: ((forwarder_agent_metrics_tls.private_key))
+          server_name: forwarder_agent_metrics
+        tls:
+          ca_cert: ((loggregator_tls_agent.ca))
+          cert: ((loggregator_tls_agent.certificate))
+          key: ((loggregator_tls_agent.private_key))
+      release: loggregator-agent
+    - name: prom_scraper_windows
+      properties:
+        metrics:
+          ca_cert: ((prom_scraper_metrics_tls.ca))
+          cert: ((prom_scraper_metrics_tls.certificate))
+          key: ((prom_scraper_metrics_tls.private_key))
+          server_name: prom_scraper_metrics
+        scrape:
+          tls:
+            ca_cert: ((prom_scraper_scrape_tls.ca))
+            cert: ((prom_scraper_scrape_tls.certificate))
+            key: ((prom_scraper_scrape_tls.private_key))
+        scrape_interval: 60s
+      release: loggregator-agent
+---
+- type: replace
+  path: /instance_groups/-
+  value:
+    name: windows-isolated-segment-2
+    azs:
+    - z1
+    instances: 1
+    vm_type: small-highmem
+    vm_extensions:
+    - 100GB_ephemeral_disk
+    stemcell: windows2019
+    networks:
+    - name: ((cf_runtime_network))
+    jobs:
+    - name: enable_ssh
+      release: windows-utilities
+    - name: winc
+      release: winc
+    - name: winc-network-hns-acls
+      properties:
+        winc_network:
+          dns_servers:
+          - 172.30.0.1
+      release: winc
+    # release controls either online/offline version is applied
+    - name: windows2019fs
+      release: windowsfs
+    - name: groot
+      provides:
+        groot: nil
+      properties:
+        groot:
+          cached_image_uris:
+          - oci:///C:/var/vcap/packages/windows2019fs
+          driver_store: /var/vcap/data/groot
+      release: winc
+    - name: garden-windows
+      properties:
+        garden:
+          destroy_containers_on_start: true
+          image_plugin: /var/vcap/packages/groot/groot.exe
+          image_plugin_extra_args:
+          - --driver-store=/var/vcap/data/groot
+          - --config=/var/vcap/jobs/groot/config/groot.yml
+          listen_address: 127.0.0.1:9241
+          network_plugin: /var/vcap/packages/winc-network-hns-acls/winc-network.exe
+          network_plugin_extra_args:
+          - --configFile=/var/vcap/jobs/winc-network-hns-acls/config/interface.json
+          - --log=/var/vcap/sys/log/winc-network-hns-acls/winc-network.log
+          nstar_bin: /var/vcap/packages/nstar/nstar.exe
+          runtime_plugin: /var/vcap/packages/winc/winc.exe
+      release: garden-runc
+    - name: rep_windows
+      properties:
+        containers:
+          trusted_ca_certificates:
+          - ((diego_instance_identity_ca.ca))
+          - ((credhub_tls.ca))
+          - ((uaa_ssl.ca))
+        declarative_healthcheck_path: /var/vcap/packages/healthcheck_windows/internal
+        diego:
+          executor:
+            instance_identity_ca_cert: ((diego_instance_identity_ca.certificate))
+            instance_identity_key: ((diego_instance_identity_ca.private_key))
+          rep:
+            placement_tags:
+            - windows-isolated-segment-2
+            open_bindmounts_acl: true
+            preloaded_rootfses:
+            - windows2016:oci:///C:/var/vcap/packages/windows2019fs
+            - windows:oci:///C:/var/vcap/packages/windows2019fs
+        enable_consul_service_registration: false
+        enable_declarative_healthcheck: true
+        logging:
+          format:
+            timestamp: rfc3339
+        loggregator:
+          ca_cert: ((loggregator_tls_agent.ca))
+          cert: ((loggregator_tls_agent.certificate))
+          key: ((loggregator_tls_agent.private_key))
+          use_v2_api: true
+        syslog_daemon_config:
+          enable: false
+        tls:
+          ca_cert: ((diego_rep_agent_v2.ca))
+          cert: ((diego_rep_agent_v2.certificate))
+          key: ((diego_rep_agent_v2.private_key))
+      release: diego
+    - consumes:
+        nats:
+          ip_addresses: false
+        nats-tls:
+          ip_addresses: false
+      name: route_emitter_windows
+      properties:
+        diego:
+          route_emitter:
+            bbs:
+              ca_cert: ((diego_bbs_client.ca))
+              client_cert: ((diego_bbs_client.certificate))
+              client_key: ((diego_bbs_client.private_key))
+            local_mode: true
+            nats:
+              tls:
+                client_cert: ((nats_client_cert.certificate))
+                client_key: ((nats_client_cert.private_key))
+                enabled: true
+        logging:
+          format:
+            timestamp: rfc3339
+        loggregator:
+          ca_cert: ((loggregator_tls_agent.ca))
+          cert: ((loggregator_tls_agent.certificate))
+          key: ((loggregator_tls_agent.private_key))
+          use_v2_api: true
+      release: diego
+    - name: loggregator_agent_windows
+      properties:
+        grpc_port: 3459
+        loggregator:
+          tls:
+            agent:
+              cert: ((loggregator_tls_agent.certificate))
+              key: ((loggregator_tls_agent.private_key))
+            ca_cert: ((loggregator_tls_agent.ca))
+        metrics:
+          ca_cert: ((loggregator_agent_metrics_tls.ca))
+          cert: ((loggregator_agent_metrics_tls.certificate))
+          key: ((loggregator_agent_metrics_tls.private_key))
+          server_name: loggregator_agent_metrics
+        syslog_daemon_config:
+          enable: false
+      release: loggregator-agent
+    - name: loggr-syslog-agent-windows
+      properties:
+        cache:
+          tls:
+            ca_cert: ((syslog_agent_api_tls.ca))
+            cert: ((syslog_agent_api_tls.certificate))
+            cn: binding-cache
+            key: ((syslog_agent_api_tls.private_key))
+        metrics:
+          ca_cert: ((syslog_agent_metrics_tls.ca))
+          cert: ((syslog_agent_metrics_tls.certificate))
+          key: ((syslog_agent_metrics_tls.private_key))
+          server_name: syslog_agent_metrics
+        port: 3460
+        tls:
+          ca_cert: ((loggregator_tls_agent.ca))
+          cert: ((loggregator_tls_agent.certificate))
+          key: ((loggregator_tls_agent.private_key))
+      release: loggregator-agent
+    - name: loggr-forwarder-agent-windows
+      properties:
+        downstream_ingress_ports:
+        - 3459
+        - 3460
+        metrics:
+          ca_cert: ((forwarder_agent_metrics_tls.ca))
+          cert: ((forwarder_agent_metrics_tls.certificate))
+          key: ((forwarder_agent_metrics_tls.private_key))
+          server_name: forwarder_agent_metrics
+        tls:
+          ca_cert: ((loggregator_tls_agent.ca))
+          cert: ((loggregator_tls_agent.certificate))
+          key: ((loggregator_tls_agent.private_key))
+      release: loggregator-agent
+    - name: prom_scraper_windows
+      properties:
+        metrics:
+          ca_cert: ((prom_scraper_metrics_tls.ca))
+          cert: ((prom_scraper_metrics_tls.certificate))
+          key: ((prom_scraper_metrics_tls.private_key))
+          server_name: prom_scraper_metrics
+        scrape:
+          tls:
+            ca_cert: ((prom_scraper_scrape_tls.ca))
+            cert: ((prom_scraper_scrape_tls.certificate))
+            key: ((prom_scraper_scrape_tls.private_key))
+        scrape_interval: 60s
+      release: loggregator-agent
+---
+addons:
+- name: bosh-dns-aliases
+  jobs:
+  - name: bosh-dns-aliases
+    properties:
+      aliases:
+      - domain: _.cell.service.cf.internal
+        targets:
+        - ((append))
+        - deployment: ((deployment_name))
+          domain: bosh
+          instance_group: windows-isolated-segment
+          network: ((cf_runtime_network))
+          query: _
+        - deployment: ((deployment_name))
+          domain: bosh
+          instance_group: windows-isolated-segment-2
+          network: ((cf_runtime_network))
+          query: _
+---
+- path: /releases/name=winc?
+  type: replace
+  value:
+    name: winc
+    sha1: 3f14f65ca0b523bbabb3631820d3388674875110
+    url: https://bosh.io/d/github.com/cloudfoundry-incubator/winc-release?v=2.5.0
+    version: 2.5.0
+- path: /releases/name=windows-utilities?
+  type: replace
+  value:
+    name: windows-utilities
+    sha1: bbc2d72d7eccdc4e3acc74e27512931d3b18d862
+    url: https://github.com/cloudfoundry/windows-utilities-release/releases/download/0.15.0/windows-utilities-0.15.0.tgz
+    version: 0.15.0
