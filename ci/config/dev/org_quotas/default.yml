@@ -1,0 +1,10 @@
+total_private_domains: unlimited
+total_reserved_route_ports: "100"
+total_service_keys: unlimited
+app_instance_limit: unlimited
+app_task_limit: unlimited
+memory-limit: 100G
+instance-memory-limit: unlimited
+total-routes: "1000"
+total-services: unlimited
+paid-service-plans-allowed: true

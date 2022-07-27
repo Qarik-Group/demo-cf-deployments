@@ -1,0 +1,27 @@
+org: segment
+org-billingmanager:
+  ldap_users: []
+  users: []
+  saml_users: []
+  ldap_groups: []
+org-manager:
+  ldap_users: []
+  users:
+  - admin
+  saml_users: []
+  ldap_groups: []
+org-auditor:
+  ldap_users: []
+  users: []
+  saml_users: []
+  ldap_groups: []
+private-domains: []
+enable-remove-private-domains: false
+shared-private-domains: []
+enable-remove-shared-private-domains: false
+enable-org-quota: false
+paid-service-plans-allowed: false
+enable-remove-users: false
+default_isolation_segment: persistent_isolation_segment
+named_quota: default
+metadata: null

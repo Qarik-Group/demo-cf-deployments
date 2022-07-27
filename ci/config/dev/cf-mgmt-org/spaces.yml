@@ -1,0 +1,4 @@
+org: cf-mgmt-org
+spaces:
+- cf-mgmt-space
+enable-delete-spaces: true

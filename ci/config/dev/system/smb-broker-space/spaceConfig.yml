@@ -1,0 +1,33 @@
+org: system
+space: smb-broker-space
+space-developer:
+  ldap_users: []
+  users: []
+  saml_users: []
+  ldap_groups: []
+space-manager:
+  ldap_users: []
+  users: []
+  saml_users: []
+  ldap_groups: []
+space-auditor:
+  ldap_users: []
+  users: []
+  saml_users: []
+  ldap_groups: []
+space-supporter:
+  ldap_users: []
+  users: []
+  saml_users: []
+  ldap_groups: []
+allow-ssh: true
+enable-space-quota: false
+enable-security-group: false
+enable-unassign-security-group: true
+enable-remove-users: false
+isolation_segment: ""
+named-security-groups:
+- credhub_open
+paid-service-plans-allowed: false
+named_quota: ""
+metadata: null

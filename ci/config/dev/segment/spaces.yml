@@ -1,0 +1,4 @@
+org: segment
+spaces:
+- segment
+enable-delete-spaces: true

@@ -1,0 +1,4 @@
+org: windows-2-org
+spaces:
+- windows-2-space
+enable-delete-spaces: true

@@ -1,0 +1,4 @@
+org: services
+spaces:
+- services
+enable-delete-spaces: true

@@ -1,0 +1,4 @@
+org: cats-and-dogs
+spaces:
+- cats
+enable-delete-spaces: true

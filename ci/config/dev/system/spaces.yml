@@ -1,0 +1,8 @@
+org: system
+spaces:
+- ops
+- smb-broker-space
+- test
+- drnic
+- nfs-broker-space
+enable-delete-spaces: true
