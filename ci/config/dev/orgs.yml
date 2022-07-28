@@ -5,7 +5,6 @@ orgs:
 - cats-and-dogs
 - windows-org
 - windows-2-org
-- cf-mgmt-org
 enable-delete-orgs: false
 protected_orgs:
 - ^system$
