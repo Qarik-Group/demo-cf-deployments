@@ -48,7 +48,7 @@ groups:
 cf-mgmt:
   dev:
     git_repo_uri: "https://github.com/starkandwayne/demo-cf-deployments.git"
-    git_repo_branch: master
+    git_repo_branch: latest-cf-aws-codex
     system_domain: "system.codex.starkandwayne.com"
     user_id: "cf_mgmt_client"
     client_secret: (( vault "secret/dev/bosh/uaa/clients/cf_mgmt_client:secret" ))
