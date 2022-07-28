@@ -90,6 +90,8 @@ jobs:
   - get: dev-config-repo
     trigger: true
   - get: dev-changes
+    passed: [dev-cf]
+  - get: baby-bosh-cache
     trigger: true
     passed: [dev-cf]
   - task: create-orgs
@@ -264,7 +266,7 @@ jobs:
   - task: update-space-users
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
     input_mapping:
-      config-repo: dev-config-repos
+      config-repo: dev-config-repo
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
