@@ -95,266 +95,111 @@ jobs:
     trigger: true
     passed: [dev-cf]
   - task: create-orgs
-    file: dev-config-repo/ci/tasks/cf-mgmt.yml
-    input_mapping:
-      config-repo: dev-config-repo
+    <<: &dev-task
+      file: dev-config-repo/ci/tasks/cf-mgmt.yml
+      input_mapping:
+        config-repo: dev-config-repo
     params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-      USER_ID: ((grab cf-mgmt.dev.user_id))
-      PASSWORD: ((grab cf-mgmt.dev.password))
-      CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+      <<: &dev-params
+        SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
+        USER_ID: ((grab cf-mgmt.dev.user_id))
+        PASSWORD: ((grab cf-mgmt.dev.password))
+        CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
+        CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
+        LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: create-orgs
-
   - task: shared-domains
-    file: dev-config-repo/ci/tasks/cf-mgmt.yml
-    input_mapping:
-      config-repo: dev-config-repo
+    <<: *dev-task
     params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-      USER_ID: ((grab cf-mgmt.dev.user_id))
-      PASSWORD: ((grab cf-mgmt.dev.password))
-      CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+      <<: *dev-params
       CF_MGMT_COMMAND: shared-domains
-
   - task: create-security-groups
-    file: dev-config-repo/ci/tasks/cf-mgmt.yml
-    input_mapping:
-      config-repo: dev-config-repo
+    <<: *dev-task
     params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-      USER_ID: ((grab cf-mgmt.dev.user_id))
-      PASSWORD: ((grab cf-mgmt.dev.password))
-      CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+      <<: *dev-params
       CF_MGMT_COMMAND: create-security-groups
-
   - task: assign-default-security-groups
-    file: dev-config-repo/ci/tasks/cf-mgmt.yml
-    input_mapping:
-      config-repo: dev-config-repo
+    <<: *dev-task
     params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-      USER_ID: ((grab cf-mgmt.dev.user_id))
-      PASSWORD: ((grab cf-mgmt.dev.password))
-      CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+      <<: *dev-params
       CF_MGMT_COMMAND: assign-default-security-groups
-
   - task: delete-orgs
-    file: dev-config-repo/ci/tasks/cf-mgmt.yml
-    input_mapping:
-      config-repo: dev-config-repo
+    <<: *dev-task
     params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-      USER_ID: ((grab cf-mgmt.dev.user_id))
-      PASSWORD: ((grab cf-mgmt.dev.password))
-      CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+      <<: *dev-params
       CF_MGMT_COMMAND: delete-orgs
-
   - task: update-orgs-metadata
-    file: dev-config-repo/ci/tasks/cf-mgmt.yml
-    input_mapping:
-      config-repo: dev-config-repo
+    <<: *dev-task
     params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-      USER_ID: ((grab cf-mgmt.dev.user_id))
-      PASSWORD: ((grab cf-mgmt.dev.password))
-      CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+      <<: *dev-params
       CF_MGMT_COMMAND: update-orgs-metadata
-
   - task: create-org-private-domains
-    file: dev-config-repo/ci/tasks/cf-mgmt.yml
-    input_mapping:
-      config-repo: dev-config-repo
+    <<: *dev-task
     params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-      USER_ID: ((grab cf-mgmt.dev.user_id))
-      PASSWORD: ((grab cf-mgmt.dev.password))
-      CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+      <<: *dev-params
       CF_MGMT_COMMAND: create-org-private-domains
-
   - task: service-access
-    file: dev-config-repo/ci/tasks/cf-mgmt.yml
-    input_mapping:
-      config-repo: dev-config-repo
+    <<: *dev-task
     params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-      USER_ID: ((grab cf-mgmt.dev.user_id))
-      PASSWORD: ((grab cf-mgmt.dev.password))
-      CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+      <<: *dev-params
       CF_MGMT_COMMAND: service-access
-
   - task: share-org-private-domains
-    file: dev-config-repo/ci/tasks/cf-mgmt.yml
-    input_mapping:
-      config-repo: dev-config-repo
+    <<: *dev-task
     params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-      USER_ID: ((grab cf-mgmt.dev.user_id))
-      PASSWORD: ((grab cf-mgmt.dev.password))
-      CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+      <<: *dev-params
       CF_MGMT_COMMAND: share-org-private-domains
-
   - task: create-spaces
-    file: dev-config-repo/ci/tasks/cf-mgmt.yml
-    input_mapping:
-      config-repo: dev-config-repo
+    <<: *dev-task
     params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-      USER_ID: ((grab cf-mgmt.dev.user_id))
-      PASSWORD: ((grab cf-mgmt.dev.password))
-      CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+      <<: *dev-params
       CF_MGMT_COMMAND: create-spaces
-
   - task: delete-spaces
-    file: dev-config-repo/ci/tasks/cf-mgmt.yml
-    input_mapping:
-      config-repo: dev-config-repo
+    <<: *dev-task
     params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-      USER_ID: ((grab cf-mgmt.dev.user_id))
-      PASSWORD: ((grab cf-mgmt.dev.password))
-      CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+      <<: *dev-params
       CF_MGMT_COMMAND: delete-spaces
-
   - task: update-spaces
-    file: dev-config-repo/ci/tasks/cf-mgmt.yml
-    input_mapping:
-      config-repo: dev-config-repo
+    <<: *dev-task
     params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-      USER_ID: ((grab cf-mgmt.dev.user_id))
-      PASSWORD: ((grab cf-mgmt.dev.password))
-      CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+      <<: *dev-params
       CF_MGMT_COMMAND: update-spaces
-
   - task: update-spaces-metadata
-    file: dev-config-repo/ci/tasks/cf-mgmt.yml
-    input_mapping:
-      config-repo: dev-config-repo
+    <<: *dev-task
     params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-      USER_ID: ((grab cf-mgmt.dev.user_id))
-      PASSWORD: ((grab cf-mgmt.dev.password))
-      CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+      <<: *dev-params
       CF_MGMT_COMMAND: update-spaces-metadata
-
   - task: update-space-users
-    file: dev-config-repo/ci/tasks/cf-mgmt.yml
-    input_mapping:
-      config-repo: dev-config-repo
+    <<: *dev-task
     params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-      USER_ID: ((grab cf-mgmt.dev.user_id))
-      PASSWORD: ((grab cf-mgmt.dev.password))
-      CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-      LDAP_USER: ((grab cf-mgmt.dev.ldap_user))
-      LDAP_PASSWORD: ((grab cf-mgmt.dev.ldap_password))
-      LDAP_SERVER: ((grab cf-mgmt.dev.ldap_server))
-      LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+      <<: *dev-params
       CF_MGMT_COMMAND: update-space-users
-
   - task: update-space-quotas
-    file: dev-config-repo/ci/tasks/cf-mgmt.yml
-    input_mapping:
-      config-repo: dev-config-repo
+    <<: *dev-task
     params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-      USER_ID: ((grab cf-mgmt.dev.user_id))
-      PASSWORD: ((grab cf-mgmt.dev.password))
-      CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+      <<: *dev-params
       CF_MGMT_COMMAND: update-space-quotas
-
   - task: update-space-security-groups
-    file: dev-config-repo/ci/tasks/cf-mgmt.yml
-    input_mapping:
-      config-repo: dev-config-repo
+    <<: *dev-task
     params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-      USER_ID: ((grab cf-mgmt.dev.user_id))
-      PASSWORD: ((grab cf-mgmt.dev.password))
-      CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+      <<: *dev-params
       CF_MGMT_COMMAND: update-space-security-groups
-
   - task: update-org-users
-    file: dev-config-repo/ci/tasks/cf-mgmt.yml
-    input_mapping:
-      config-repo: dev-config-repo
+    <<: *dev-task
     params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-      USER_ID: ((grab cf-mgmt.dev.user_id))
-      PASSWORD: ((grab cf-mgmt.dev.password))
-      CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-      LDAP_USER: ((grab cf-mgmt.dev.ldap_user))
-      LDAP_PASSWORD: ((grab cf-mgmt.dev.ldap_password))
-      LDAP_SERVER: ((grab cf-mgmt.dev.ldap_server))
-      LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+      <<: *dev-params
       CF_MGMT_COMMAND: update-org-users
-
   - task: update-org-quotas
-    file: dev-config-repo/ci/tasks/cf-mgmt.yml
-    input_mapping:
-      config-repo: dev-config-repo
+    <<: *dev-task
     params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-      USER_ID: ((grab cf-mgmt.dev.user_id))
-      PASSWORD: ((grab cf-mgmt.dev.password))
-      CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+      <<: *dev-params
       CF_MGMT_COMMAND: update-org-quotas
-
   - task: isolation-segments
-    file: dev-config-repo/ci/tasks/cf-mgmt.yml
-    input_mapping:
-      config-repo: dev-config-repo
+    <<: *dev-task
     params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-      USER_ID: ((grab cf-mgmt.dev.user_id))
-      CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-      CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-      LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+      <<: *dev-params
       CF_MGMT_COMMAND: isolation-segments
-
   - task: cleanup-org-users
-    file: dev-config-repo/ci/tasks/cf-mgmt.yml
-    input_mapping:
-      config-repo: dev-config-repo
+    <<: *dev-task
     params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-      USER_ID: ((grab cf-mgmt.dev.user_id))
-      PASSWORD: ((grab cf-mgmt.dev.password))
-      CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+      <<: *dev-params
       CF_MGMT_COMMAND: cleanup-org-users
