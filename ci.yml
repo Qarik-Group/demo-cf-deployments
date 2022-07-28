@@ -39,10 +39,7 @@ groups:
 - name: cf-platform-pipeline
   jobs:
   - ((append))
-  - configure-internal-domain
-- name: platform-features
-  jobs:
-  - configure-internal-domain
+  - dev-cf-config
 
 ##### CF-MGMT stuff #####
 ##### dev.yml configuration #####
@@ -54,7 +51,7 @@ cf-mgmt:
     git_repo_branch: master
     system_domain: "system.codex.starkandwayne.com"
     user_id: "cf_mgmt_client"
-    client_secret: "(( vault "secret/dev/bosh/uaa/clients/cf_mgmt_client:secret" )) "
+    client_secret: (( vault "secret/dev/bosh/uaa/clients/cf_mgmt_client:secret" ))
     log_level: INFO
     time-trigger: 15m
     config_dir: ci/config/dev
@@ -67,7 +64,7 @@ cf-mgmt:
     git_repo_branch: master
     system_domain: "system.codex.starkandwayne.com"
     user_id: "cf_mgmt_client"
-    client_secret: "(( vault "secret/dev/bosh/uaa/clients/cf_mgmt_client:secret" ))"
+    client_secret: (( vault "secret/dev/bosh/uaa/clients/cf_mgmt_client:secret" ))
     log_level: INFO
     time-trigger: 15m
     config_dir: ci/config/baby-bosh
@@ -86,18 +83,17 @@ resources:
     branch: ((grab cf-mgmt.dev.git_repo_branch))
     # only watch for changes in config directory
     paths: ["ci", "((grab cf-mgmt.dev.config_dir))"]
-- name: dev-time-trigger
-  type: time
-  source:
-    interval: ((grab cf-mgmt.dev.time-trigger))
 
 jobs:
-- name: dev-create-orgs
+- name: dev-cf-config
   plan:
   - get: dev-config-repo
     trigger: true
+  - get: dev-changes
+    trigger: true
+    passed: [dev-cf]
   - task: create-orgs
-    file: config-repo/ci/tasks/cf-mgmt.yml
+    file: dev-config-repo/ci/tasks/cf-mgmt.yml
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -107,12 +103,8 @@ jobs:
       LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: create-orgs
 
-- name: dev-shared-domains
-  plan:
-  - get: dev-config-repo
-    trigger: true
   - task: shared-domains
-    file: config-repo/ci/tasks/cf-mgmt.yml
+    file: dev-config-repo/ci/tasks/cf-mgmt.yml
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -122,12 +114,8 @@ jobs:
       LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: shared-domains
 
-- name: dev-create-security-groups
-  plan:
-  - get: dev-config-repo
-    trigger: true
   - task: create-security-groups
-    file: config-repo/ci/tasks/cf-mgmt.yml
+    file: dev-config-repo/ci/tasks/cf-mgmt.yml
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -137,13 +125,8 @@ jobs:
       LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: create-security-groups
 
-- name: dev-assign-default-security-groups
-  plan:
-  - get: dev-config-repo
-    trigger: true
-    passed: [create-security-groups]
   - task: assign-default-security-groups
-    file: config-repo/ci/tasks/cf-mgmt.yml
+    file: dev-config-repo/ci/tasks/cf-mgmt.yml
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -153,15 +136,8 @@ jobs:
       LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: assign-default-security-groups
 
-- name: dev-delete-orgs
-  plan:
-  - get: dev-config-repo
-    trigger: true
-    passed: [create-orgs]
-  - get: dev-time-trigger
-    trigger: true
   - task: delete-orgs
-    file: config-repo/ci/tasks/cf-mgmt.yml
+    file: dev-config-repo/ci/tasks/cf-mgmt.yml
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -171,13 +147,8 @@ jobs:
       LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: delete-orgs
 
-- name: dev-update-orgs-metadata
-  plan:
-  - get: dev-config-repo
-    passed: [create-orgs]
-    trigger: true
   - task: update-orgs-metadata
-    file: config-repo/ci/tasks/cf-mgmt.yml
+    file: dev-config-repo/ci/tasks/cf-mgmt.yml
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -187,13 +158,8 @@ jobs:
       LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: update-orgs-metadata
 
-- name: dev-create-org-private-domains
-  plan:
-  - get: dev-config-repo
-    passed: [create-orgs]
-    trigger: true
   - task: create-org-private-domains
-    file: config-repo/ci/tasks/cf-mgmt.yml
+    file: dev-config-repo/ci/tasks/cf-mgmt.yml
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -203,13 +169,8 @@ jobs:
       LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: create-org-private-domains
 
-- name: dev-service-access
-  plan:
-  - get: dev-config-repo
-    passed: [create-orgs]
-    trigger: true
   - task: service-access
-    file: config-repo/ci/tasks/cf-mgmt.yml
+    file: dev-config-repo/ci/tasks/cf-mgmt.yml
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -219,13 +180,8 @@ jobs:
       LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: service-access
 
-- name: dev-share-org-private-domains
-  plan:
-  - get: dev-config-repo
-    passed: [create-org-private-domains]
-    trigger: true
   - task: share-org-private-domains
-    file: config-repo/ci/tasks/cf-mgmt.yml
+    file: dev-config-repo/ci/tasks/cf-mgmt.yml
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -235,13 +191,8 @@ jobs:
       LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: share-org-private-domains
 
-- name: dev-create-spaces
-  plan:
-  - get: dev-config-repo
-    passed: [create-orgs, update-org-users]
-    trigger: true
   - task: create-spaces
-    file: config-repo/ci/tasks/cf-mgmt.yml
+    file: dev-config-repo/ci/tasks/cf-mgmt.yml
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -251,15 +202,8 @@ jobs:
       LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: create-spaces
 
-- name: dev-delete-spaces
-  plan:
-  - get: dev-config-repo
-    passed: [create-orgs, create-spaces]
-    trigger: true
-  - get: dev-time-trigger
-    trigger: true
   - task: delete-spaces
-    file: config-repo/ci/tasks/cf-mgmt.yml
+    file: dev-config-repo/ci/tasks/cf-mgmt.yml
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -269,15 +213,8 @@ jobs:
       LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: delete-spaces
 
-- name: dev-update-spaces
-  plan:
-  - get: dev-config-repo
-    passed: [create-spaces]
-    trigger: true
-  - get: dev-time-trigger
-    trigger: true
   - task: update-spaces
-    file: config-repo/ci/tasks/cf-mgmt.yml
+    file: dev-config-repo/ci/tasks/cf-mgmt.yml
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -287,13 +224,8 @@ jobs:
       LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: update-spaces
 
-- name: dev-update-spaces-metadata
-  plan:
-  - get: dev-config-repo
-    passed: [create-spaces]
-    trigger: true
   - task: update-spaces-metadata
-    file: config-repo/ci/tasks/cf-mgmt.yml
+    file: dev-config-repo/ci/tasks/cf-mgmt.yml
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -303,15 +235,8 @@ jobs:
       LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: update-spaces-metadata
 
-- name: dev-update-space-users
-  plan:
-  - get: dev-config-repo
-    passed: [create-spaces]
-    trigger: true
-  - get: dev-time-trigger
-    trigger: true
   - task: update-space-users
-    file: config-repo/ci/tasks/cf-mgmt.yml
+    file: dev-config-repo/ci/tasks/cf-mgmt.yml
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -324,13 +249,8 @@ jobs:
       LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: update-space-users
 
-- name: dev-update-space-quotas
-  plan:
-  - get: dev-config-repo
-    passed: [create-spaces]
-    trigger: true
   - task: update-space-quotas
-    file: config-repo/ci/tasks/cf-mgmt.yml
+    file: dev-config-repo/ci/tasks/cf-mgmt.yml
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -340,13 +260,8 @@ jobs:
       LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: update-space-quotas
 
-- name: dev-update-space-security-groups
-  plan:
-  - get: dev-config-repo
-    passed: [create-spaces,create-security-groups]
-    trigger: true
   - task: update-space-security-groups
-    file: config-repo/ci/tasks/cf-mgmt.yml
+    file: dev-config-repo/ci/tasks/cf-mgmt.yml
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -356,15 +271,8 @@ jobs:
       LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: update-space-security-groups
 
-- name: dev-update-org-users
-  plan:
-  - get: dev-config-repo
-    passed: [create-orgs]
-    trigger: true
-  - get: dev-time-trigger
-    trigger: true
   - task: update-org-users
-    file: config-repo/ci/tasks/cf-mgmt.yml
+    file: dev-config-repo/ci/tasks/cf-mgmt.yml
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -377,13 +285,8 @@ jobs:
       LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: update-org-users
 
-- name: dev-update-org-quotas
-  plan:
-  - get: dev-config-repo
-    passed: [create-orgs]
-    trigger: true
   - task: update-org-quotas
-    file: config-repo/ci/tasks/cf-mgmt.yml
+    file: dev-config-repo/ci/tasks/cf-mgmt.yml
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -393,15 +296,8 @@ jobs:
       LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: update-org-quotas
 
-- name: dev-isolation-segments
-  plan:
-  - get: dev-config-repo
-    trigger: true
-    passed: [create-orgs, create-spaces]
-  - get: dev-time-trigger
-    trigger: true
   - task: isolation-segments
-    file: config-repo/ci/tasks/cf-mgmt.yml
+    file: dev-config-repo/ci/tasks/cf-mgmt.yml
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -410,15 +306,8 @@ jobs:
       LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: isolation-segments
 
-- name: dev-cleanup-org-users
-  plan:
-  - get: dev-config-repo
-    passed: [update-org-users,update-space-users]
-    trigger: true
-  - get: dev-time-trigger
-    trigger: true
   - task: cleanup-org-users
-    file: config-repo/ci/tasks/cf-mgmt.yml
+    file: dev-config-repo/ci/tasks/cf-mgmt.yml
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -427,405 +316,3 @@ jobs:
       CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
       LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: cleanup-org-users
-#### group for dev
-groups:
-- ((append))
-- name: dev-platform-management
-  jobs:
-  - dev-create-orgs
-  - dev-shared-domains
-  - dev-create-security-groups
-  - dev-assign-default-security-groups
-  - dev-delete-orgs
-  - dev-update-orgs-metadata
-  - dev-create-org-private-domains
-  - dev-service-access
-  - dev-share-org-private-domains
-  - dev-create-spaces
-  - dev-delete-spaces
-  - dev-update-spaces
-  - dev-update-spaces-metadata
-  - dev-update-space-users
-  - dev-update-space-quotas
-  - dev-update-space-security-groups
-  - dev-update-org-users
-  - dev-update-org-quotas
-  - dev-isolation-segments
-  - dev-cleanup-org-users
-#############################################
-#### baby-bosh cf-mgmt pipeline configuration
-#############################################
-resources:
-- name: baby-bosh-config-repo
-  type: git
-  source:
-    uri: ((grab cf-mgmt.baby-bosh.git_repo_uri))
-    branch: ((grab cf-mgmt.baby-bosh.git_repo_branch))
-    # only watch for changes in config directory
-    paths: ["ci", "((grab cf-mgmt.baby-bosh.config_dir))"]
-- name: baby-bosh-time-trigger
-  type: time
-  source:
-    interval: ((grab cf-mgmt.baby-bosh.time-trigger))
-
-jobs:
-- name: baby-bosh-create-orgs
-  plan:
-  - get: baby-bosh-config-repo
-    trigger: true
-  - task: create-orgs
-    file: config-repo/ci/tasks/cf-mgmt.yml
-    params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-      USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-      PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-      CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: create-orgs
-
-- name: baby-bosh-shared-domains
-  plan:
-  - get: baby-bosh-config-repo
-    trigger: true
-  - task: shared-domains
-    file: config-repo/ci/tasks/cf-mgmt.yml
-    params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-      USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-      PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-      CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: shared-domains
-
-- name: baby-bosh-create-security-groups
-  plan:
-  - get: baby-bosh-config-repo
-    trigger: true
-  - task: create-security-groups
-    file: config-repo/ci/tasks/cf-mgmt.yml
-    params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-      USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-      PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-      CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: create-security-groups
-
-- name: baby-bosh-assign-default-security-groups
-  plan:
-  - get: baby-bosh-config-repo
-    trigger: true
-    passed: [create-security-groups]
-  - task: assign-default-security-groups
-    file: config-repo/ci/tasks/cf-mgmt.yml
-    params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-      USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-      PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-      CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: assign-default-security-groups
-
-- name: baby-bosh-delete-orgs
-  plan:
-  - get: baby-bosh-config-repo
-    trigger: true
-    passed: [create-orgs]
-  - get: baby-bosh-time-trigger
-    trigger: true
-  - task: delete-orgs
-    file: config-repo/ci/tasks/cf-mgmt.yml
-    params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-      USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-      PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-      CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: delete-orgs
-
-- name: baby-bosh-update-orgs-metadata
-  plan:
-  - get: baby-bosh-config-repo
-    passed: [create-orgs]
-    trigger: true
-  - task: update-orgs-metadata
-    file: config-repo/ci/tasks/cf-mgmt.yml
-    params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-      USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-      PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-      CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: update-orgs-metadata
-
-- name: baby-bosh-create-org-private-domains
-  plan:
-  - get: baby-bosh-config-repo
-    passed: [create-orgs]
-    trigger: true
-  - task: create-org-private-domains
-    file: config-repo/ci/tasks/cf-mgmt.yml
-    params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-      USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-      PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-      CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: create-org-private-domains
-
-- name: baby-bosh-service-access
-  plan:
-  - get: baby-bosh-config-repo
-    passed: [create-orgs]
-    trigger: true
-  - task: service-access
-    file: config-repo/ci/tasks/cf-mgmt.yml
-    params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-      USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-      PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-      CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: service-access
-
-- name: baby-bosh-share-org-private-domains
-  plan:
-  - get: baby-bosh-config-repo
-    passed: [create-org-private-domains]
-    trigger: true
-  - task: share-org-private-domains
-    file: config-repo/ci/tasks/cf-mgmt.yml
-    params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-      USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-      PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-      CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: share-org-private-domains
-
-- name: baby-bosh-create-spaces
-  plan:
-  - get: baby-bosh-config-repo
-    passed: [create-orgs, update-org-users]
-    trigger: true
-  - task: create-spaces
-    file: config-repo/ci/tasks/cf-mgmt.yml
-    params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-      USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-      PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-      CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: create-spaces
-
-- name: baby-bosh-delete-spaces
-  plan:
-  - get: baby-bosh-config-repo
-    passed: [create-orgs, create-spaces]
-    trigger: true
-  - get: baby-bosh-time-trigger
-    trigger: true
-  - task: delete-spaces
-    file: config-repo/ci/tasks/cf-mgmt.yml
-    params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-      USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-      PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-      CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: delete-spaces
-
-- name: baby-bosh-update-spaces
-  plan:
-  - get: baby-bosh-config-repo
-    passed: [create-spaces]
-    trigger: true
-  - get: baby-bosh-time-trigger
-    trigger: true
-  - task: update-spaces
-    file: config-repo/ci/tasks/cf-mgmt.yml
-    params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-      USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-      PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-      CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: update-spaces
-
-- name: baby-bosh-update-spaces-metadata
-  plan:
-  - get: baby-bosh-config-repo
-    passed: [create-spaces]
-    trigger: true
-  - task: update-spaces-metadata
-    file: config-repo/ci/tasks/cf-mgmt.yml
-    params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-      USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-      PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-      CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: update-spaces-metadata
-
-- name: baby-bosh-update-space-users
-  plan:
-  - get: baby-bosh-config-repo
-    passed: [create-spaces]
-    trigger: true
-  - get: baby-bosh-time-trigger
-    trigger: true
-  - task: update-space-users
-    file: config-repo/ci/tasks/cf-mgmt.yml
-    params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-      USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-      PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-      CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-      LDAP_USER: ((grab cf-mgmt.baby-bosh.ldap_user))
-      LDAP_PASSWORD: ((grab cf-mgmt.baby-bosh.ldap_password))
-      LDAP_SERVER: ((grab cf-mgmt.baby-bosh.ldap_server))
-      LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: update-space-users
-
-- name: baby-bosh-update-space-quotas
-  plan:
-  - get: baby-bosh-config-repo
-    passed: [create-spaces]
-    trigger: true
-  - task: update-space-quotas
-    file: config-repo/ci/tasks/cf-mgmt.yml
-    params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-      USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-      PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-      CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: update-space-quotas
-
-- name: baby-bosh-update-space-security-groups
-  plan:
-  - get: baby-bosh-config-repo
-    passed: [create-spaces,create-security-groups]
-    trigger: true
-  - task: update-space-security-groups
-    file: config-repo/ci/tasks/cf-mgmt.yml
-    params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-      USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-      PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-      CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: update-space-security-groups
-
-- name: baby-bosh-update-org-users
-  plan:
-  - get: baby-bosh-config-repo
-    passed: [create-orgs]
-    trigger: true
-  - get: baby-bosh-time-trigger
-    trigger: true
-  - task: update-org-users
-    file: config-repo/ci/tasks/cf-mgmt.yml
-    params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-      USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-      PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-      CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-      LDAP_USER: ((grab cf-mgmt.baby-bosh.ldap_user))
-      LDAP_PASSWORD: ((grab cf-mgmt.baby-bosh.ldap_password))
-      LDAP_SERVER: ((grab cf-mgmt.baby-bosh.ldap_server))
-      LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: update-org-users
-
-- name: baby-bosh-update-org-quotas
-  plan:
-  - get: baby-bosh-config-repo
-    passed: [create-orgs]
-    trigger: true
-  - task: update-org-quotas
-    file: config-repo/ci/tasks/cf-mgmt.yml
-    params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-      USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-      PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-      CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: update-org-quotas
-
-- name: baby-bosh-isolation-segments
-  plan:
-  - get: baby-bosh-config-repo
-    trigger: true
-    passed: [create-orgs, create-spaces]
-  - get: baby-bosh-time-trigger
-    trigger: true
-  - task: isolation-segments
-    file: config-repo/ci/tasks/cf-mgmt.yml
-    params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-      USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-      CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-      CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-      LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: isolation-segments
-
-- name: baby-bosh-cleanup-org-users
-  plan:
-  - get: baby-bosh-config-repo
-    passed: [update-org-users,update-space-users]
-    trigger: true
-  - get: baby-bosh-time-trigger
-    trigger: true
-  - task: cleanup-org-users
-    file: config-repo/ci/tasks/cf-mgmt.yml
-    params:
-      SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-      USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-      PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-      CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-      CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-      LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: cleanup-org-users
-#### group for baby-bosh
-groups:
-- ((append))
-- name: baby-bosh-platform-management
-  jobs:
-  - baby-bosh-create-orgs
-  - baby-bosh-shared-domains
-  - baby-bosh-create-security-groups
-  - baby-bosh-assign-default-security-groups
-  - baby-bosh-delete-orgs
-  - baby-bosh-update-orgs-metadata
-  - baby-bosh-create-org-private-domains
-  - baby-bosh-service-access
-  - baby-bosh-share-org-private-domains
-  - baby-bosh-create-spaces
-  - baby-bosh-delete-spaces
-  - baby-bosh-update-spaces
-  - baby-bosh-update-spaces-metadata
-  - baby-bosh-update-space-users
-  - baby-bosh-update-space-quotas
-  - baby-bosh-update-space-security-groups
-  - baby-bosh-update-org-users
-  - baby-bosh-update-org-quotas
-  - baby-bosh-isolation-segments
-  - baby-bosh-cleanup-org-users
