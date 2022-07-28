@@ -94,6 +94,8 @@ jobs:
     passed: [dev-cf]
   - task: create-orgs
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
+    input_mapping:
+      config-repo: dev-config-repo
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -105,6 +107,8 @@ jobs:
 
   - task: shared-domains
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
+    input_mapping:
+      config-repo: dev-config-repo
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -116,6 +120,8 @@ jobs:
 
   - task: create-security-groups
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
+    input_mapping:
+      config-repo: dev-config-repo
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -127,6 +133,8 @@ jobs:
 
   - task: assign-default-security-groups
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
+    input_mapping:
+      config-repo: dev-config-repo
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -138,6 +146,8 @@ jobs:
 
   - task: delete-orgs
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
+    input_mapping:
+      config-repo: dev-config-repo
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -149,6 +159,8 @@ jobs:
 
   - task: update-orgs-metadata
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
+    input_mapping:
+      config-repo: dev-config-repo
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -160,6 +172,8 @@ jobs:
 
   - task: create-org-private-domains
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
+    input_mapping:
+      config-repo: dev-config-repo
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -171,6 +185,8 @@ jobs:
 
   - task: service-access
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
+    input_mapping:
+      config-repo: dev-config-repo
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -182,6 +198,8 @@ jobs:
 
   - task: share-org-private-domains
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
+    input_mapping:
+      config-repo: dev-config-repo
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -193,6 +211,8 @@ jobs:
 
   - task: create-spaces
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
+    input_mapping:
+      config-repo: dev-config-repo
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -204,6 +224,8 @@ jobs:
 
   - task: delete-spaces
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
+    input_mapping:
+      config-repo: dev-config-repo
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -215,6 +237,8 @@ jobs:
 
   - task: update-spaces
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
+    input_mapping:
+      config-repo: dev-config-repo
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -226,6 +250,8 @@ jobs:
 
   - task: update-spaces-metadata
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
+    input_mapping:
+      config-repo: dev-config-repo
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -237,6 +263,8 @@ jobs:
 
   - task: update-space-users
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
+    input_mapping:
+      config-repo: dev-config-repos
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -251,6 +279,8 @@ jobs:
 
   - task: update-space-quotas
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
+    input_mapping:
+      config-repo: dev-config-repo
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -262,6 +292,8 @@ jobs:
 
   - task: update-space-security-groups
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
+    input_mapping:
+      config-repo: dev-config-repo
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -273,6 +305,8 @@ jobs:
 
   - task: update-org-users
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
+    input_mapping:
+      config-repo: dev-config-repo
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -287,6 +321,8 @@ jobs:
 
   - task: update-org-quotas
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
+    input_mapping:
+      config-repo: dev-config-repo
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -298,6 +334,8 @@ jobs:
 
   - task: isolation-segments
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
+    input_mapping:
+      config-repo: dev-config-repo
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
@@ -308,6 +346,8 @@ jobs:
 
   - task: cleanup-org-users
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
+    input_mapping:
+      config-repo: dev-config-repo
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
       USER_ID: ((grab cf-mgmt.dev.user_id))
