@@ -555,7 +555,7 @@ exodus:
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.25.0
   cf-deployment-version: 16.25.0
   core_network: cf-core
-  dated: 2022-07-26 13:57:08 +0000
+  dated: 2022-07-28 12:52:00 +0000
   db_network: cf-core
   deployer: unknown
   edge_network: cf-edge
