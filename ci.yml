@@ -91,9 +91,6 @@ jobs:
     trigger: true
   - get: dev-changes
     passed: [dev-cf]
-  - get: baby-bosh-cache
-    trigger: true
-    passed: [dev-cf]
   - task: create-orgs
     file: dev-config-repo/ci/tasks/cf-mgmt.yml
     input_mapping:
