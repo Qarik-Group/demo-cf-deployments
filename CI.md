@@ -16,12 +16,43 @@ One of the biggest challenge in that approach is the mindset shift that configur
 >- [gitops approach](https://www.gitops.tech/)
 >- [ArgoCD as example of gitops implementation](https://github.com/argoproj/argo-cd/blob/master/README.md)
 # Design & Architecture
+#### UX flow when providing a change
 ```mermaid
-  graph TD;
-      A-->B;
-      A-->C;
-      B-->D;
-      C-->D;
+  flowchart LR
+    A[user] -->|modify| B[config-repository]
+    subgraph automatically triggered
+    direction LR
+    B -->|trigger| C(concourse-pipeline)
+    C -->|run| D[first-env deploy]
+    D -->|success| E[first-env configure]
+    D -->|failure| F[notify]
+    D -->|success| F
+    E -->|modify| G[first-env cloud-foundry]
+    end
+    subgraph manually triggered
+    direction RL
+    F -->|send to| K[operator]
+    K -->|trigger| L[second-env deploy]
+    L -->|success| M[second-env configure]
+    L -->|failure| N[notify]
+    L -->|success| N
+    end
+```
+#### UX flow when only CF config changes
+```mermaid
+  flowchart LR
+    A[user] -->|modify| B[config-repository]
+    B -->|trigger| D(concourse-pipeline)
+    D --> E[first-env configure]
+    D --> F[second-env configure]
+    subgraph first-env
+    direction LR
+    E -->|modify| G[first-env cloud-foundry]
+    end
+    subgraph  second-env
+    direction LR
+    F -->|modify| H[first-env cloud-foundry]
+    end
 ```
 # Setup
 ## CloudFoundry
