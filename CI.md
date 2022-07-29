@@ -31,10 +31,11 @@ Please check [Disabling single-source-of-truth of cf-mgmt](#disabling-single-sou
     + [Get cf-mgmt CLI tools:](#get-cf-mgmt-cli-tools-)
       - [Export configuration, or initialise new one.](#export-configuration--or-initialise-new-one)
     + [New Concourse pipeline generation](#new-concourse-pipeline-generation)
+  * [Deployment configuration](#deployment-configuration)
     + [Extending existing ci.yml](#extending-existing-ciyml)
       - [Add new environment configuration](#add-new-environment-configuration)
       - [Add new environment resource](#add-new-environment-resource)
-      - [Add new environment jobs](#add-new-environment-jobs)
+      - [Add new environment config job](#add-new-environment-config-job)
     + [Disabling single-source-of-truth of cf-mgmt](#disabling-single-source-of-truth-of-cf-mgmt)
 - [Manual](#manual)
   * [Create org and space](#create-org-and-space)
@@ -167,22 +168,230 @@ This should create two things (if not existing already):
 
 >What that command did was it generated a `pipeline.yml` with a multiple Concourse `jobs` that all call the same `task` which just executes `cf-mgmt` binary with correct input of parameters for whatever resource needs to be modified on CloudFoundry side.
 
+## Deployment configuration
 ### Extending existing ci.yml
-- [ ] TODO
+In most cases the operations will focus around existing `ci.yml` and `ci` directory. The below guide covers most of the use-cases of providing new environment to the mix.\
+The entire structure lives inside the `ci.yml`. Each env needs to be declared in three sections: `configuration`, `resources` and `jobs`.
+
+All of the below steps are copy-paste based and should take no longer then 2 minutes to complete.\
+The example below is using `$env == 'test-ci-mgmt'` so all examples can be copy-pasted and later replace all can be used to replace all `test-ci-mgmt` to something else
 #### Add new environment configuration
-- [ ] TODO
+Under `ci.yml` find the key `cf-mgmt`. It should look like this:
+```yaml
+cf-mgmt:
+  env1:
+    (...)
+  env2:
+    (...)
+  etc...:
+```
+Add new env to it using a standard template of vars.yml from cf-mgmt. It should look similar to this:
+```yaml
+cf-mgmt:
+  (... some existing envs ...)
+  test-ci-mgmt:
+    # your git repo uri, where config_dir is located
+    git_repo_uri: "https://github.com/starkandwayne/demo-cf-deployments.git"
+    git_repo_branch: latest-cf-aws-codex
+    # your cf system domain, `genesis info $env` from cf deployment dir
+    system_domain: "system.codex.starkandwayne.com"
+    # UAA user created in first steps
+    user_id: "cf_mgmt_client"
+    client_secret: (( vault "secret/test-ci-mgmt/bosh/uaa/clients/cf_mgmt_client:secret" ))
+    # log level logging for actions performed by cf-mgmt
+    log_level: INFO
+    # not used - deprecated
+    time-trigger: 15m
+    # path from git_repo_uri where config for $env is located, ci/config/$env
+    config_dir: ci/config/test-ci-mgmt
+    # provide if LDAP should be connected to create/modify users
+    ldap_server: ""
+    ldap_user: ""
+    ldap_password: ""
+    # deprecated, UAA user client_secret is used
+    password: ""
+```
+>Even if LDAP is not used the parameters are required by `cf-mgmt`, it is okay to leave them empty.
+
 #### Add new environment resource
-- [ ] TODO
-#### Add new environment jobs
-- [ ] TODO
+To the `resources:` map in `ci.yml` add new `$env` git resource:
+```yaml
+resources:
+- ((append))
+- (... other configs ...)
+- name: test-ci-mgmt-config-repo
+  type: git
+  source:
+    # (( grab cf-mgmt.$env.* ))
+    uri: ((grab cf-mgmt.test-ci-mgmt.git_repo_uri))
+    branch: ((grab cf-mgmt.test-ci-mgmt.git_repo_branch))
+    paths: ["((grab cf-mgmt.test-ci-mgmt.config_dir))"]
+```
+#### Add new environment config job
+To the `jobs:` map in `ci.yml` add new jobs for our `$env`:
+```yaml
+jobs:
+- ((append))
+- (... some other jobs ...)
+- name: test-ci-mgmt-cf-config
+  plan:
+  - get: test-ci-mgmt-config-repo
+    trigger: true
+  - get: test-ci-mgmt-changes
+    passed: [test-ci-mgmt-cf]
+  - get: baby-bosh-cache
+    trigger: true
+    passed: [test-ci-mgmt-cf]
+  - task: create-orgs
+    <<: &test-ci-mgmt-task
+      file: test-ci-mgmt-config-repo/ci/tasks/cf-mgmt.yml
+      input_mapping:
+        config-repo: test-ci-mgmt-config-repo
+    params:
+      <<: &test-ci-mgmt-params
+        SYSTEM_DOMAIN: ((grab cf-mgmt.test-ci-mgmt.system_domain))
+        USER_ID: ((grab cf-mgmt.test-ci-mgmt.user_id))
+        PASSWORD: ((grab cf-mgmt.test-ci-mgmt.password))
+        CONFIG_DIR: ((grab cf-mgmt.test-ci-mgmt.config_dir))
+        CLIENT_SECRET: ((grab cf-mgmt.test-ci-mgmt.client_secret))
+        LOG_LEVEL: ((grab cf-mgmt.test-ci-mgmt.log_level))
+      CF_MGMT_COMMAND: create-orgs
+  - task: shared-domains
+    <<: *test-ci-mgmt-task
+    params:
+      <<: *test-ci-mgmt-params
+      CF_MGMT_COMMAND: shared-domains
+  - task: create-security-groups
+    <<: *test-ci-mgmt-task
+    params:
+      <<: *test-ci-mgmt-params
+      CF_MGMT_COMMAND: create-security-groups
+  - task: assign-default-security-groups
+    <<: *test-ci-mgmt-task
+    params:
+      <<: *test-ci-mgmt-params
+      CF_MGMT_COMMAND: assign-default-security-groups
+  - task: delete-orgs
+    <<: *test-ci-mgmt-task
+    params:
+      <<: *test-ci-mgmt-params
+      CF_MGMT_COMMAND: delete-orgs
+  - task: update-orgs-metadata
+    <<: *test-ci-mgmt-task
+    params:
+      <<: *test-ci-mgmt-params
+      CF_MGMT_COMMAND: update-orgs-metadata
+  - task: create-org-private-domains
+    <<: *test-ci-mgmt-task
+    params:
+      <<: *test-ci-mgmt-params
+      CF_MGMT_COMMAND: create-org-private-domains
+  - task: service-access
+    <<: *test-ci-mgmt-task
+    params:
+      <<: *test-ci-mgmt-params
+      CF_MGMT_COMMAND: service-access
+  - task: share-org-private-domains
+    <<: *test-ci-mgmt-task
+    params:
+      <<: *test-ci-mgmt-params
+      CF_MGMT_COMMAND: share-org-private-domains
+  - task: create-spaces
+    <<: *test-ci-mgmt-task
+    params:
+      <<: *test-ci-mgmt-params
+      CF_MGMT_COMMAND: create-spaces
+  - task: delete-spaces
+    <<: *test-ci-mgmt-task
+    params:
+      <<: *test-ci-mgmt-params
+      CF_MGMT_COMMAND: delete-spaces
+  - task: update-spaces
+    <<: *test-ci-mgmt-task
+    params:
+      <<: *test-ci-mgmt-params
+      CF_MGMT_COMMAND: update-spaces
+  - task: update-spaces-metadata
+    <<: *test-ci-mgmt-task
+    params:
+      <<: *test-ci-mgmt-params
+      CF_MGMT_COMMAND: update-spaces-metadata
+  - task: update-space-users
+    <<: *test-ci-mgmt-task
+    params:
+      <<: *test-ci-mgmt-params
+      CF_MGMT_COMMAND: update-space-users
+  - task: update-space-quotas
+    <<: *test-ci-mgmt-task
+    params:
+      <<: *test-ci-mgmt-params
+      CF_MGMT_COMMAND: update-space-quotas
+  - task: update-space-security-groups
+    <<: *test-ci-mgmt-task
+    params:
+      <<: *test-ci-mgmt-params
+      CF_MGMT_COMMAND: update-space-security-groups
+  - task: update-org-users
+    <<: *test-ci-mgmt-task
+    params:
+      <<: *test-ci-mgmt-params
+      CF_MGMT_COMMAND: update-org-users
+  - task: update-org-quotas
+    <<: *test-ci-mgmt-task
+    params:
+      <<: *test-ci-mgmt-params
+      CF_MGMT_COMMAND: update-org-quotas
+  - task: isolation-segments
+    <<: *test-ci-mgmt-task
+    params:
+      <<: *test-ci-mgmt-params
+      CF_MGMT_COMMAND: isolation-segments
+  - task: cleanup-org-users
+    <<: *test-ci-mgmt-task
+    params:
+      <<: *test-ci-mgmt-params
+      CF_MGMT_COMMAND: cleanup-org-users
+```
 ### Disabling single-source-of-truth of cf-mgmt
-- [ ] TODO
+It may be a case under some organizations that this approach should be only used to add stuff to CloudFoundry and not to worry about it desired state to be equal to the code.
+
+To disable all checks we need to modify `ci/config/$env/cf-mgmt.yml` file.\
+Some of the top flags that should be disabled to stop most of the synchronization:
+```yaml
+# to not remove isolation segments once created or existed already
+enable-delete-isolation-segments: false
+# dont unassign any SG if found
+enable-unassign-security-groups: false
+# disable if there are domains that are not in the code
+enable-remove-shared-domains: false
+```
+For each org seperately it can be also tweaked, `ci/config/$env/$org/orgConfig.yml`.
+```yaml
+# disable removal of private domains under specific $org
+enable-remove-private-domains: false
+# same as above but for shared ones
+enable-remove-shared-private-domains: false
+# don't remove users from $org, regardless if they are in code or not
+enable-remove-users: false
+```
+For each org we can also disable removal of `spaces` - `ci/config/$env/$org/spaces.yml`.
+```yaml
+# disable removal of spaces
+enable-delete-spaces: false
+```
+To configure default spaces behaviour we can use `ci/config/$env/spaceDefaults.yml`.
+```yaml
+# dont unassign any SG's
+enable-unassign-security-group: false
+# dont remove space-specific users
+enable-remove-users: false
+```
 # Manual
 Manually executed steps documentation to manage the configuration of CloudFoundry via code.
 
 ## Create org and space
 To create a new org and space just copy a template of existing one and modify it to your needs.\
-Or run new init via `./cf-mgmt-config add-org --org test`.\
+Or run new init via `./cf-mgmt-config add-org --org test --peek`.\
 For the sake of this testing/tutorial we assume `cf-mgmt-org` exists with space `cf-mgmt-space` in it.\
 Take a look here for example: https://github.com/starkandwayne/demo-cf-mgmt-deployments/tree/main/config/cf-mgmt-org
 
@@ -191,14 +400,14 @@ Same steps are for org or space, just modify space config vs org config ;-)\
 First we need to create a new user in UAA or have connected LDAP.\
 If you are using LDAP, just configure user in `ldap.yml` as docs says.\
 
-Create user:
+Create new CloudFoundry user in UAA via `uaac` CLI:
 ```bash
 uaac user add test --emails "test@test" --password test
 uaac member add scim.read test
 uaac member add clients.read test
 ```
 
-Let's now add it under our `cf-mgmt-org`, modify `config/cf-mgmt-org/orgConfig.yml`:
+Let's now add it under our `cf-mgmt-org`, modify `ci/config/test-ci-mgmt/cf-mgmt-org/orgConfig.yml`:
 ```diff
 org-manager:
   ldap_users: []
@@ -209,7 +418,7 @@ org-manager:
 
 Execute a dry run:
 ```bash
-./local-cf-mgmt update-org-users --peek
+./local-cf-mgmt update-org-users
 ```
 You should see output similar to this one:
 ```log
@@ -236,11 +445,11 @@ Same steps are for org or space, just modify space config vs org config ;-)
 
 Let's start with creating new quota. If you want to use existing one, just skip this step.
 
-Create new file under `config/org_quotas/` named `cf-mgmt-quota.yml` and copy `default` quota configuration to it.
+Create new file under `ci/config/test-ci-mgmt/org_quotas/` named `cf-mgmt-quota.yml` and copy `default` quota configuration to it.
 ```bash
 cat default.yml > cf-mgmt-quota.yml
 ```
-Modify config:
+Modify config to your needs, example changes below:
 ```diff
 total_private_domains: unlimited
 total_reserved_route_ports: "100"
@@ -257,7 +466,7 @@ total-services: unlimited
 paid-service-plans-allowed: true
 ```
 
-Now use this quota in `cf-mgmt-org`, modify `config/cf-mgmt-org/orgConfig.yml`:
+Now use this quota in `cf-mgmt-org`, modify `ci/config/test-ci-mgmt/cf-mgmt-org/orgConfig.yml`:
 ```diff
 -named_quota: default
 +named_quota: cf-mgmt-quota
@@ -265,7 +474,7 @@ Now use this quota in `cf-mgmt-org`, modify `config/cf-mgmt-org/orgConfig.yml`:
 
 Let's test that new quota:
 ```log
-> ./local-cf-mgmt update-org-quotas --peek
+> ./local-cf-mgmt update-org-quotas
 2022/07/25 13:16:47 I0725 13:16:47.884558 1837380 quota.go:419] [dry-run]: create org quota cf-mgmt-quota
 2022/07/25 13:16:47 I0725 13:16:47.924608 1837380 quota.go:443] [dry-run]: assign quota dry-run-quota to org cf-mgmt-org
 ```
@@ -282,7 +491,7 @@ There are two types of ASG's: default ones and all others ;-)\
 Each ASG is applied during `runtime`, `staging` or for both.\
 Let's go first and create a new `default` ASG, `default` ones applies to both `staging` and `runtime` and are not scoped - they apply to entire CF deployment.
 
-Under `config/defaults_asgs/` create new file called `private_networks.json` with a content:
+Under `ci/config/test-ci-mgmt/defaults_asgs/` create new file called `private_networks.json` with a content:
 ```json
 [
   {
@@ -304,7 +513,7 @@ Under `config/defaults_asgs/` create new file called `private_networks.json` wit
 ```
 And let's see if that applies:
 ```bash
-> ./local-cf-mgmt create-security-groups --peek
+> ./local-cf-mgmt create-security-groups
 2022/07/25 13:40:30 I0725 13:40:30.85259 1868840 securitygroup.go:332] [dry-run]: creating securityGroup private_networks with contents [
   {
     "protocol": "tcp",
@@ -325,7 +534,7 @@ And let's see if that applies:
 ```
 
 Let's go ahead now and actually create the **global** ASG for our space `cf-mgmt-space`.\
-Under `config/asgs/` create new file called `cf-mgmt-asg.json` with a content:
+Under `ci/config/test-ci-mgmt/asgs/` create new file called `cf-mgmt-asg.json` with a content:
 ```json
 [
 	{
@@ -345,7 +554,7 @@ Update the `config/cf-mgmt-org/cf-mgmt-space/spaceConfig.yml`
 -named-security-groups: []
 +named-security-groups: [cf-mgmt-asg]
 ```
-And global config file `config/cf-mgmt.yml`:
+And global config file `ci/config/test-ci-mgmt/cf-mgmt.yml`:
 ```diff
 -enable-unassign-security-groups: false
 +enable-unassign-security-groups: true # !!change it only if all ASGs are controlled by cf-mgmt!!
@@ -358,7 +567,7 @@ staging-security-groups:
 
 Let's test if it works:
 ```bash
-> ./local-cf-mgmt create-security-groups --peek
+> ./local-cf-mgmt create-security-groups
 2022/07/25 13:48:08 I0725 13:48:08.896168 1878661 securitygroup.go:332] [dry-run]: creating securityGroup cf-mgmt-asg with contents [
         {
                 "protocol": "tcp",
@@ -370,12 +579,12 @@ Let's test if it works:
 ]
 ```
 ```bash
-> ./local-cf-mgmt update-space-security-groups --peek
+> ./local-cf-mgmt update-space-security-groups
 
 ```
 
 If we want to only create a security group for specific space and not actually share it globally there is a way.\
-Under `config/cf-mgmt-org/cf-mgmt-space/security-group.json` add a new security group.\
+Under `ci/config/test-ci-mgmt/cf-mgmt-org/cf-mgmt-space/security-group.json` add a new security group.\
 Then we need to enable this ASG create mode by turning this flag under `spaceConfig.yml`:
 ```diff
 -enable-security-group: false
@@ -412,7 +621,7 @@ There is no command under `cf-mgmt-config` to add those.
 
 Let's test it:
 ```bash
-> ./local-cf-mgmt isolation-segments --peek
+> ./local-cf-mgmt isolation-segments
 2022/07/26 11:48:37 I0726 11:48:37.47125 3496941 isolation_segment.go:386] create segment test
 2022/07/26 11:48:37 I0726 11:48:37.784086 3496941 isolation_segment.go:411] entitle org 23e733ec-857b-4cfe-8986-6a6536807d81 to iso segment test
 2022/07/26 11:48:38 I0726 11:48:38.302575 3496941 isolation_segment.go:362] set isolation segment for space cf-mgmt-space to test (org cf-mgmt-org)

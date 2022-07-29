@@ -83,15 +83,13 @@ resources:
   source:
     uri: ((grab cf-mgmt.dev.git_repo_uri))
     branch: ((grab cf-mgmt.dev.git_repo_branch))
-    # only watch for changes in config directory
-    paths: ["ci", "((grab cf-mgmt.dev.config_dir))"]
+    paths: ["((grab cf-mgmt.dev.config_dir))"]
 - name: baby-bosh-config-repo
   type: git
   source:
     uri: ((grab cf-mgmt.baby-bosh.git_repo_uri))
     branch: ((grab cf-mgmt.baby-bosh.git_repo_branch))
-    # only watch for changes in config directory
-    paths: ["ci", "((grab cf-mgmt.baby-bosh.config_dir))"]
+    paths: ["((grab cf-mgmt.baby-bosh.config_dir))"]
 
 jobs:
 - ((append))
