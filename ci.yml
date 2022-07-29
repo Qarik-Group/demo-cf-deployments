@@ -40,6 +40,7 @@ groups:
   jobs:
   - ((append))
   - dev-cf-config
+  - baby-bosh-cf-config
 
 ##### CF-MGMT stuff #####
 ##### dev.yml configuration #####
@@ -61,7 +62,7 @@ cf-mgmt:
     password: ""
   baby-bosh:
     git_repo_uri: "https://github.com/starkandwayne/demo-cf-deployments.git"
-    git_repo_branch: master
+    git_repo_branch: latest-cf-aws-codex
     system_domain: "system.codex.starkandwayne.com"
     user_id: "cf_mgmt_client"
     client_secret: (( vault "secret/dev/bosh/uaa/clients/cf_mgmt_client:secret" ))
@@ -76,6 +77,7 @@ cf-mgmt:
 #### dev cf-mgmt pipeline configuration
 #############################################
 resources:
+- ((append))
 - name: dev-config-repo
   type: git
   source:
@@ -83,8 +85,16 @@ resources:
     branch: ((grab cf-mgmt.dev.git_repo_branch))
     # only watch for changes in config directory
     paths: ["ci", "((grab cf-mgmt.dev.config_dir))"]
+- name: baby-bosh-config-repo
+  type: git
+  source:
+    uri: ((grab cf-mgmt.baby-bosh.git_repo_uri))
+    branch: ((grab cf-mgmt.baby-bosh.git_repo_branch))
+    # only watch for changes in config directory
+    paths: ["ci", "((grab cf-mgmt.baby-bosh.config_dir))"]
 
 jobs:
+- ((append))
 - name: dev-cf-config
   plan:
   - get: dev-config-repo
@@ -202,4 +212,122 @@ jobs:
     <<: *dev-task
     params:
       <<: *dev-params
+      CF_MGMT_COMMAND: cleanup-org-users
+- name: baby-bosh-cf-config
+  plan:
+  - get: baby-bosh-config-repo
+    trigger: true
+  - get: baby-bosh-changes
+    passed: [baby-bosh-cf]
+  - get: baby-bosh-cache
+    trigger: true
+    passed: [baby-bosh-cf]
+  - task: create-orgs
+    <<: &baby-bosh-task
+      file: baby-bosh-config-repo/ci/tasks/cf-mgmt.yml
+      input_mapping:
+        config-repo: baby-bosh-config-repo
+    params:
+      <<: &baby-bosh-params
+        SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
+        USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
+        PASSWORD: ((grab cf-mgmt.baby-bosh.password))
+        CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
+        CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
+        LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
+      CF_MGMT_COMMAND: create-orgs
+  - task: shared-domains
+    <<: *baby-bosh-task
+    params:
+      <<: *baby-bosh-params
+      CF_MGMT_COMMAND: shared-domains
+  - task: create-security-groups
+    <<: *baby-bosh-task
+    params:
+      <<: *baby-bosh-params
+      CF_MGMT_COMMAND: create-security-groups
+  - task: assign-default-security-groups
+    <<: *baby-bosh-task
+    params:
+      <<: *baby-bosh-params
+      CF_MGMT_COMMAND: assign-default-security-groups
+  - task: delete-orgs
+    <<: *baby-bosh-task
+    params:
+      <<: *baby-bosh-params
+      CF_MGMT_COMMAND: delete-orgs
+  - task: update-orgs-metadata
+    <<: *baby-bosh-task
+    params:
+      <<: *baby-bosh-params
+      CF_MGMT_COMMAND: update-orgs-metadata
+  - task: create-org-private-domains
+    <<: *baby-bosh-task
+    params:
+      <<: *baby-bosh-params
+      CF_MGMT_COMMAND: create-org-private-domains
+  - task: service-access
+    <<: *baby-bosh-task
+    params:
+      <<: *baby-bosh-params
+      CF_MGMT_COMMAND: service-access
+  - task: share-org-private-domains
+    <<: *baby-bosh-task
+    params:
+      <<: *baby-bosh-params
+      CF_MGMT_COMMAND: share-org-private-domains
+  - task: create-spaces
+    <<: *baby-bosh-task
+    params:
+      <<: *baby-bosh-params
+      CF_MGMT_COMMAND: create-spaces
+  - task: delete-spaces
+    <<: *baby-bosh-task
+    params:
+      <<: *baby-bosh-params
+      CF_MGMT_COMMAND: delete-spaces
+  - task: update-spaces
+    <<: *baby-bosh-task
+    params:
+      <<: *baby-bosh-params
+      CF_MGMT_COMMAND: update-spaces
+  - task: update-spaces-metadata
+    <<: *baby-bosh-task
+    params:
+      <<: *baby-bosh-params
+      CF_MGMT_COMMAND: update-spaces-metadata
+  - task: update-space-users
+    <<: *baby-bosh-task
+    params:
+      <<: *baby-bosh-params
+      CF_MGMT_COMMAND: update-space-users
+  - task: update-space-quotas
+    <<: *baby-bosh-task
+    params:
+      <<: *baby-bosh-params
+      CF_MGMT_COMMAND: update-space-quotas
+  - task: update-space-security-groups
+    <<: *baby-bosh-task
+    params:
+      <<: *baby-bosh-params
+      CF_MGMT_COMMAND: update-space-security-groups
+  - task: update-org-users
+    <<: *baby-bosh-task
+    params:
+      <<: *baby-bosh-params
+      CF_MGMT_COMMAND: update-org-users
+  - task: update-org-quotas
+    <<: *baby-bosh-task
+    params:
+      <<: *baby-bosh-params
+      CF_MGMT_COMMAND: update-org-quotas
+  - task: isolation-segments
+    <<: *baby-bosh-task
+    params:
+      <<: *baby-bosh-params
+      CF_MGMT_COMMAND: isolation-segments
+  - task: cleanup-org-users
+    <<: *baby-bosh-task
+    params:
+      <<: *baby-bosh-params
       CF_MGMT_COMMAND: cleanup-org-users
