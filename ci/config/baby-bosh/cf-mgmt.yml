@@ -9,7 +9,7 @@ staging-security-groups:
 shared-domains:
   apps.cucumber.starkandwayne.com:
     internal: false
-enable-remove-shared-domains: true
+enable-remove-shared-domains: false
 metadata-prefix: cf-mgmt.pivotal.io
 enable-service-access: true
 ignore-legacy-service-access: false
