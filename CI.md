@@ -3,22 +3,25 @@ The story behind the functionality presented below comes from the clients that l
 At some point clients created a multi-env (>10 environments) genesis backed deployments for CloudFoundry using [`genesis repipe`](https://github.com/genesis-community/genesis/blob/main/docs/PIPELINES.md) to configure, design and generate Concourse pipeline.\
 `genesis repipe` allows users to generate for each env two jobs, one for executing `genesis deploy $env` and second that notifies about the change `notify $env deployed`.\
 At some point clients wanted to extend the functionality in that pipeline to for example include post-deploy steps like secret rotations per env, internal domains creations, application security groups configuration and bindings, and many more.\
-Thanks to the fact that Genesis Project widely adopted [spruce](https://github.com/geofffranks/spruce) creation of such custom functionality was possible by appending to the generated pipeline a new tasks or jobs which were executing the desire features.
+Thanks to the fact that Genesis Project widely adopted [spruce](https://github.com/geofffranks/spruce), creation of such custom functionality was possible by appending to the generated pipeline a new tasks or jobs which were executing the desire features.
 
-For the CloudFoundry the amount of such post-deploy features to be executed per each env can become quite big over the time. Also we would need a place to store for ex. definitions for ASG rules, organizations & spaces hierarchy and all kind of various bindings.\
-For that purpose the custom implementation could be made, but this documentation and implementation covers the usage of [cf-mgmt]() project.\
+For the CloudFoundry the amount of such post-deploy features can be a vast list over the time. Also we would need a place to store for ex. definitions for ASG rules, organizations & spaces hierarchy and all kind of various bindings.\
+For that purpose the custom implementation of each could be made, but this documentation and implementation covers the usage of [cf-mgmt]() project.\
 [cf-mgmt docs]() include a variety of commands for end-users to create, modify or destroy resources on CloudFoundry using the code repository as a single source of truth medium to store each environment configuration under SVC system. By modifying the code in that repository the operators can manage the entire CloudFoundry foundation using the code vs CLI.
 
-This approach brings equally benefits and challenges, most recognized benefit to be a fact that configuration is now visible and the state of the deployment is known, as well as it can be restored from any point of time thanks to the SVC system.\
-One of the biggest challenge in that approach is the mindset shift that configuration is now not the result of applied commands to the platform, but the code itself.
+This approach brings both benefits and challenges, most recognized benefit is the fact that configuration is now stored as a single source of truth of the desired state, as well as it can be restored from any point of time thanks to the SVC system, allowing fast rollbacks and providing changes.\
+One of the biggest challenge in that approach is the mindset shift that configuration is now not the result of applied commands to the platform directly (via CLI for example), but the code itself.
+
+**This solution can still be used in parallel to the direct usage of CLI.\
+Please check [Disabling single-source-of-truth of cf-mgmt](#disable-ssot).**
 >Some other concepts that share principles similar to cf-mgmt:
 >- [Infrastructure as a Code](https://www.techtarget.com/searchitoperations/definition/Infrastructure-as-Code-IAC)
 >- [gitops approach](https://www.gitops.tech/)
 >- [ArgoCD as example of gitops implementation](https://github.com/argoproj/argo-cd/blob/master/README.md)
 # Diagrams & Architecture
-#### Concourse pipeline
+### Concourse pipeline
 ![alt Concourse Pipeline example](./ci/docs/concourse.png "Concourse Pipeline")
-#### UX flow when providing a change
+### UX flow when providing a change
 ```mermaid
   flowchart LR
     A[user] -->|modify| B[config-repository]
@@ -40,7 +43,7 @@ One of the biggest challenge in that approach is the mindset shift that configur
     L -->|success| N
     end
 ```
-#### UX flow when only CF config changes
+### UX flow when only CF config changes
 ```mermaid
   flowchart LR
     A[user] -->|modify| B[config-repository]
@@ -58,8 +61,8 @@ One of the biggest challenge in that approach is the mindset shift that configur
 ```
 # Setup
 ## CloudFoundry
-#### Setup cf-mgmt UAA client, put the content into your cf-genesis-kit/ops/*.yml
------
+### Setup cf-mgmt UAA client
+Under the `deployments/cf/ops` directory declare a new feature, ex. `cf-mgmt-uaa-client` with the configuration as shown below:
 ```yaml
 instance_groups:
 - name: uaa
@@ -80,8 +83,30 @@ variables:
 - name: cf_mgmt_client_secret
   type: password
 ```
+This should create a new OAuth2 client in UAA called `cf_mgmt_client` and store the secret for it in the credhub under `/$env-bosh/$env-cf/cf_mgmt_client_secret`.\
+Add it under your `$env.yml` in the `deployments/cf` directory:
+```diff
+---
+genesis:
+  env:         dev
+  min_version: 2.8.4
+
+kit:
+  name: cf
+  version: 2.2.0-rc.14
+  features:
+    - postgres-db
+    - aws-blobstore
+    (...)
++   - cf-mgmt-uaa-client
+```
+
+Run deplot for the environment you wish to apply it for.
+```
+genesis deploy $env
+```
 ## cf-mgmt
-#### Get cf-mgmt CLI tools:
+### Get cf-mgmt CLI tools:
 ```bash
 wget https://github.com/vmware-tanzu-labs/cf-mgmt/releases/download/v1.0.52/cf-mgmt-linux
 wget https://github.com/vmware-tanzu-labs/cf-mgmt/releases/download/v1.0.52/cf-mgmt-config-linux
@@ -96,73 +121,47 @@ Initialisation should happen only if you are connecting cf-mgmt configuration to
 
 From this repository root run:
 ```bash
-./ci/export-config.sh
+#./ci/export-config.sh dev system.codex.starkandwayne.com
+./ci/export-config.sh $env $system_domain
+
 ```
 export-config documentation: https://github.com/vmware-tanzu-labs/cf-mgmt/blob/main/docs/export-config/README.md
 
-This should create a new directory called `config` at the top level. 
+This should create a new directory called `ci/config/$env` with configuration extracted from deployment. 
 
-### Concourse Pipeline generation
-With the `config/` dir generated let's now run CI generation:
+### New Concourse pipeline generation
+**Skip this part if cf-mgmt is already present in your flow**\
+From the root directory let's now run CI generation:
 ```bash
-./cf-mgmt-config generate-concourse-pipeline
+#./ci/cf-mgmt-config generate-concourse-pipeline --config-dir=ci/config/dev
+./ci/cf-mgmt-config generate-concourse-pipeline --config-dir=ci/config/$env
 ```
-This should create two things:
-- a dir named `ci`
+This should create two things (if not existing already):
+- a dir named `ci` with `tasks` subdir
 - a yml file named `pipeline.yml`
 
-What it did was it generated a multiple Concourse `jobs` that all call the same `task` which just executes `cf-mgmt` with correct input of parameters regarding what resource needs to be modified on CloudFoundry side.
+>What that command did was it generated a `pipeline.yml` with a multiple Concourse `jobs` that all call the same `task` which just executes `cf-mgmt` binary with correct input of parameters for whatever resource needs to be modified on CloudFoundry side.
 
-**Add config/vars.yml to .gitignore**
+### Extending existing ci.yml
+- [ ] TODO
+#### Add new environment configuration
+- [ ] TODO
+#### Add new environment resource
+- [ ] TODO
+#### Add new environment jobs
+- [ ] TODO
+### <a name="disabe-ssot"></a>Disabling single-source-of-truth of cf-mgmt
+- [ ] TODO
+# Manual
+Manually executed steps documentation to manage the configuration of CloudFoundry via code.
 
-It should not be pushed to the remote repository (or it can if you don't have plain text passwords in it ;-) )
-
-Example `config/vars.yml`
-```yaml
-# your git repo uri
-git_repo_uri: "https://github.com/starkandwayne/demo-cf-mgmt-deployments"
-git_repo_branch: main
-# your cf system domain
-system_domain: "system.codex.starkandwayne.com"
-# user account with permission to create orgs/spaces
-user_id: "cf_mgmt_client"
-# DEPRECATED - Use client_secret - password of user account with permission to create orgs/spaces
-password: ""
-# client secret for uaa for user_id
-client_secret: "[read it via \"credhub g -n /dev-bosh/dev-cf/cf_mgmt_client_secret | sed -n 's/value: //p'\""
-
-# logging level for cf-mgmt commands in the pipeline
-log_level: INFO
-# time interval to trigger update/delete jobs on
-time-trigger: 15m
-
-# configuration directory
-config_dir: config
-
-# allow specifying ldap server in pipeline vs in ldap.yml only needed if using LDAP
-ldap_server: ""
-
-# allow specifying ldap bind user in pipeline vs in ldap.yml only needed if using LDAP
-ldap_user: ""
-
-# password to bind to ldap - only needed if using LDAP
-ldap_password: ""
-```
-
-### Extending configuration
-To extend or modify current configuration please use `./cf-mgmt-config` CLI or do it directly by modifying and creating files.\
-`./cf-mgmt-config` is mostly generating new yml files with some templates in them so it may be useful at the beginning.
-
-### Testing
-Manually executed set of tests that can be also useful for learning cf-mgmt
-
-#### Create org and space
+## Create org and space
 To create a new org and space just copy a template of existing one and modify it to your needs.\
 Or run new init via `./cf-mgmt-config add-org --org test`.\
 For the sake of this testing/tutorial we assume `cf-mgmt-org` exists with space `cf-mgmt-space` in it.\
 Take a look here for example: https://github.com/starkandwayne/demo-cf-mgmt-deployments/tree/main/config/cf-mgmt-org
 
-#### Create user in org/space
+## Create user in org/space
 Same steps are for org or space, just modify space config vs org config ;-)\
 First we need to create a new user in UAA or have connected LDAP.\
 If you are using LDAP, just configure user in `ldap.yml` as docs says.\
@@ -207,7 +206,7 @@ ORG AUDITOR
   No ORG AUDITOR found
 ```
 
-#### Create quotas and bind it to org/space
+## Create quotas and bind it to org/space
 Same steps are for org or space, just modify space config vs org config ;-)
 
 Let's start with creating new quota. If you want to use existing one, just skip this step.
@@ -253,7 +252,7 @@ cf org cf-mgmt-org
 ```
 Should show new quota, it params, and that it is now used by `cf-mgmt-org`.
 
-#### Create ASG's
+## Create ASG's
 There are two types of ASG's: default ones and all others ;-)\
 Each ASG is applied during `runtime`, `staging` or for both.\
 Let's go first and create a new `default` ASG, `default` ones applies to both `staging` and `runtime` and are not scoped - they apply to entire CF deployment.
@@ -358,7 +357,7 @@ Then we need to enable this ASG create mode by turning this flag under `spaceCon
 +enable-security-group: true
 ```
 
-#### Create and enable isolation segments
+## Create and enable isolation segments
 Isolation segments needs to be first installed by platform engineering team.\
 Make sure the CF-Genesis-Kit has feature flag `isolation-segments` enabled, and that the `params:` section include the configuration of isolation segments.\
 Use the names from kit `params:` to refer isolation segment.\
