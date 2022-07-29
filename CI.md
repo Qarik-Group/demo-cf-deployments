@@ -15,7 +15,9 @@ One of the biggest challenge in that approach is the mindset shift that configur
 >- [Infrastructure as a Code](https://www.techtarget.com/searchitoperations/definition/Infrastructure-as-Code-IAC)
 >- [gitops approach](https://www.gitops.tech/)
 >- [ArgoCD as example of gitops implementation](https://github.com/argoproj/argo-cd/blob/master/README.md)
-# Design & Architecture
+# Diagrams & Architecture
+#### Concourse pipeline
+![alt Concourse Pipeline example](./ci/docs/concourse.png "Concourse Pipeline")
 #### UX flow when providing a change
 ```mermaid
   flowchart LR
