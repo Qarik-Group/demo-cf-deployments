@@ -6,6 +6,10 @@ cf BOSH deployments, using the format prescribed by the
 [Genesis][1] utility. These deployments are based off of the
 [cf-genesis-kit][2].
 
+Concourse Pipeline
+------------------
+Please refer to the [CI.md documentation](CI.md) for the details about CI powered by Concourse.
+
 Environment Naming
 ------------------
 

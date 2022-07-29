@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+### Examples:
+# Configured to locally mimic the Concourse pipeline actions
+# Uses --peek to only dry-run actions
+# ./local-cf-mgmt create-orgs # ==> to check what orgs and how they will be created
+# Change params to reflect system_domain and client_secret from $env
+
+LOG_LEVEL=INFO ./cf-mgmt "$@" --peek\
+  --system-domain=system.codex.starkandwayne.com\
+  --user-id=cf_mgmt_client\
+  --client-secret=$(credhub g -n /dev-bosh/dev-cf/cf_mgmt_client_secret | sed -n 's/value: //p')\
