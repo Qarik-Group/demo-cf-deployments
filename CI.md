@@ -13,11 +13,36 @@ This approach brings both benefits and challenges, most recognized benefit is th
 One of the biggest challenge in that approach is the mindset shift that configuration is now not the result of applied commands to the platform directly (via CLI for example), but the code itself.
 
 **This solution can still be used in parallel to the direct usage of CLI.\
-Please check [Disabling single-source-of-truth of cf-mgmt](#disable-ssot).**
+Please check [Disabling single-source-of-truth of cf-mgmt](#disabling-single-source-of-truth-of-cf-mgmt).**
 >Some other concepts that share principles similar to cf-mgmt:
 >- [Infrastructure as a Code](https://www.techtarget.com/searchitoperations/definition/Infrastructure-as-Code-IAC)
 >- [gitops approach](https://www.gitops.tech/)
 >- [ArgoCD as example of gitops implementation](https://github.com/argoproj/argo-cd/blob/master/README.md)
+
+# Table of Content
+- [Diagrams & Architecture](#diagrams---architecture)
+    + [Concourse pipeline](#concourse-pipeline)
+    + [UX flow when providing a change](#ux-flow-when-providing-a-change)
+    + [UX flow when only CF config changes](#ux-flow-when-only-cf-config-changes)
+- [Setup](#setup)
+  * [CloudFoundry](#cloudfoundry)
+    + [Setup cf-mgmt UAA client](#setup-cf-mgmt-uaa-client)
+  * [cf-mgmt](#cf-mgmt)
+    + [Get cf-mgmt CLI tools:](#get-cf-mgmt-cli-tools-)
+      - [Export configuration, or initialise new one.](#export-configuration--or-initialise-new-one)
+    + [New Concourse pipeline generation](#new-concourse-pipeline-generation)
+    + [Extending existing ci.yml](#extending-existing-ciyml)
+      - [Add new environment configuration](#add-new-environment-configuration)
+      - [Add new environment resource](#add-new-environment-resource)
+      - [Add new environment jobs](#add-new-environment-jobs)
+    + [Disabling single-source-of-truth of cf-mgmt](#disabling-single-source-of-truth-of-cf-mgmt)
+- [Manual](#manual)
+  * [Create org and space](#create-org-and-space)
+  * [Create user in org/space](#create-user-in-org-space)
+  * [Create quotas and bind it to org/space](#create-quotas-and-bind-it-to-org-space)
+  * [Create ASG's](#create-asg-s)
+  * [Create and enable isolation segments](#create-and-enable-isolation-segments)
+
 # Diagrams & Architecture
 ### Concourse pipeline
 ![alt Concourse Pipeline example](./ci/docs/concourse.png "Concourse Pipeline")
@@ -150,7 +175,7 @@ This should create two things (if not existing already):
 - [ ] TODO
 #### Add new environment jobs
 - [ ] TODO
-### <a name="disabe-ssot"></a>Disabling single-source-of-truth of cf-mgmt
+### Disabling single-source-of-truth of cf-mgmt
 - [ ] TODO
 # Manual
 Manually executed steps documentation to manage the configuration of CloudFoundry via code.
