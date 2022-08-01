@@ -6,9 +6,6 @@ image_resource:
     tag: latest
   type: registry-image
 
-inputs:
-- name: changes
-
 run:
   path: sh
   args:
