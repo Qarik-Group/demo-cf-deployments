@@ -117,6 +117,8 @@ jobs:
         LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: create-orgs
   - task: uaac-script-run
+    params:
+      SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
     file: dev-config-repo/ci/tasks/uaac-cli.yml
   - task: shared-domains
     <<: *dev-task

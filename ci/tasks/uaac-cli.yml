@@ -6,9 +6,14 @@ image_resource:
     tag: latest
   type: registry-image
 
+params:
+  SYSTEM_DOMAIN:
+
 run:
   path: sh
   args:
   - -ce
   - |
+    uaac target $SYSTEM_DOMAIN --skip-ssl-validation
     uaac targets
+    uaac contexts
