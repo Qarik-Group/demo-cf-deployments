@@ -1,0 +1,25 @@
+platform: linux
+image_resource:
+  name: ""
+  source:
+    repository: starkandwayne/concourse
+    tag: latest
+  type: registry-image
+
+inputs:
+- name: changes
+
+params:
+  SCRIPT: ((SCRIPT))
+  #SCRIPT_CONFIG: ((SCRIPT_CONFIG))
+  VAULT_ADDR: ((VAULT_ADDR))
+  VAULT_ROLE: ((VAULT_ROLE))
+  VAULT_SECRET: ((VAULT_SECRET))
+  VAULT_SKIP_VERIFY: ((VAULT_SKIP_VERIFY))
+
+run:
+  path: sh
+  args:
+  - -ce
+  - |
+    uaac targets
