@@ -14,4 +14,4 @@ space-auditor:
   saml_users: []
   ldap_groups: []
 enable-unassign-security-group: false
-enable-remove-users: false
+enable-remove-users: true
