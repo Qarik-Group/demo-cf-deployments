@@ -83,7 +83,7 @@ resources:
   source:
     uri: ((grab cf-mgmt.dev.git_repo_uri))
     branch: ((grab cf-mgmt.dev.git_repo_branch))
-    paths: ["((grab cf-mgmt.dev.config_dir))"]
+    paths: ["((grab cf-mgmt.dev.config_dir))", "tasks"]
 - name: baby-bosh-config-repo
   type: git
   source:
@@ -116,6 +116,8 @@ jobs:
         CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
         LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: create-orgs
+  - task: uaac-script-run
+    file: dev-config-repo/ci/tasks/uaac-cli.yml
   - task: shared-domains
     <<: *dev-task
     params:
@@ -211,10 +213,6 @@ jobs:
     params:
       <<: *dev-params
       CF_MGMT_COMMAND: cleanup-org-users
-  - task: uaac-script-run
-    file: dev-config-repo/ci/tasks/uaac-cli.yml
-    input_mapping:
-      config-repo: dev-config-repo
 - name: baby-bosh-cf-config
   plan:
   - get: baby-bosh-config-repo
