@@ -14,6 +14,6 @@ run:
   args:
   - -ce
   - |
-    uaac target $SYSTEM_DOMAIN --skip-ssl-validation
+    uaac target "uaa.$SYSTEM_DOMAIN" --skip-ssl-validation
     uaac targets
     uaac contexts
