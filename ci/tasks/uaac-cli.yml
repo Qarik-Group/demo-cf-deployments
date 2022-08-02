@@ -23,4 +23,4 @@ run:
     uaac target "uaa.$SYSTEM_DOMAIN" --skip-ssl-validation
     echo "[DG] CLIENT SECRET - $CLIENT_SECRET"
     echo cf_mgmt_client | uaac token client get --secret="$CLIENT_SECRET"
-    bash $UAAC_SCRIPT
+    ./$UAAC_SCRIPT
