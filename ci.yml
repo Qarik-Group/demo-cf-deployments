@@ -119,6 +119,7 @@ jobs:
   - task: uaac-script-run
     params:
       <<: *dev-params
+      UAAC_SCRIPT: dev-config-repo/ci/scripts/uaac-script-example.sh
     file: dev-config-repo/ci/tasks/uaac-cli.yml
   - task: shared-domains
     <<: *dev-task
