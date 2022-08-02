@@ -117,6 +117,8 @@ jobs:
         LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: create-orgs
   - task: uaac-script-run
+    input_mapping:
+      config-repo: dev-config-repo
     params:
       <<: *dev-params
       UAAC_SCRIPT: ci/scripts/uaac-script-example.sh

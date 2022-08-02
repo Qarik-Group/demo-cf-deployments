@@ -6,6 +6,9 @@ image_resource:
     tag: latest
   type: registry-image
 
+inputs:
+- name: config-repo
+
 params:
   SYSTEM_DOMAIN:
   USER_ID:
@@ -20,7 +23,7 @@ run:
   args:
   - -ce
   - |
+    cd config-repo
     uaac target "uaa.$SYSTEM_DOMAIN" --skip-ssl-validation
     echo cf_mgmt_client | uaac token client get --secret="$CLIENT_SECRET"
-    ls -ltra
     ./$UAAC_SCRIPT
