@@ -8,8 +8,11 @@ image_resource:
 
 params:
   SYSTEM_DOMAIN:
-  ENV:
-  UAAC_SECRET:
+  USER_ID:
+  PASSWORD:
+  CONFIG_DIR:
+  CLIENT_SECRET:
+  LOG_LEVEL:
 
 run:
   path: sh
@@ -17,6 +20,7 @@ run:
   - -ce
   - |
     uaac target "uaa.$SYSTEM_DOMAIN" --skip-ssl-validation
-    echo cf_mgmt_client | uaac token client get --secret=$UAAC_SECRET
+    echo "[DG] CLIENT SECRET - $CLIENT_SECRET"
+    echo cf_mgmt_client | uaac token client get --secret="$CLIENT_SECRET"
     uaac targets
     uaac contexts
