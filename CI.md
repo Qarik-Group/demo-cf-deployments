@@ -27,6 +27,7 @@ Please check [Disabling single-source-of-truth of cf-mgmt](#disabling-single-sou
 - [Setup](#setup)
   * [CloudFoundry](#cloudfoundry)
     + [Setup cf-mgmt UAA client](#setup-cf-mgmt-uaa-client)
+    + [Push UAAC secret to the Vault](#push-uaac-secret-to-the-vault)
   * [cf-mgmt](#cf-mgmt)
     + [Get cf-mgmt CLI tools:](#get-cf-mgmt-cli-tools-)
       - [Export configuration, or initialise new one.](#export-configuration--or-initialise-new-one)
@@ -43,6 +44,7 @@ Please check [Disabling single-source-of-truth of cf-mgmt](#disabling-single-sou
   * [Create quotas and bind it to org/space](#create-quotas-and-bind-it-to-org-space)
   * [Create ASG's](#create-asg-s)
   * [Create and enable isolation segments](#create-and-enable-isolation-segments)
+  * [Run UAAC CLI - Group Creation and Mapping example](#run-uaac-cli---group-creation-and-mapping-example)
 
 # Diagrams & Architecture
 ### Concourse pipeline
@@ -635,4 +637,21 @@ Let's test it:
 ```
 
 If you would like to remove isolation segments when no longer used, not only "unbind" them from org or space, please switch the flag for `enable-delete-isolation-segments` in `cf-mgmt.yml`.
+
+## Run UAAC CLI - Group Creation and Mapping example
+In case of any UAAC action that needs to be run from deployments pipeline there is a special task that utilizes existing `uaac` binary and authenticates it against the environment with the UAA Client of `cf_mgmt_client`.
+
+Current setup assumes there is a standard task added to job of `$env-cf-config` in pipeline, should look like this:
+```yml
+  - task: uaac-script-run
+    input_mapping:
+      config-repo: dev-config-repo
+    params:
+      <<: *dev-params
+      UAAC_SCRIPT: ci/scripts/uaac-script-example.sh
+    file: dev-config-repo/ci/tasks/uaac-cli.yml
+```
+Whatever script is passed under `UAAC_SCRIPT` parameter it will be executed with client permission level. Standard group creating and mapping should work out of the box.
+
+In a case where we need to add more mapping and possibly split the script to couple scripts this can be easly redone so that we take an array of scripts (`UAAC_SCRIPTS: [1.sh,2.sh,3.sh,4.sh]`) or we can simply add more tasks like this one for each script (probably better if the failure of one underlying script should not cause failure of all other scripts).
 

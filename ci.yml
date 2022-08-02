@@ -116,13 +116,6 @@ jobs:
         CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
         LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
       CF_MGMT_COMMAND: create-orgs
-  - task: uaac-script-run
-    input_mapping:
-      config-repo: dev-config-repo
-    params:
-      <<: *dev-params
-      UAAC_SCRIPT: ci/scripts/uaac-script-example.sh
-    file: dev-config-repo/ci/tasks/uaac-cli.yml
   - task: shared-domains
     <<: *dev-task
     params:
@@ -218,6 +211,13 @@ jobs:
     params:
       <<: *dev-params
       CF_MGMT_COMMAND: cleanup-org-users
+  - task: uaac-script-run
+    input_mapping:
+      config-repo: dev-config-repo
+    params:
+      <<: *dev-params
+      UAAC_SCRIPT: ci/scripts/uaac-script-example.sh
+    file: dev-config-repo/ci/tasks/uaac-cli.yml
 - name: baby-bosh-cf-config
   plan:
   - get: baby-bosh-config-repo
@@ -336,3 +336,10 @@ jobs:
     params:
       <<: *baby-bosh-params
       CF_MGMT_COMMAND: cleanup-org-users
+  - task: uaac-script-run
+    input_mapping:
+      config-repo: baby-bosh-config-repo
+    params:
+      <<: *baby-bosh-params
+      UAAC_SCRIPT: ci/scripts/uaac-script-example.sh
+    file: baby-bosh-config-repo/ci/tasks/uaac-cli.yml
