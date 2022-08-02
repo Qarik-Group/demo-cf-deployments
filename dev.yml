@@ -32,8 +32,8 @@ kit:
     #- windows-smoke-tests
     #- prometheus-integration
     - custom-router-group
-    - add-persistent-isolation-segment-diego-cell
-    - add-windows-isolation-segment
+    #- add-persistent-isolation-segment-diego-cell
+    #- add-windows-isolation-segment
     #- app-security-groups
     - cf-mgmt-uaa-client
 
