@@ -127,10 +127,17 @@ kit:
 +   - cf-mgmt-uaa-client
 ```
 
-Run deplot for the environment you wish to apply it for.
+Run deploy for the environment you wish to apply it for.
 ```
 genesis deploy $env
 ```
+### Push UAAC secret to the Vault
+As it is much easier to integrate Genesis toolkit with Vault then credhub for reading secrets, please push the UAAC client secret to the Vault.
+```
+safe set secret/dev/bosh/uaa/clients/cf_mgmt_client secret=$(credhub g -n /dev-bosh/dev-cf/cf_mgmt_client_secret | sed -n 's/value: //p')
+```
+**Feel free to change the path to something else if needed, please put the correct path under `cf-mgmt.$env.client_secret` keys.**
+
 ## cf-mgmt
 ### Get cf-mgmt CLI tools:
 ```bash

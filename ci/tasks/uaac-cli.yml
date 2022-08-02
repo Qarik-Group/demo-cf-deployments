@@ -8,6 +8,8 @@ image_resource:
 
 params:
   SYSTEM_DOMAIN:
+  ENV:
+  UAAC_SECRET:
 
 run:
   path: sh
@@ -15,5 +17,6 @@ run:
   - -ce
   - |
     uaac target "uaa.$SYSTEM_DOMAIN" --skip-ssl-validation
+    uaac token client get --secret=$UAAC_SECRET
     uaac targets
     uaac contexts

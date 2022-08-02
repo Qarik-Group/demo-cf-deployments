@@ -119,6 +119,8 @@ jobs:
   - task: uaac-script-run
     params:
       SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
+      ENV: dev
+      UAAC_SECRET: ((grab cf-mgmt.dev.client_secret))
     file: dev-config-repo/ci/tasks/uaac-cli.yml
   - task: shared-domains
     <<: *dev-task
