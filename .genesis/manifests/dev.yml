@@ -178,11 +178,6 @@ addons:
           instance_group: isolated-diego-cell
           network: ((cf_runtime_network))
           query: _
-        - deployment: dev-cf
-          domain: bosh
-          instance_group: windows2019-cell
-          network: cf-runtime
-          query: _
       - domain: auctioneer.service.cf.internal
         targets:
         - deployment: ((deployment_name))
@@ -339,39 +334,6 @@ addons:
           query: '*'
     release: bosh-dns-aliases
   name: bosh-dns-aliases
-- include:
-    stemcell:
-    - os: windows2019
-  jobs:
-  - name: metrics-discovery-registrar-windows
-    properties:
-      metrics:
-        ca_cert: ((metrics_discovery_metrics_tls.ca))
-        cert: ((metrics_discovery_metrics_tls.certificate))
-        key: ((metrics_discovery_metrics_tls.private_key))
-        server_name: metrics_discovery_metrics
-      nats_client:
-        cert: ((nats_client_cert.certificate))
-        key: ((nats_client_cert.private_key))
-    release: metrics-discovery
-  - name: metrics-agent-windows
-    properties:
-      grpc:
-        ca_cert: ((loggregator_tls_agent.ca))
-        cert: ((loggregator_tls_agent.certificate))
-        key: ((loggregator_tls_agent.private_key))
-      metrics:
-        ca_cert: ((metrics_agent_tls.ca))
-        cert: ((metrics_agent_tls.certificate))
-        key: ((metrics_agent_tls.private_key))
-        server_name: metrics_agent
-      scrape:
-        tls:
-          ca_cert: ((prom_scraper_scrape_tls.ca))
-          cert: ((prom_scraper_scrape_tls.certificate))
-          key: ((prom_scraper_scrape_tls.private_key))
-    release: metrics-discovery
-  name: metrics-discovery-windows2019
 azs:
 - cloud_properties:
     availability_zone: us-west-2a
@@ -540,11 +502,11 @@ exodus:
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.25.0
   cf-deployment-version: 16.25.0
   core_network: cf-core
-  dated: 2022-08-03 12:19:59 +0000
+  dated: 2022-08-03 13:15:17 +0000
   db_network: cf-core
   deployer: unknown
   edge_network: cf-edge
-  features: postgres-db,aws-blobstore,small-footprint,ssh-proxy-on-routers,app-scheduler-integration,smb-test-server,smb-volume-services,smb-volume-services-releases,app-autoscaler-integration,windows-dev-bosh-dns-alias,windows-diego-cells,windows-releases,custom-router-group,cf-mgmt-uaa-client
+  features: postgres-db,aws-blobstore,small-footprint,ssh-proxy-on-routers,app-scheduler-integration,smb-test-server,smb-volume-services,smb-volume-services-releases,app-autoscaler-integration,custom-router-group,cf-mgmt-uaa-client
   is_director: false
   kit_is_dev: false
   kit_name: cf
@@ -1090,14 +1052,6 @@ instance_groups:
           package: r-buildpack-cflinuxfs3
         - name: binary_buildpack
           package: binary-buildpack-cflinuxfs3
-        - name: hwc_buildpack
-          package: hwc-buildpack-windows2016
-        - name: hwc_buildpack
-          package: hwc-buildpack-windows
-        - name: binary_buildpack
-          package: binary-buildpack-windows2016
-        - name: binary_buildpack
-          package: binary-buildpack-windows
         internal_api_password: ((cc_internal_api_password))
         logcache_tls:
           certificate: ((cc_logcache_tls.certificate))
@@ -1142,10 +1096,6 @@ instance_groups:
         stacks:
         - description: Cloud Foundry Linux-based filesystem (Ubuntu 18.04)
           name: cflinuxfs3
-        - description: Windows Server 2016
-          name: windows2016
-        - description: Windows Server
-          name: windows
         staging_upload_password: ((cc_staging_upload_password))
         staging_upload_user: staging_user
         temporary_use_logcache: true
@@ -1396,8 +1346,6 @@ instance_groups:
         key: ((loggr_udp_forwarder_tls.private_key))
         server_name: loggr_udp_forwarder_metrics
     release: loggregator-agent
-  - name: hwc-buildpack
-    release: hwc-buildpack
   name: api
   networks:
   - name: ((cf_core_network))
@@ -2340,182 +2288,6 @@ instance_groups:
   - name: ((cf_runtime_network))
   stemcell: default
   vm_type: minimal
-- azs:
-  - z1
-  instances: 1
-  jobs:
-  - name: winc
-    release: winc
-  - name: winc-network-hns-acls
-    properties:
-      winc_network:
-        dns_servers:
-        - 172.30.0.1
-    release: winc
-  - name: groot
-    properties:
-      groot:
-        cached_image_uris:
-        - oci:///C:/var/vcap/packages/windows2019fs
-        driver_store: /var/vcap/data/groot
-    release: winc
-  - name: garden-windows
-    properties:
-      garden:
-        destroy_containers_on_start: true
-        image_plugin: /var/vcap/packages/groot/groot.exe
-        image_plugin_extra_args:
-        - --driver-store=/var/vcap/data/groot
-        - --config=/var/vcap/jobs/groot/config/groot.yml
-        listen_address: 127.0.0.1:9241
-        network_plugin: /var/vcap/packages/winc-network-hns-acls/winc-network.exe
-        network_plugin_extra_args:
-        - --configFile=/var/vcap/jobs/winc-network-hns-acls/config/interface.json
-        - --log=/var/vcap/sys/log/winc-network-hns-acls/winc-network.log
-        nstar_bin: /var/vcap/packages/nstar/nstar.exe
-        runtime_plugin: /var/vcap/packages/winc/winc.exe
-    release: garden-runc
-  - name: rep_windows
-    properties:
-      containers:
-        trusted_ca_certificates:
-        - ((diego_instance_identity_ca.ca))
-        - ((credhub_tls.ca))
-        - ((uaa_ssl.ca))
-      declarative_healthcheck_path: /var/vcap/packages/healthcheck_windows/internal
-      diego:
-        executor:
-          instance_identity_ca_cert: ((diego_instance_identity_ca.certificate))
-          instance_identity_key: ((diego_instance_identity_ca.private_key))
-        rep:
-          open_bindmounts_acl: true
-          preloaded_rootfses:
-          - windows2016:oci:///C:/var/vcap/packages/windows2019fs
-          - windows:oci:///C:/var/vcap/packages/windows2019fs
-      enable_consul_service_registration: false
-      enable_declarative_healthcheck: true
-      logging:
-        format:
-          timestamp: rfc3339
-      loggregator:
-        ca_cert: ((loggregator_tls_agent.ca))
-        cert: ((loggregator_tls_agent.certificate))
-        key: ((loggregator_tls_agent.private_key))
-        use_v2_api: true
-      syslog_daemon_config:
-        enable: false
-      tls:
-        ca_cert: ((diego_rep_agent_v2.ca))
-        cert: ((diego_rep_agent_v2.certificate))
-        key: ((diego_rep_agent_v2.private_key))
-    release: diego
-  - consumes:
-      nats:
-        ip_addresses: false
-      nats-tls:
-        ip_addresses: false
-    name: route_emitter_windows
-    properties:
-      diego:
-        route_emitter:
-          bbs:
-            ca_cert: ((diego_bbs_client.ca))
-            client_cert: ((diego_bbs_client.certificate))
-            client_key: ((diego_bbs_client.private_key))
-          local_mode: true
-          nats:
-            tls:
-              client_cert: ((nats_client_cert.certificate))
-              client_key: ((nats_client_cert.private_key))
-              enabled: true
-      logging:
-        format:
-          timestamp: rfc3339
-      loggregator:
-        ca_cert: ((loggregator_tls_agent.ca))
-        cert: ((loggregator_tls_agent.certificate))
-        key: ((loggregator_tls_agent.private_key))
-        use_v2_api: true
-    release: diego
-  - name: loggregator_agent_windows
-    properties:
-      grpc_port: 3459
-      loggregator:
-        tls:
-          agent:
-            cert: ((loggregator_tls_agent.certificate))
-            key: ((loggregator_tls_agent.private_key))
-          ca_cert: ((loggregator_tls_agent.ca))
-      metrics:
-        ca_cert: ((loggregator_agent_metrics_tls.ca))
-        cert: ((loggregator_agent_metrics_tls.certificate))
-        key: ((loggregator_agent_metrics_tls.private_key))
-        server_name: loggregator_agent_metrics
-      syslog_daemon_config:
-        enable: false
-    release: loggregator-agent
-  - name: loggr-syslog-agent-windows
-    properties:
-      cache:
-        tls:
-          ca_cert: ((syslog_agent_api_tls.ca))
-          cert: ((syslog_agent_api_tls.certificate))
-          cn: binding-cache
-          key: ((syslog_agent_api_tls.private_key))
-      metrics:
-        ca_cert: ((syslog_agent_metrics_tls.ca))
-        cert: ((syslog_agent_metrics_tls.certificate))
-        key: ((syslog_agent_metrics_tls.private_key))
-        server_name: syslog_agent_metrics
-      port: 3460
-      tls:
-        ca_cert: ((loggregator_tls_agent.ca))
-        cert: ((loggregator_tls_agent.certificate))
-        key: ((loggregator_tls_agent.private_key))
-    release: loggregator-agent
-  - name: loggr-forwarder-agent-windows
-    properties:
-      downstream_ingress_ports:
-      - 3459
-      - 3460
-      metrics:
-        ca_cert: ((forwarder_agent_metrics_tls.ca))
-        cert: ((forwarder_agent_metrics_tls.certificate))
-        key: ((forwarder_agent_metrics_tls.private_key))
-        server_name: forwarder_agent_metrics
-      tls:
-        ca_cert: ((loggregator_tls_agent.ca))
-        cert: ((loggregator_tls_agent.certificate))
-        key: ((loggregator_tls_agent.private_key))
-    release: loggregator-agent
-  - name: prom_scraper_windows
-    properties:
-      metrics:
-        ca_cert: ((prom_scraper_metrics_tls.ca))
-        cert: ((prom_scraper_metrics_tls.certificate))
-        key: ((prom_scraper_metrics_tls.private_key))
-        server_name: prom_scraper_metrics
-      scrape:
-        tls:
-          ca_cert: ((prom_scraper_scrape_tls.ca))
-          cert: ((prom_scraper_scrape_tls.certificate))
-          key: ((prom_scraper_scrape_tls.private_key))
-      scrape_interval: 60s
-    release: loggregator-agent
-  - name: enable_ssh
-    release: windows-utilities
-  - name: windows2019fs
-    release: windowsfs
-  - name: resize_root_disk
-    properties: {}
-    release: windows-resize-root-disk
-  name: windows2019-cell
-  networks:
-  - name: ((cf_runtime_network))
-  stemcell: windows2019
-  vm_extensions:
-  - 100GB_ephemeral_disk
-  vm_type: diego-cell
 kit:
   features:
   - postgres-db
@@ -2527,9 +2299,6 @@ kit:
   - smb-volume-services
   - smb-volume-services-releases
   - app-autoscaler-integration
-  - windows-dev-bosh-dns-alias
-  - windows-diego-cells
-  - windows-releases
   - custom-router-group
   - cf-mgmt-uaa-client
   name: cf
@@ -2917,8 +2686,6 @@ params:
   uaa_instances: 1
   uaa_vm_type: uaa
   uaadb_scheme: postgresql
-  windows_diego_cell_instances: 1
-  windows_diego_cell_vm_type: diego-cell
 releases:
 - name: binary-buildpack
   sha1: 6e1ff3753ac5a86e968546222bbbaaba1264d938
@@ -3044,34 +2811,11 @@ releases:
   sha1: 5565d59f1baea51a0acb59256ae2b2118f4631da
   url: https://bosh.io/d/github.com/cloudfoundry/smb-volume-release?v=3.1.2
   version: 3.1.2
-- name: hwc-buildpack
-  sha1: d23998512071991a9b85470661b77f9be3d41bc8
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/hwc-buildpack-release?v=3.1.19
-  version: 3.1.19
-- name: winc
-  sha1: 3f14f65ca0b523bbabb3631820d3388674875110
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/winc-release?v=2.5.0
-  version: 2.5.0
-- name: windows-utilities
-  sha1: 7886ffd43b84d4eced06560ba601ce1eb97c6616
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/windows-utilities-release?v=0.14.0
-  version: 0.14.0
-- name: windowsfs
-  sha1: 36fcc451396ef259150548f5ae1073007a56fc75
-  url: https://bosh.io/d/github.com/cloudfoundry/windowsfs-online-release?v=2.35.0
-  version: 2.35.0
-- name: windows-resize-root-disk
-  sha1: 8fe1adc3b6b6b68d8a370c576f649929f5452c6a
-  url: https://github.com/starkandwayne/windows-resize-root-disk/releases/download/v1.0/windows-resize-root-disk-release-1.0.tgz
-  version: "1.0"
 - name: nfs-volume
   version: 7.1.1+dev.1
 stemcells:
 - alias: default
   os: ubuntu-bionic
-  version: latest
-- alias: windows2019
-  os: windows2019
   version: latest
 update:
   canaries: 1
