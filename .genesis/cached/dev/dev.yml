@@ -24,9 +24,9 @@ kit:
     #- compiled-releases
     #- enable-service-discovery
     ### Windows features
-    - windows-dev-bosh-dns-alias
-    - windows-diego-cells
-    - windows-releases
+    #- windows-dev-bosh-dns-alias
+    #- windows-diego-cells
+    #- windows-releases
     #- windows-ofline-2019fs
     #- windows-remove-default-network
     #- windows-smoke-tests
@@ -109,8 +109,8 @@ params:
   tcp_router_instances: 1
   uaa_instances: 1
   diego_cell_instances: 2
-  windows_diego_cell_instances: 1 # Required for Windows, 3 one for each az
-  windows_diego_cell_vm_type: diego-cell # Required for Windows
+  #windows_diego_cell_instances: 1 # Required for Windows, 3 one for each az
+  #windows_diego_cell_vm_type: diego-cell # Required for Windows
   #windows2019_cell_vm_type: cell
   #windows2019_cell_instances: 2
 
