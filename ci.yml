@@ -112,11 +112,11 @@ jobs:
   - get: every-5m
     trigger: true
   - task: autoscale-fetch
-    file: dev-changes/ci/tasks/run-cf-cli.yml
+    file: dev-changes/ci/tasks/run-cf-autoscale.yml
     input_mapping:
       changes: dev-changes
     params:
-      SCRIPT: dev-changes/ci/scripts/cf_scale/cf_scale
+      SCRIPT: ci/scripts/cf_scale/cf_scale 
       ARGS: ci/scripts/cf_scale
       ENV: dev
       VAULT_ADDR: (( grab pipeline.vault.url ))

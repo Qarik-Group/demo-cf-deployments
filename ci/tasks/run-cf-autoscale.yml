@@ -36,8 +36,8 @@ run:
     genesis do $ENV -q -- setup-cli -f
     echo ">> Login to CF..."
     genesis do $ENV -q -- login
-    echo ">> Select 'system' org"
-    cf target -o system
-    echo ">> Running \"$SCRIPT\" with [\"$ARGS\"] against CF..."
     echo "PWD -- $(pwd)"
-    ./$SCRIPT "$ARGS"
+    cd "changes/ci/config/$ENV"
+    echo "PWD -- $(pwd)"
+    echo ">> Running \"$SCRIPT\" with [\"$ARGS\"] against CF..."
+    ./changes/$SCRIPT changes/$ARGS
