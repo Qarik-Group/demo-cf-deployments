@@ -95,11 +95,11 @@ resources:
     uri: ((grab cf-mgmt.baby-bosh.git_repo_uri))
     branch: ((grab cf-mgmt.baby-bosh.git_repo_branch))
     paths: ["((grab cf-mgmt.baby-bosh.config_dir))"]
-- name: every-5m
+- name: every-15m
   type: time
   icon: clock-outline
   source:
-    interval: 5m
+    interval: 15m
 
 jobs:
 - ((append))
@@ -109,7 +109,7 @@ jobs:
   - get: baby-bosh-cache
     trigger: true
     passed: [dev-cf]
-  - get: every-5m
+  - get: every-15m
     trigger: true
   - task: autoscale-fetch
     file: dev-changes/ci/tasks/run-cf-autoscale.yml
