@@ -84,7 +84,7 @@ resources:
   source:
     uri: ((grab cf-mgmt.dev.git_repo_uri))
     branch: ((grab cf-mgmt.dev.git_repo_branch))
-    paths: ["((grab cf-mgmt.dev.config_dir))", "ci"]
+    paths: ["((grab cf-mgmt.dev.config_dir))"]
 - name: baby-bosh-config-repo
   type: git
   source:
