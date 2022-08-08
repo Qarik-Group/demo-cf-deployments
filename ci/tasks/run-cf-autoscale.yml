@@ -23,7 +23,7 @@ run:
   args:
   - -ce
   - |
-    cd changes
+    BASE_PATH=$(pwd)/changes
     VERIFY=$([ "$VAULT_SKIP_VERIFY" ] && echo "-k" || echo "")
     safe target $VERIFY $VAULT_ADDR vault
     {
@@ -40,4 +40,4 @@ run:
     cd "ci/config/$ENV"
     echo "PWD -- $(pwd)"
     echo ">> Running \"$SCRIPT\" with [\"$ARGS\"] against CF..."
-    ./changes/$SCRIPT changes/$ARGS
+    ./$BASE_PATH/$SCRIPT "$BASE_PATH/$ARGS"
