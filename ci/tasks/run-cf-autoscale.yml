@@ -37,7 +37,7 @@ run:
     echo ">> Login to CF..."
     genesis do $ENV -q -- login
     echo "PWD -- $(pwd)"
-    cd "changes/ci/config/$ENV"
+    cd "ci/config/$ENV"
     echo "PWD -- $(pwd)"
     echo ">> Running \"$SCRIPT\" with [\"$ARGS\"] against CF..."
     ./changes/$SCRIPT changes/$ARGS
