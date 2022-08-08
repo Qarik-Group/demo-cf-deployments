@@ -43,4 +43,4 @@ run:
     ls -ltr
     echo ">> Running \".$BASE_PATH/$SCRIPT\" with [\"$BASE_PATH/$ARGS\"] against CF..."
     ls -ltr $BASE_PATH/ci/scripts/cf_scale
-    bash $BASE_PATH/$SCRIPT "$BASE_PATH/$ARGS"
+    bash $BASE_PATH/$SCRIPT
