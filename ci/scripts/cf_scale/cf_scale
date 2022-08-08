@@ -6,6 +6,9 @@ shopt -u extglob
 unset CDPATH
 cmd_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+echo "BASH_SOURCE[0] == ${BASH_SOURCE[0]}"
+echo "COMMAND DIR FOUND == $cmd_dir"
+
 (( BASH_VERSINFO[0] >= 4 )) || {
     echo  "Bash version must be 4.X or greater"
     exit 1
