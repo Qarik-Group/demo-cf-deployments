@@ -39,4 +39,5 @@ run:
     echo ">> Select 'system' org"
     cf target -o system
     echo ">> Running \"$SCRIPT\" with [\"$ARGS\"] against CF..."
+    echo "PWD -- $(pwd)"
     ./$SCRIPT "$ARGS"
