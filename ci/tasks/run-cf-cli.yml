@@ -11,7 +11,6 @@ inputs:
 
 params:
   SCRIPT: ((SCRIPT))
-  ENV: ((ENV))
   #SCRIPT_CONFIG: ((SCRIPT_CONFIG))
   VAULT_ADDR: ((VAULT_ADDR))
   VAULT_ROLE: ((VAULT_ROLE))
@@ -39,4 +38,4 @@ run:
     echo ">> Select 'system' org"
     cf target -o system
     echo ">> Running \"$SCRIPT\" against CF..."
-    ./$SCRIPT
+    ./$SCRIPT scripts/cf_scale/lib

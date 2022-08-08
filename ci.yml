@@ -41,6 +41,7 @@ groups:
   - ((append))
   - dev-cf-config
   - baby-bosh-cf-config
+  - autoscale-dev-cf
 
 ##### CF-MGMT stuff #####
 ##### dev.yml configuration #####
@@ -90,9 +91,31 @@ resources:
     uri: ((grab cf-mgmt.baby-bosh.git_repo_uri))
     branch: ((grab cf-mgmt.baby-bosh.git_repo_branch))
     paths: ["((grab cf-mgmt.baby-bosh.config_dir))"]
+- name: every-5m
+  type: time
+  icon: clock-outline
+  source:
+    interval: 5m
 
 jobs:
 - ((append))
+- name: autoscale-dev-cf
+  plan:
+  - get: baby-bosh-cache
+    trigger: true
+    passed: [dev-cf]
+  - get: every-5m
+    trigger: true
+  - task: autoscale-fetch
+    file: dev-config-repo/ci/tasks/run-cf-cli.yml
+    input_mapping:
+      change: dev-config-repo
+    params:
+      SCRIPT: dev-config-repo/ci/scripts/cf_scale/cf_scale
+      VAULT_ADDR: (( grab pipeline.vault.url ))
+      VAULT_ROLE: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
+      VAULT_SECRET: (( vault "secret/exodus/ci/genesis-pipelines:approle-secret" ))
+      VAULT_SKIP_VERIFY: true
 - name: dev-cf-config
   plan:
   - get: dev-config-repo
