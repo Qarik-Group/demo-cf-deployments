@@ -24,6 +24,8 @@ run:
   - -ce
   - |
     BASE_PATH=$(pwd)/changes
+    cd $BASE_PATH
+
     VERIFY=$([ "$VAULT_SKIP_VERIFY" ] && echo "-k" || echo "")
     safe target $VERIFY $VAULT_ADDR vault
     {
