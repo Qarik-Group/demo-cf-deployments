@@ -38,5 +38,5 @@ run:
     genesis do $ENV -q -- login
     echo ">> Select 'system' org"
     cf target -o system
-    echo ">> Running \"$SCRIPT\" against CF..."
+    echo ">> Running \"$SCRIPT\" with [\"$ARGS\"] against CF..."
     ./$SCRIPT "$ARGS"
