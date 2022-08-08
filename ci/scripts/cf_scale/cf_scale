@@ -95,6 +95,7 @@ collect_scale_data() {
     cli::step collecting application data
 
     rm -rf scale_up scale_down results/*
+    mkdir -p results
 
     # Get applications and transform into simplier JSON
 
