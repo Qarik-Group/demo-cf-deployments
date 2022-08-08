@@ -1,0 +1,304 @@
+#!/usr/bin/env bash
+
+set -o errexit -o nounset -o pipefail
+shopt -u extglob
+
+unset CDPATH
+cmd_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+(( BASH_VERSINFO[0] >= 4 )) || {
+    echo  "Bash version must be 4.X or greater"
+    exit 1
+}
+
+[[ ! -d "${cmd_dir}/lib" ]] && {
+    echo "Cannot find cf_scale's lib direcory"
+    exit 1
+}
+
+PATH="${cmd_dir}/lib:$PATH"
+
+# shellcheck source=lib/cli.sh
+source cli.sh
+
+handle_exit() {
+  #/ Add cleanup code here
+  #/ for eg. rm -f "/tmp/${lock_file}.lock"
+  #/ exit with an appropriate status code
+  cli::info List of file created during cf_scale run
+  # shellcheck disable=SC2046
+  ls -l $(find . -type f -regex "./results/.*" -o -name scale_up -o -name scale_down | sed 's/^.\///')
+}
+
+trap handle_exit EXIT SIGHUP SIGINT SIGQUIT SIGABRT SIGTERM
+
+# shellcheck source=lib/debug.sh
+source debug.sh
+# shellcheck source=lib/curl.sh
+source curl.sh
+# shellcheck source=lib/dependency.sh
+source dependency.sh
+
+#TODO Do we make the generated script smarter when targeting orgs and spaces?
+#TODO Do we remove the --process flag for web types since that is the default value?
+#TODO Do we do live scale down script instead?
+
+declare apps_per_page=150
+declare processes_per_page=500
+declare scale_down_timeout=5
+declare scale_up_timeout=5
+
+generate_scale_cmds() {
+    declare direction="${1:?dependency::generate_scale_cmds() - missing direction parameter up|down   $(debug::called_by)}"
+
+    cli::step Creating "scale_${direction}" script
+
+    exec 3<results/combined_sorted.tsv
+    exec 4>"scale_${direction}"
+
+    IFS=$'\t' read -r -u 3 column_names 
+
+    echo -e "#!/usr/bin/env bash\n" >&4
+    echo -e "set +e\n" >&4
+    
+    if [[ "${direction}" == "down" ]]
+    then 
+        echo -e "export CF_STARTUP_TIMEOUT=${scale_down_timeout}\n" >&4
+    else
+        echo -e "export CF_STARTUP_TIMEOUT=${scale_up_timeout}\n" >&4
+    fi
+    # shellcheck disable=SC2086
+    while IFS=$'\t' read -r -u 3 ${column_names:?} 
+    do
+        [[ "${direction}" == "down" ]] && process_instances=1
+        echo cf target -o "${org_name:?}" -s "${space_name:?}"
+        echo cf scale "${app_name:?}" --process "${process_type:?}" -i "${process_instances:?}"
+    done >&4
+
+    exec 3<&-
+    exec 4>&-
+
+    # shellcheck disable=SC2046
+    cli::echo "\nOK  " $(wc -l <"scale_${direction}") "lines\n"
+}
+
+collect_scale_data() {
+    cli::step "Checking software dependencies."
+
+    dependency::add_tool_check "cf" "7.5" "cf --version"
+    dependency::add_tool_check "jq" "1.5" "jq --version"
+
+    dependency::checks "cf" "jq" || exit 1
+
+    cli::echo "\nOK\n"
+
+    cli::step collecting application data
+
+    rm -rf scale_up scale_down results/*
+
+    # Get applications and transform into simplier JSON
+
+    query::cf_api '/v3/apps?include=space,space.organization&per_page='"${apps_per_page}" v3_apps 
+    jq '. as {resources: $resources, included: $included}| 
+         $included as {spaces: $spaces, organizations: $orgs}|
+          $resources | .[]| . as $app | .relationships.space.data.guid as $space_guid |
+          ($spaces[]|select(.guid==$space_guid)) | . as $space | .relationships.organization.data.guid as $org_guid |
+          ($orgs[]|select(.guid==$org_guid)) | . as $org | 
+           { "app_name": $app.name, "app_guid": $app.guid, 
+            "space_name": $space.name, "space_guid":  $space.guid,
+            "org_name": $org.name, "org_guid": $org_guid, 
+            "processes_url": ($app.links.processes.href|match(".*?//.*?(/.*)")|.captures[0].string),
+            "app_file": input_filename}' results/v3_apps/parts.$$/*  &> results/apps_list.json
+
+    cli::echo "\nOK  " "$(jq -s '.|length' results/apps_list.json)" "applications\n" 
+
+    cli::step collecting process data
+
+    query::cf_api '/v3/processes?per_page='"${processes_per_page}" v3_processes
+    jq '.| .resources as $resources| $resources[] as $procs| 
+        { "process_guid": $procs.guid, "process_type": $procs.type,
+          "process_instances": $procs.instances, 
+          "app_guid": $procs.relationships.app.data.guid,  
+          "process_file": input_filename}' results/v3_processes/parts.$$/*  &> results/processes_list.json
+
+    cli::echo "\nOK  " "$(jq -s '.|length' results/processes_list.json)" "processes\n" 
+
+    # Merge applications and processes objects into a single object
+    cli::step merging collected data
+
+    jq -S --slurpfile apps_list results/apps_list.json '. | . as $procs |
+        ($apps_list[]| select($procs.app_guid == .app_guid)) |. as $apps |
+        $procs + { "space_name": $apps.space_name, 
+                   "space_guid": $apps.space_guid, 
+                   "org_name": $apps.org_name, 
+                   "org_guid": $apps.org_guid, 
+                   "app_file": $apps.app_file,
+                   "app_name": $apps.app_name }' results/processes_list.json &>results/combined.json
+
+    # Sort the data by organization, space and application name
+
+    jq -Ss '.|sort_by(.org_name, .space_name, .app_name)' results/combined.json  &>results/combined_sorted.json
+
+    cli::echo "\nOK  " "$(jq length results/combined_sorted.json)" "merged records\n"
+
+    # Generate a TSV file to simplify use of the in the shell 
+    cli::step Generate a TSV file
+
+    jq -r '(map(keys)|add|unique) as $cols | map(. as $row | $cols | map($row[.])) as $rows | $cols, $rows[] | @tsv' results/combined_sorted.json &>results/combined_sorted.tsv
+
+    # shellcheck disable=SC2046
+    cli::echo "\nOK  " $(wc -l <results/combined_sorted.tsv) "tsv records\n"
+
+}
+
+
+usage() {
+  declare usage_type=${1:-"long"}
+  declare rc=${2:-1}
+  declare return_by=${3:-"exit"}
+  echo
+  echo "cf_scale - Generates scale up and scale down commands for an environment"
+  echo
+  echo "Usage: $(basename "$0") [help|-h|--help] [[-d|--debug|--debug=] curl|checks|paths]..."
+  echo "                [[--apps_per_page|--apps_per_page=] 1-5000]"
+  echo "                [[--processes_per_page|--processes_per_page=] 1-5000]"
+  echo "                [[--scale_down_timeout|--scale_down_timeout=] 1-60]"
+  echo "                [[--scale_up_timeout|--scale_up_timeout=] 1-60]"
+  echo ""
+  echo "--apps_per_page|--apps_per_page= 1-5000             queries for 'n' applications per CF api call"
+  echo "--processes_per_page|--processes_per_page= 1-5000   queries for 'n' processes per CF api call"
+  echo ""
+  echo "--scale_down_timeout|--scale_down_timeout= 1-60   sets the CF_STARTUP_TIMEOUT variable"
+  echo "--scale_up_timeout|--scale_up_timeout= 1-60       sets the CF_STARTUP_TIMEOUT variable"
+  echo ""
+  echo "-d|--debug|--debug= curl|checks   curl   - enables debug information for CF api calls"
+  echo "-d|--debug|--debug= curl|checks   checks - enables debug information for tools existence checking"
+  echo "-d|--debug|--debug= curl|paths    paths  - enables debug for PATH variable changes"
+
+  [[ "${usage_type}" == "short" ]] && ${return_by} "${rc}"
+
+  echo
+  echo "Cf_scale assumes three things before the caller executes this tool."
+  echo
+  echo "1. The caller will login into the CF environment using an account that can"
+  echo "   access all organizations and spaces. This is normally the admin user "
+  echo "   created by the genesis deploy cf operation."
+  echo "2. The caller will 'cd' to the directory where all output files should be written."
+  echo "3. The 'PATH' variable should be set up to where 'cf_scale' is located."
+  echo
+  echo "The cf_scale will create a 'results' directory where files are stored.  The"
+  echo "scale_up and scale_down scripts will be written to the local directory."
+  echo
+  echo "The CF_STARTUP_TIMEOUT variable controls the CF command waiting time for the"
+  echo "application process to start or stop. This may not mean the scale operation failed."
+  echo "The scaling operation may continue in the background.  The CF commanddefault value"
+  echo "is 5 minutes."
+  ${return_by} "${rc}"
+}
+
+while (($# > 0))
+do
+    case $1 in
+    -h|help|--help) 
+        usage long 0
+        ;;
+    -d|--debug|--debug=*) 
+        declare arg=""
+        if [[ $1 == --debug=* ]]; then
+            arg="${1#"--debug="}"
+        else
+            if (( $# > 1 )); then 
+              shift;
+              arg="$1"
+            fi
+        fi
+        if [[ -n "${arg}" ]]; then
+          debug::enable "${arg}"
+        else
+          cli::error "Missing -d argument"
+          usage short
+        fi
+        ;;
+    --apps_per_page|--apps_per_page=*)
+        declare arg=""
+        if [[ $1 == --apps_per_page=* ]]; then
+            arg="${1#"--apps_per_page="}"
+        else
+            if (( $# > 1 )); then
+              shift;
+              arg="$1"
+            fi
+        fi
+        if [[ -n "${arg}" && ${arg} == [1-9]*([0-9]) && $arg -ge 1 && $arg -le 5000 ]]; then
+          apps_per_page="${arg}"
+        else
+          cli::error "Missing or invalid apps_per_page argument"
+          usage short
+        fi
+        ;;
+    --processes_per_page|--processes_per_page=*)
+        declare arg=""
+        if [[ $1 == --processes_per_page=* ]]; then
+            arg="${1#"--processes_per_page="}"
+        else
+            if (( $# > 1 )); then
+              shift;
+              arg="$1"
+            fi
+        fi
+        if [[ -n "${arg}" && "${arg}" == [1-9]*([0-9]) && $arg -gt 0 && $arg -le 5000 ]]; then
+          processes_per_page="${arg}"
+        else
+          cli::error "Missing or invalid processes_per_page argument"
+          usage short
+        fi
+        ;;
+    --scale_up_timeout|--scale_up_timeout=*)
+        declare arg=""
+        if [[ $1 == --scale_up_timeout=* ]]; then
+            arg="${1#"--scale_up_timeout="}"
+        else
+            if (( $# > 1 )); then
+              shift;
+              arg="$1"
+            fi
+        fi
+        if [[ -n "${arg}" && ${arg} == [1-9]*([0-9]) && $arg -ge 1 && $arg -le 5000 ]]; then
+          scale_up_timeout="${arg}"
+        else
+          cli::error "Missing or invalid scale_up_timeout argument"
+          usage short
+        fi
+        ;;
+    --scale_down_timeout|--scale_down_timeout=*)
+        declare arg=""
+        if [[ $1 == --scale_down_timeout=* ]]; then
+            arg="${1#"--scale_down_timeout="}"
+        else
+            if (( $# > 1 )); then
+              shift;
+              arg="$1"
+            fi
+        fi
+        if [[ -n "${arg}" && ${arg} == [1-9]*([0-9]) && $arg -ge 1 && $arg -le 5000 ]]; then
+          scale_down_timeout="${arg}"
+        else
+          cli::error "Missing or invalid scale_down_timeout argument"
+          usage short
+        fi
+        ;;
+    *) usage
+        cli::error "invalid parameter(s) $*"
+        usage short
+        ;;
+    esac
+    shift
+done
+
+if debug::is_enabled paths; then
+    cli::debug paths "PATH ${PATH}"
+fi
+
+collect_scale_data
+generate_scale_cmds up
+generate_scale_cmds down
