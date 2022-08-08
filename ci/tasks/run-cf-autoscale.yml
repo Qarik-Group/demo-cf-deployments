@@ -41,5 +41,5 @@ run:
     echo "PWD -- $(pwd)"
     cd "ci/config/$ENV"
     echo "PWD -- $(pwd)"
-    echo ">> Running \"$SCRIPT\" with [\"$ARGS\"] against CF..."
-    ./$BASE_PATH/$SCRIPT "$BASE_PATH/$ARGS"
+    echo ">> Running \".$BASE_PATH/$SCRIPT\" with [\"$BASE_PATH/$ARGS\"] against CF..."
+    .$BASE_PATH/$SCRIPT "$BASE_PATH/$ARGS"
