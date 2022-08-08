@@ -101,6 +101,7 @@ jobs:
 - ((append))
 - name: autoscale-dev-cf
   plan:
+  - get: dev-config-repo
   - get: baby-bosh-cache
     trigger: true
     passed: [dev-cf]
@@ -109,9 +110,10 @@ jobs:
   - task: autoscale-fetch
     file: dev-config-repo/ci/tasks/run-cf-cli.yml
     input_mapping:
-      change: dev-config-repo
+      changes: dev-config-repo
     params:
       SCRIPT: dev-config-repo/ci/scripts/cf_scale/cf_scale
+      ENV: dev
       VAULT_ADDR: (( grab pipeline.vault.url ))
       VAULT_ROLE: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
       VAULT_SECRET: (( vault "secret/exodus/ci/genesis-pipelines:approle-secret" ))
