@@ -85,7 +85,7 @@ generate_scale_cmds() {
 collect_scale_data() {
     cli::step "Checking software dependencies."
 
-    dependency::add_tool_check "cf" "7.5" "cf --version"
+    dependency::add_tool_check "cf" "7.4" "cf --version"
     dependency::add_tool_check "jq" "1.5" "jq --version"
 
     dependency::checks "cf" "jq" || exit 1
