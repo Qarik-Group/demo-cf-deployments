@@ -11,6 +11,7 @@ inputs:
 
 params:
   SCRIPT: ((SCRIPT))
+  ENV: ((ENV))
   #SCRIPT_CONFIG: ((SCRIPT_CONFIG))
   VAULT_ADDR: ((VAULT_ADDR))
   VAULT_ROLE: ((VAULT_ROLE))
@@ -30,11 +31,11 @@ run:
       echo $VAULT_SECRET
     } | safe auth approle
     echo ">> Show genesis info"
-    genesis info dev -q
+    genesis info $ENV -q
     echo ">> Setting up CLI"
-    genesis do dev -q -- setup-cli -f
+    genesis do $ENV -q -- setup-cli -f
     echo ">> Login to CF..."
-    genesis do dev -q -- login
+    genesis do $ENV -q -- login
     echo ">> Select 'system' org"
     cf target -o system
     echo ">> Running \"$SCRIPT\" against CF..."

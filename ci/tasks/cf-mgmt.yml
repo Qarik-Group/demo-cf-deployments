@@ -3,6 +3,7 @@ platform: linux
 
 image_resource:
   type: docker-image
+  # need to go under S&W runner
   source: {repository: pivotalservices/cf-mgmt, tag: "1.0.52"}
 
 inputs:
