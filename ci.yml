@@ -113,6 +113,7 @@ jobs:
       changes: dev-config-repo
     params:
       SCRIPT: dev-config-repo/ci/scripts/cf_scale/cf_scale
+      ARGS: scripts/cf_scale
       ENV: dev
       VAULT_ADDR: (( grab pipeline.vault.url ))
       VAULT_ROLE: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
