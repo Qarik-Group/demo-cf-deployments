@@ -55,3 +55,6 @@ run:
     git config user.name "Concourse Bot"
     git config user.email "concourse@pipeline"
     git commit -m "[AUTOSCALE] Push latest results of cf_scale"
+    # rebase to be in sync with remote if something changes when executing
+    # put step is simple push
+    git pull -r
