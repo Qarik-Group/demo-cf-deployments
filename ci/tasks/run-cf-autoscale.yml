@@ -19,6 +19,7 @@ params:
   VAULT_ROLE: ((VAULT_ROLE))
   VAULT_SECRET: ((VAULT_SECRET))
   VAULT_SKIP_VERIFY: ((VAULT_SKIP_VERIFY))
+  GIT_BRANCH: ((GIT_BRANCH))
 
 run:
   path: sh
@@ -55,3 +56,6 @@ run:
     git config user.name "Concourse Bot"
     git config user.email "concourse@pipeline"
     git commit -m "[AUTOSCALE] Push latest results of cf_scale"
+
+    # rebase, as there is non-0 chance something will be commited between our commit
+    git pull -r origin $GIT_BRANCH

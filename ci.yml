@@ -83,14 +83,14 @@ resources:
     paths:
     - ((append))
     - ci
-- name: config-repo
-  type: git
-  icon: github
-  source:
-    uri: git@github.com:starkandwayne/demo-cf-deployments
-    branch: ((grab cf-mgmt.dev.git_repo_branch))
-    private_key: (( vault "concourse/demo/cf/github:private_key" ))
-    paths: ["ci/config/**/results/"]
+# - name: config-repo
+#   type: git
+#   icon: github
+#   source:
+#     uri: git@github.com:starkandwayne/demo-cf-deployments
+#     branch: ((grab cf-mgmt.dev.git_repo_branch))
+#     private_key: (( vault "concourse/demo/cf/github:private_key" ))
+#     paths: ["ci/config/**/results/"]
 - name: dev-config-repo
   type: git
   icon: github
@@ -116,7 +116,6 @@ jobs:
 - name: autoscale-dev-cf
   plan:
   - get: dev-changes
-  - get: config-repo
   - get: baby-bosh-cache
     trigger: true
     passed: [dev-cf]
@@ -125,17 +124,18 @@ jobs:
   - task: autoscale-fetch
     file: dev-changes/ci/tasks/run-cf-autoscale.yml
     input_mapping:
-      changes: config-repo
+      changes: dev-changes
     output_mapping:
       changes-autoscale: config-repo-autoscale
     params:
       SCRIPT: ci/scripts/cf_scale/cf_scale 
       ENV: dev
+      GIT_BRANCH: (( grab cf-mgmt.dev.git_repo_branch ))
       VAULT_ADDR: (( grab pipeline.vault.url ))
       VAULT_ROLE: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
       VAULT_SECRET: (( vault "secret/exodus/ci/genesis-pipelines:approle-secret" ))
       VAULT_SKIP_VERIFY: true
-  - put: config-repo
+  - put: dev-changes
     params:
       repository: config-repo-autoscale
 - name: dev-cf-config
