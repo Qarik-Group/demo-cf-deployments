@@ -54,8 +54,6 @@ run:
     git config user.email "concourse@pipeline"
     git commit -m "[AUTOSCALE] Push latest results of cf_scale"
 
-    # rebase, as there is non-0 chance something will be commited between our commit
-    git pull -r origin $GIT_BRANCH
     echo ">> Setting ssh known_hosts"
     SHA=$(ssh-keyscan -t ecdsa github.com 2>&1 |ssh-keygen -lf - | grep -E -o 'SHA256:[0-9a-zA-Z/]+')
     if ["$SHA" == "SHA256:p2QAMXNIC1TJYWeIOttrVc98/R1BUFWu3/LiyKgUfQM"]; then
@@ -66,5 +64,6 @@ run:
       exit 1
     fi
     
-
+    # rebase, as there is non-0 chance something will be commited between our commit
+    git pull -r origin $GIT_BRANCH
     git push
