@@ -83,14 +83,6 @@ resources:
     paths:
     - ((append))
     - ci
-# - name: config-repo
-#   type: git
-#   icon: github
-#   source:
-#     uri: git@github.com:starkandwayne/demo-cf-deployments
-#     branch: ((grab cf-mgmt.dev.git_repo_branch))
-#     private_key: (( vault "concourse/demo/cf/github:private_key" ))
-#     paths: ["ci/config/**/results/"]
 - name: dev-config-repo
   type: git
   icon: github
