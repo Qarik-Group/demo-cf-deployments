@@ -119,7 +119,7 @@ jobs:
     input_mapping:
       changes: dev-changes
     output_mapping:
-      changes-autoscale: dev-changes
+      changes: dev-changes
     params:
       SCRIPT: ci/scripts/cf_scale/cf_scale 
       ENV: dev

@@ -10,7 +10,7 @@ inputs:
 - name: changes
 
 outputs:
-- name: changes-autoscale
+- name: changes
 
 params:
   SCRIPT: ((SCRIPT))
@@ -29,8 +29,7 @@ run:
     # stop on non-0, prompt non-existing vars
     set -eu
     # do everything in task using output
-    git clone changes changes-autoscale
-    BASE_PATH=$(pwd)/changes-autoscale
+    BASE_PATH=$(pwd)/changes
     cd $BASE_PATH
 
     # setup Vault
