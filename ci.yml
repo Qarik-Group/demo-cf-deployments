@@ -118,6 +118,8 @@ jobs:
     file: dev-changes/ci/tasks/run-cf-autoscale.yml
     input_mapping:
       changes: dev-changes
+    output_mapping:
+      changes-autoscale: dev-changes
     params:
       SCRIPT: ci/scripts/cf_scale/cf_scale 
       ENV: dev
@@ -126,6 +128,9 @@ jobs:
       VAULT_ROLE: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
       VAULT_SECRET: (( vault "secret/exodus/ci/genesis-pipelines:approle-secret" ))
       VAULT_SKIP_VERIFY: true
+  - put: dev-changes
+    params:
+      repository: dev-changes
 - name: dev-cf-config
   plan:
   - get: dev-config-repo
