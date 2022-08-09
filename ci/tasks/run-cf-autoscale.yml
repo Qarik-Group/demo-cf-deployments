@@ -56,9 +56,15 @@ run:
 
     # rebase, as there is non-0 chance something will be commited between our commit
     git pull -r origin $GIT_BRANCH
-    #ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-    # alternatively use this ssh-keyscan above
-    # this is not bullet-proof and is a subject of MITM attack this way
-    # best would be to actually retrieve and validate fingerprint but that's rare on CI 
-    echo -e "StrictHostKeyChecking no\n" >> ~/.ssh/config
+    echo ">> Setting ssh known_hosts"
+    SHA=$(ssh-keyscan -t ecdsa github.com 2>&1 |ssh-keygen -lf - | grep -E -o 'SHA256:[0-9a-zA-Z/]+')
+    if ["$SHA" == "SHA256:p2QAMXNIC1TJYWeIOttrVc98/R1BUFWu3/LiyKgUfQM"]; then
+      echo "Matched proper SHA256 for github"
+      ssh-keyscan -t ecdsa github.com >> ~/.ssh/known_hosts
+    else
+      echo "SHA fetched from github.com doesn't match! It may be a MITM attempt!"
+      exit 1
+    fi
+    
+
     git push
