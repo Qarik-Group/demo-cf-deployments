@@ -12,7 +12,6 @@ inputs:
 params:
   SCRIPT: ((SCRIPT))
   ENV: ((ENV))
-  ARGS: ((ARGS))
   VAULT_ADDR: ((VAULT_ADDR))
   VAULT_ROLE: ((VAULT_ROLE))
   VAULT_SECRET: ((VAULT_SECRET))
@@ -39,8 +38,5 @@ run:
     echo ">> Login to CF..."
     genesis do $ENV -q -- login
     cd "$BASE_PATH/ci/config/$ENV"
-    pwd
-    ls -ltr
-    echo ">> Running \".$BASE_PATH/$SCRIPT\" with [\"$BASE_PATH/$ARGS\"] against CF..."
-    ls -ltr $BASE_PATH/ci/scripts/cf_scale
+    echo ">> Running \".$BASE_PATH/$SCRIPT\" against CF..."
     bash $BASE_PATH/$SCRIPT

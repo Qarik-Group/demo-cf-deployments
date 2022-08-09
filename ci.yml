@@ -85,21 +85,23 @@ resources:
     - ci
 - name: dev-config-repo
   type: git
+  icon: github
   source:
     uri: ((grab cf-mgmt.dev.git_repo_uri))
     branch: ((grab cf-mgmt.dev.git_repo_branch))
     paths: ["((grab cf-mgmt.dev.config_dir))"]
 - name: baby-bosh-config-repo
   type: git
+  icon: github
   source:
     uri: ((grab cf-mgmt.baby-bosh.git_repo_uri))
     branch: ((grab cf-mgmt.baby-bosh.git_repo_branch))
     paths: ["((grab cf-mgmt.baby-bosh.config_dir))"]
-- name: every-15m
+- name: every-1h
   type: time
   icon: clock-outline
   source:
-    interval: 15m
+    interval: 1h
 
 jobs:
 - ((append))
@@ -109,20 +111,46 @@ jobs:
   - get: baby-bosh-cache
     trigger: true
     passed: [dev-cf]
-  - get: every-15m
+  - get: every-1h
     trigger: true
   - task: autoscale-fetch
     file: dev-changes/ci/tasks/run-cf-autoscale.yml
     input_mapping:
       changes: dev-changes
+    output_mapping:
+      changes: dev-changes
     params:
       SCRIPT: ci/scripts/cf_scale/cf_scale 
-      ARGS: ci/scripts/cf_scale
       ENV: dev
       VAULT_ADDR: (( grab pipeline.vault.url ))
       VAULT_ROLE: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
       VAULT_SECRET: (( vault "secret/exodus/ci/genesis-pipelines:approle-secret" ))
       VAULT_SKIP_VERIFY: true
+  - task: store-autoscale-results
+    config:
+      platform: linux
+      image_resource:
+        name: ""
+        source:
+          repository: starkandwayne/concourse
+          tag: latest
+        type: registry-image
+      inputs:
+      - name: dev-changes
+      outputs:
+      - name: dev-changes
+      run:
+        path: sh
+        args:
+        - cx
+        - |
+          cd dev-changes
+          git status
+          git add ./ci/config/
+          git commit -m '[CI] Store latest result of cf_scale'
+  - put: dev-changes
+    params:
+      repository: dev-changes
 - name: dev-cf-config
   plan:
   - get: dev-config-repo
