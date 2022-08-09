@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+set +e
+
+export CF_STARTUP_TIMEOUT=5
+
+cf target -o cats-and-dogs -s cats
+cf scale frontend --process web -i 1
+cf target -o segment -s segment
+cf scale backend --process web -i 1
+cf target -o segment -s segment
+cf scale spring-java-simple --process web -i 1
+cf target -o services -s services
+cf scale cf-env --process web -i 1
+cf target -o services -s services
+cf scale frontend-shared --process web -i 1
+cf target -o services -s services
+cf scale pora --process web -i 1
+cf target -o services -s services
+cf scale rabbitmq-example-app --process web -i 1
+cf target -o services -s services
+cf scale rmq-app --process web -i 1
+cf target -o services -s services
+cf scale rmq-env --process web -i 1
+cf target -o windows-2-org -s windows-2-space
+cf scale backend-windows-2 --process web -i 1
+cf target -o windows-org -s windows-space
+cf scale backend-windows --process web -i 1

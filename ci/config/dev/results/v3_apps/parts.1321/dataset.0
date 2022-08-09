@@ -1,0 +1,1119 @@
+{
+   "pagination": {
+      "total_results": 11,
+      "total_pages": 1,
+      "first": {
+         "href": "https://api.system.codex.starkandwayne.com/v3/apps?include=space%2Cspace.organization&page=1&per_page=150"
+      },
+      "last": {
+         "href": "https://api.system.codex.starkandwayne.com/v3/apps?include=space%2Cspace.organization&page=1&per_page=150"
+      },
+      "next": null,
+      "previous": null
+   },
+   "resources": [
+      {
+         "guid": "b63343a1-4ba2-4aea-af30-d6a2906673ae",
+         "created_at": "2022-04-20T21:40:16Z",
+         "updated_at": "2022-05-18T03:33:49Z",
+         "name": "pora",
+         "state": "STARTED",
+         "lifecycle": {
+            "type": "buildpack",
+            "data": {
+               "buildpacks": [
+                  "go_buildpack"
+               ],
+               "stack": "cflinuxfs3"
+            }
+         },
+         "relationships": {
+            "space": {
+               "data": {
+                  "guid": "d01ec187-f0e4-49e1-a443-6efb165b1cd3"
+               }
+            }
+         },
+         "metadata": {
+            "labels": {},
+            "annotations": {}
+         },
+         "links": {
+            "self": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/b63343a1-4ba2-4aea-af30-d6a2906673ae"
+            },
+            "environment_variables": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/b63343a1-4ba2-4aea-af30-d6a2906673ae/environment_variables"
+            },
+            "space": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/spaces/d01ec187-f0e4-49e1-a443-6efb165b1cd3"
+            },
+            "processes": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/b63343a1-4ba2-4aea-af30-d6a2906673ae/processes"
+            },
+            "packages": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/b63343a1-4ba2-4aea-af30-d6a2906673ae/packages"
+            },
+            "current_droplet": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/b63343a1-4ba2-4aea-af30-d6a2906673ae/droplets/current"
+            },
+            "droplets": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/b63343a1-4ba2-4aea-af30-d6a2906673ae/droplets"
+            },
+            "tasks": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/b63343a1-4ba2-4aea-af30-d6a2906673ae/tasks"
+            },
+            "start": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/b63343a1-4ba2-4aea-af30-d6a2906673ae/actions/start",
+               "method": "POST"
+            },
+            "stop": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/b63343a1-4ba2-4aea-af30-d6a2906673ae/actions/stop",
+               "method": "POST"
+            },
+            "revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/b63343a1-4ba2-4aea-af30-d6a2906673ae/revisions"
+            },
+            "deployed_revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/b63343a1-4ba2-4aea-af30-d6a2906673ae/revisions/deployed"
+            },
+            "features": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/b63343a1-4ba2-4aea-af30-d6a2906673ae/features"
+            }
+         }
+      },
+      {
+         "guid": "80966cd5-644b-4989-a113-f6e3841fca25",
+         "created_at": "2022-04-20T23:54:23Z",
+         "updated_at": "2022-04-20T23:54:28Z",
+         "name": "rmq-env",
+         "state": "STOPPED",
+         "lifecycle": {
+            "type": "buildpack",
+            "data": {
+               "buildpacks": [
+                  "ruby_buildpack"
+               ],
+               "stack": "cflinuxfs3"
+            }
+         },
+         "relationships": {
+            "space": {
+               "data": {
+                  "guid": "d01ec187-f0e4-49e1-a443-6efb165b1cd3"
+               }
+            }
+         },
+         "metadata": {
+            "labels": {},
+            "annotations": {}
+         },
+         "links": {
+            "self": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/80966cd5-644b-4989-a113-f6e3841fca25"
+            },
+            "environment_variables": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/80966cd5-644b-4989-a113-f6e3841fca25/environment_variables"
+            },
+            "space": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/spaces/d01ec187-f0e4-49e1-a443-6efb165b1cd3"
+            },
+            "processes": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/80966cd5-644b-4989-a113-f6e3841fca25/processes"
+            },
+            "packages": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/80966cd5-644b-4989-a113-f6e3841fca25/packages"
+            },
+            "current_droplet": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/80966cd5-644b-4989-a113-f6e3841fca25/droplets/current"
+            },
+            "droplets": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/80966cd5-644b-4989-a113-f6e3841fca25/droplets"
+            },
+            "tasks": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/80966cd5-644b-4989-a113-f6e3841fca25/tasks"
+            },
+            "start": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/80966cd5-644b-4989-a113-f6e3841fca25/actions/start",
+               "method": "POST"
+            },
+            "stop": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/80966cd5-644b-4989-a113-f6e3841fca25/actions/stop",
+               "method": "POST"
+            },
+            "revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/80966cd5-644b-4989-a113-f6e3841fca25/revisions"
+            },
+            "deployed_revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/80966cd5-644b-4989-a113-f6e3841fca25/revisions/deployed"
+            },
+            "features": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/80966cd5-644b-4989-a113-f6e3841fca25/features"
+            }
+         }
+      },
+      {
+         "guid": "dc74b297-e845-4894-806c-6b6123de0d9c",
+         "created_at": "2022-05-02T19:54:55Z",
+         "updated_at": "2022-05-02T19:57:10Z",
+         "name": "rmq-app",
+         "state": "STARTED",
+         "lifecycle": {
+            "type": "buildpack",
+            "data": {
+               "buildpacks": [],
+               "stack": "cflinuxfs3"
+            }
+         },
+         "relationships": {
+            "space": {
+               "data": {
+                  "guid": "d01ec187-f0e4-49e1-a443-6efb165b1cd3"
+               }
+            }
+         },
+         "metadata": {
+            "labels": {},
+            "annotations": {}
+         },
+         "links": {
+            "self": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/dc74b297-e845-4894-806c-6b6123de0d9c"
+            },
+            "environment_variables": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/dc74b297-e845-4894-806c-6b6123de0d9c/environment_variables"
+            },
+            "space": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/spaces/d01ec187-f0e4-49e1-a443-6efb165b1cd3"
+            },
+            "processes": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/dc74b297-e845-4894-806c-6b6123de0d9c/processes"
+            },
+            "packages": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/dc74b297-e845-4894-806c-6b6123de0d9c/packages"
+            },
+            "current_droplet": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/dc74b297-e845-4894-806c-6b6123de0d9c/droplets/current"
+            },
+            "droplets": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/dc74b297-e845-4894-806c-6b6123de0d9c/droplets"
+            },
+            "tasks": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/dc74b297-e845-4894-806c-6b6123de0d9c/tasks"
+            },
+            "start": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/dc74b297-e845-4894-806c-6b6123de0d9c/actions/start",
+               "method": "POST"
+            },
+            "stop": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/dc74b297-e845-4894-806c-6b6123de0d9c/actions/stop",
+               "method": "POST"
+            },
+            "revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/dc74b297-e845-4894-806c-6b6123de0d9c/revisions"
+            },
+            "deployed_revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/dc74b297-e845-4894-806c-6b6123de0d9c/revisions/deployed"
+            },
+            "features": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/dc74b297-e845-4894-806c-6b6123de0d9c/features"
+            }
+         }
+      },
+      {
+         "guid": "476b9983-b0c6-40a4-8ae2-355e74d080c0",
+         "created_at": "2022-05-11T17:53:20Z",
+         "updated_at": "2022-05-11T17:59:25Z",
+         "name": "rabbitmq-example-app",
+         "state": "STARTED",
+         "lifecycle": {
+            "type": "buildpack",
+            "data": {
+               "buildpacks": [],
+               "stack": "cflinuxfs3"
+            }
+         },
+         "relationships": {
+            "space": {
+               "data": {
+                  "guid": "d01ec187-f0e4-49e1-a443-6efb165b1cd3"
+               }
+            }
+         },
+         "metadata": {
+            "labels": {},
+            "annotations": {}
+         },
+         "links": {
+            "self": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/476b9983-b0c6-40a4-8ae2-355e74d080c0"
+            },
+            "environment_variables": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/476b9983-b0c6-40a4-8ae2-355e74d080c0/environment_variables"
+            },
+            "space": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/spaces/d01ec187-f0e4-49e1-a443-6efb165b1cd3"
+            },
+            "processes": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/476b9983-b0c6-40a4-8ae2-355e74d080c0/processes"
+            },
+            "packages": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/476b9983-b0c6-40a4-8ae2-355e74d080c0/packages"
+            },
+            "current_droplet": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/476b9983-b0c6-40a4-8ae2-355e74d080c0/droplets/current"
+            },
+            "droplets": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/476b9983-b0c6-40a4-8ae2-355e74d080c0/droplets"
+            },
+            "tasks": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/476b9983-b0c6-40a4-8ae2-355e74d080c0/tasks"
+            },
+            "start": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/476b9983-b0c6-40a4-8ae2-355e74d080c0/actions/start",
+               "method": "POST"
+            },
+            "stop": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/476b9983-b0c6-40a4-8ae2-355e74d080c0/actions/stop",
+               "method": "POST"
+            },
+            "revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/476b9983-b0c6-40a4-8ae2-355e74d080c0/revisions"
+            },
+            "deployed_revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/476b9983-b0c6-40a4-8ae2-355e74d080c0/revisions/deployed"
+            },
+            "features": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/476b9983-b0c6-40a4-8ae2-355e74d080c0/features"
+            }
+         }
+      },
+      {
+         "guid": "d010e541-2b82-4609-b97f-450c2cbf1677",
+         "created_at": "2022-05-25T08:14:18Z",
+         "updated_at": "2022-05-31T11:54:44Z",
+         "name": "spring-java-simple",
+         "state": "STARTED",
+         "lifecycle": {
+            "type": "buildpack",
+            "data": {
+               "buildpacks": [],
+               "stack": "cflinuxfs3"
+            }
+         },
+         "relationships": {
+            "space": {
+               "data": {
+                  "guid": "492f716d-3cad-4494-98c0-70a28376b558"
+               }
+            }
+         },
+         "metadata": {
+            "labels": {},
+            "annotations": {}
+         },
+         "links": {
+            "self": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/d010e541-2b82-4609-b97f-450c2cbf1677"
+            },
+            "environment_variables": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/d010e541-2b82-4609-b97f-450c2cbf1677/environment_variables"
+            },
+            "space": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/spaces/492f716d-3cad-4494-98c0-70a28376b558"
+            },
+            "processes": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/d010e541-2b82-4609-b97f-450c2cbf1677/processes"
+            },
+            "packages": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/d010e541-2b82-4609-b97f-450c2cbf1677/packages"
+            },
+            "current_droplet": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/d010e541-2b82-4609-b97f-450c2cbf1677/droplets/current"
+            },
+            "droplets": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/d010e541-2b82-4609-b97f-450c2cbf1677/droplets"
+            },
+            "tasks": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/d010e541-2b82-4609-b97f-450c2cbf1677/tasks"
+            },
+            "start": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/d010e541-2b82-4609-b97f-450c2cbf1677/actions/start",
+               "method": "POST"
+            },
+            "stop": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/d010e541-2b82-4609-b97f-450c2cbf1677/actions/stop",
+               "method": "POST"
+            },
+            "revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/d010e541-2b82-4609-b97f-450c2cbf1677/revisions"
+            },
+            "deployed_revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/d010e541-2b82-4609-b97f-450c2cbf1677/revisions/deployed"
+            },
+            "features": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/d010e541-2b82-4609-b97f-450c2cbf1677/features"
+            }
+         }
+      },
+      {
+         "guid": "c3b3d6cf-e4c8-41a2-8cf4-5f2251b101eb",
+         "created_at": "2022-06-02T13:03:58Z",
+         "updated_at": "2022-06-02T13:04:47Z",
+         "name": "frontend",
+         "state": "STARTED",
+         "lifecycle": {
+            "type": "buildpack",
+            "data": {
+               "buildpacks": [
+                  "go_buildpack"
+               ],
+               "stack": "cflinuxfs3"
+            }
+         },
+         "relationships": {
+            "space": {
+               "data": {
+                  "guid": "be9018e3-aeb2-45ce-91d0-8c4148112638"
+               }
+            }
+         },
+         "metadata": {
+            "labels": {},
+            "annotations": {}
+         },
+         "links": {
+            "self": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/c3b3d6cf-e4c8-41a2-8cf4-5f2251b101eb"
+            },
+            "environment_variables": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/c3b3d6cf-e4c8-41a2-8cf4-5f2251b101eb/environment_variables"
+            },
+            "space": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/spaces/be9018e3-aeb2-45ce-91d0-8c4148112638"
+            },
+            "processes": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/c3b3d6cf-e4c8-41a2-8cf4-5f2251b101eb/processes"
+            },
+            "packages": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/c3b3d6cf-e4c8-41a2-8cf4-5f2251b101eb/packages"
+            },
+            "current_droplet": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/c3b3d6cf-e4c8-41a2-8cf4-5f2251b101eb/droplets/current"
+            },
+            "droplets": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/c3b3d6cf-e4c8-41a2-8cf4-5f2251b101eb/droplets"
+            },
+            "tasks": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/c3b3d6cf-e4c8-41a2-8cf4-5f2251b101eb/tasks"
+            },
+            "start": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/c3b3d6cf-e4c8-41a2-8cf4-5f2251b101eb/actions/start",
+               "method": "POST"
+            },
+            "stop": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/c3b3d6cf-e4c8-41a2-8cf4-5f2251b101eb/actions/stop",
+               "method": "POST"
+            },
+            "revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/c3b3d6cf-e4c8-41a2-8cf4-5f2251b101eb/revisions"
+            },
+            "deployed_revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/c3b3d6cf-e4c8-41a2-8cf4-5f2251b101eb/revisions/deployed"
+            },
+            "features": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/c3b3d6cf-e4c8-41a2-8cf4-5f2251b101eb/features"
+            }
+         }
+      },
+      {
+         "guid": "077a0589-7ee5-45b7-a766-a27c6284f057",
+         "created_at": "2022-06-02T13:43:11Z",
+         "updated_at": "2022-06-02T13:46:08Z",
+         "name": "backend",
+         "state": "STARTED",
+         "lifecycle": {
+            "type": "buildpack",
+            "data": {
+               "buildpacks": [
+                  "go_buildpack"
+               ],
+               "stack": "cflinuxfs3"
+            }
+         },
+         "relationships": {
+            "space": {
+               "data": {
+                  "guid": "492f716d-3cad-4494-98c0-70a28376b558"
+               }
+            }
+         },
+         "metadata": {
+            "labels": {},
+            "annotations": {}
+         },
+         "links": {
+            "self": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/077a0589-7ee5-45b7-a766-a27c6284f057"
+            },
+            "environment_variables": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/077a0589-7ee5-45b7-a766-a27c6284f057/environment_variables"
+            },
+            "space": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/spaces/492f716d-3cad-4494-98c0-70a28376b558"
+            },
+            "processes": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/077a0589-7ee5-45b7-a766-a27c6284f057/processes"
+            },
+            "packages": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/077a0589-7ee5-45b7-a766-a27c6284f057/packages"
+            },
+            "current_droplet": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/077a0589-7ee5-45b7-a766-a27c6284f057/droplets/current"
+            },
+            "droplets": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/077a0589-7ee5-45b7-a766-a27c6284f057/droplets"
+            },
+            "tasks": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/077a0589-7ee5-45b7-a766-a27c6284f057/tasks"
+            },
+            "start": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/077a0589-7ee5-45b7-a766-a27c6284f057/actions/start",
+               "method": "POST"
+            },
+            "stop": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/077a0589-7ee5-45b7-a766-a27c6284f057/actions/stop",
+               "method": "POST"
+            },
+            "revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/077a0589-7ee5-45b7-a766-a27c6284f057/revisions"
+            },
+            "deployed_revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/077a0589-7ee5-45b7-a766-a27c6284f057/revisions/deployed"
+            },
+            "features": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/077a0589-7ee5-45b7-a766-a27c6284f057/features"
+            }
+         }
+      },
+      {
+         "guid": "be33b762-ca3b-420c-b58a-43d85afc56e3",
+         "created_at": "2022-06-30T14:06:57Z",
+         "updated_at": "2022-07-05T09:59:38Z",
+         "name": "backend-windows",
+         "state": "STARTED",
+         "lifecycle": {
+            "type": "buildpack",
+            "data": {
+               "buildpacks": [
+                  "go_buildpack"
+               ],
+               "stack": "cflinuxfs3"
+            }
+         },
+         "relationships": {
+            "space": {
+               "data": {
+                  "guid": "f3995fa0-d74d-43cd-b077-f6a0964b4856"
+               }
+            }
+         },
+         "metadata": {
+            "labels": {},
+            "annotations": {}
+         },
+         "links": {
+            "self": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/be33b762-ca3b-420c-b58a-43d85afc56e3"
+            },
+            "environment_variables": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/be33b762-ca3b-420c-b58a-43d85afc56e3/environment_variables"
+            },
+            "space": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/spaces/f3995fa0-d74d-43cd-b077-f6a0964b4856"
+            },
+            "processes": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/be33b762-ca3b-420c-b58a-43d85afc56e3/processes"
+            },
+            "packages": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/be33b762-ca3b-420c-b58a-43d85afc56e3/packages"
+            },
+            "current_droplet": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/be33b762-ca3b-420c-b58a-43d85afc56e3/droplets/current"
+            },
+            "droplets": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/be33b762-ca3b-420c-b58a-43d85afc56e3/droplets"
+            },
+            "tasks": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/be33b762-ca3b-420c-b58a-43d85afc56e3/tasks"
+            },
+            "start": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/be33b762-ca3b-420c-b58a-43d85afc56e3/actions/start",
+               "method": "POST"
+            },
+            "stop": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/be33b762-ca3b-420c-b58a-43d85afc56e3/actions/stop",
+               "method": "POST"
+            },
+            "revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/be33b762-ca3b-420c-b58a-43d85afc56e3/revisions"
+            },
+            "deployed_revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/be33b762-ca3b-420c-b58a-43d85afc56e3/revisions/deployed"
+            },
+            "features": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/be33b762-ca3b-420c-b58a-43d85afc56e3/features"
+            }
+         }
+      },
+      {
+         "guid": "ef2d61c6-bb2d-425d-868f-3af222199d2a",
+         "created_at": "2022-07-04T09:42:00Z",
+         "updated_at": "2022-07-04T10:19:02Z",
+         "name": "backend-windows-2",
+         "state": "STARTED",
+         "lifecycle": {
+            "type": "buildpack",
+            "data": {
+               "buildpacks": [
+                  "go_buildpack"
+               ],
+               "stack": "cflinuxfs3"
+            }
+         },
+         "relationships": {
+            "space": {
+               "data": {
+                  "guid": "1346b0df-ee66-41e6-9b2d-7b071aad0741"
+               }
+            }
+         },
+         "metadata": {
+            "labels": {},
+            "annotations": {}
+         },
+         "links": {
+            "self": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/ef2d61c6-bb2d-425d-868f-3af222199d2a"
+            },
+            "environment_variables": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/ef2d61c6-bb2d-425d-868f-3af222199d2a/environment_variables"
+            },
+            "space": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/spaces/1346b0df-ee66-41e6-9b2d-7b071aad0741"
+            },
+            "processes": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/ef2d61c6-bb2d-425d-868f-3af222199d2a/processes"
+            },
+            "packages": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/ef2d61c6-bb2d-425d-868f-3af222199d2a/packages"
+            },
+            "current_droplet": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/ef2d61c6-bb2d-425d-868f-3af222199d2a/droplets/current"
+            },
+            "droplets": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/ef2d61c6-bb2d-425d-868f-3af222199d2a/droplets"
+            },
+            "tasks": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/ef2d61c6-bb2d-425d-868f-3af222199d2a/tasks"
+            },
+            "start": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/ef2d61c6-bb2d-425d-868f-3af222199d2a/actions/start",
+               "method": "POST"
+            },
+            "stop": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/ef2d61c6-bb2d-425d-868f-3af222199d2a/actions/stop",
+               "method": "POST"
+            },
+            "revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/ef2d61c6-bb2d-425d-868f-3af222199d2a/revisions"
+            },
+            "deployed_revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/ef2d61c6-bb2d-425d-868f-3af222199d2a/revisions/deployed"
+            },
+            "features": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/ef2d61c6-bb2d-425d-868f-3af222199d2a/features"
+            }
+         }
+      },
+      {
+         "guid": "6264631e-d489-447c-8b6f-7482c06eb966",
+         "created_at": "2022-07-04T09:49:20Z",
+         "updated_at": "2022-07-04T09:50:05Z",
+         "name": "frontend-shared",
+         "state": "STARTED",
+         "lifecycle": {
+            "type": "buildpack",
+            "data": {
+               "buildpacks": [
+                  "go_buildpack"
+               ],
+               "stack": "cflinuxfs3"
+            }
+         },
+         "relationships": {
+            "space": {
+               "data": {
+                  "guid": "d01ec187-f0e4-49e1-a443-6efb165b1cd3"
+               }
+            }
+         },
+         "metadata": {
+            "labels": {},
+            "annotations": {}
+         },
+         "links": {
+            "self": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/6264631e-d489-447c-8b6f-7482c06eb966"
+            },
+            "environment_variables": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/6264631e-d489-447c-8b6f-7482c06eb966/environment_variables"
+            },
+            "space": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/spaces/d01ec187-f0e4-49e1-a443-6efb165b1cd3"
+            },
+            "processes": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/6264631e-d489-447c-8b6f-7482c06eb966/processes"
+            },
+            "packages": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/6264631e-d489-447c-8b6f-7482c06eb966/packages"
+            },
+            "current_droplet": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/6264631e-d489-447c-8b6f-7482c06eb966/droplets/current"
+            },
+            "droplets": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/6264631e-d489-447c-8b6f-7482c06eb966/droplets"
+            },
+            "tasks": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/6264631e-d489-447c-8b6f-7482c06eb966/tasks"
+            },
+            "start": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/6264631e-d489-447c-8b6f-7482c06eb966/actions/start",
+               "method": "POST"
+            },
+            "stop": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/6264631e-d489-447c-8b6f-7482c06eb966/actions/stop",
+               "method": "POST"
+            },
+            "revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/6264631e-d489-447c-8b6f-7482c06eb966/revisions"
+            },
+            "deployed_revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/6264631e-d489-447c-8b6f-7482c06eb966/revisions/deployed"
+            },
+            "features": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/6264631e-d489-447c-8b6f-7482c06eb966/features"
+            }
+         }
+      },
+      {
+         "guid": "4da0f50f-39af-4c84-ba54-736d6ee6450c",
+         "created_at": "2022-08-08T16:36:30Z",
+         "updated_at": "2022-08-09T05:08:58Z",
+         "name": "cf-env",
+         "state": "STARTED",
+         "lifecycle": {
+            "type": "buildpack",
+            "data": {
+               "buildpacks": [],
+               "stack": "cflinuxfs3"
+            }
+         },
+         "relationships": {
+            "space": {
+               "data": {
+                  "guid": "d01ec187-f0e4-49e1-a443-6efb165b1cd3"
+               }
+            }
+         },
+         "metadata": {
+            "labels": {},
+            "annotations": {}
+         },
+         "links": {
+            "self": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/4da0f50f-39af-4c84-ba54-736d6ee6450c"
+            },
+            "environment_variables": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/4da0f50f-39af-4c84-ba54-736d6ee6450c/environment_variables"
+            },
+            "space": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/spaces/d01ec187-f0e4-49e1-a443-6efb165b1cd3"
+            },
+            "processes": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/4da0f50f-39af-4c84-ba54-736d6ee6450c/processes"
+            },
+            "packages": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/4da0f50f-39af-4c84-ba54-736d6ee6450c/packages"
+            },
+            "current_droplet": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/4da0f50f-39af-4c84-ba54-736d6ee6450c/droplets/current"
+            },
+            "droplets": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/4da0f50f-39af-4c84-ba54-736d6ee6450c/droplets"
+            },
+            "tasks": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/4da0f50f-39af-4c84-ba54-736d6ee6450c/tasks"
+            },
+            "start": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/4da0f50f-39af-4c84-ba54-736d6ee6450c/actions/start",
+               "method": "POST"
+            },
+            "stop": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/4da0f50f-39af-4c84-ba54-736d6ee6450c/actions/stop",
+               "method": "POST"
+            },
+            "revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/4da0f50f-39af-4c84-ba54-736d6ee6450c/revisions"
+            },
+            "deployed_revisions": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/4da0f50f-39af-4c84-ba54-736d6ee6450c/revisions/deployed"
+            },
+            "features": {
+               "href": "https://api.system.codex.starkandwayne.com/v3/apps/4da0f50f-39af-4c84-ba54-736d6ee6450c/features"
+            }
+         }
+      }
+   ],
+   "included": {
+      "spaces": [
+         {
+            "guid": "d01ec187-f0e4-49e1-a443-6efb165b1cd3",
+            "created_at": "2022-04-04T16:07:52Z",
+            "updated_at": "2022-04-04T16:07:52Z",
+            "name": "services",
+            "relationships": {
+               "organization": {
+                  "data": {
+                     "guid": "ce7f834a-b4d5-4097-8097-a8b20513b71f"
+                  }
+               },
+               "quota": {
+                  "data": null
+               }
+            },
+            "metadata": {
+               "labels": {},
+               "annotations": {}
+            },
+            "links": {
+               "self": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/spaces/d01ec187-f0e4-49e1-a443-6efb165b1cd3"
+               },
+               "organization": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organizations/ce7f834a-b4d5-4097-8097-a8b20513b71f"
+               },
+               "features": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/spaces/d01ec187-f0e4-49e1-a443-6efb165b1cd3/features"
+               },
+               "apply_manifest": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/spaces/d01ec187-f0e4-49e1-a443-6efb165b1cd3/actions/apply_manifest",
+                  "method": "POST"
+               }
+            }
+         },
+         {
+            "guid": "492f716d-3cad-4494-98c0-70a28376b558",
+            "created_at": "2022-05-25T07:41:06Z",
+            "updated_at": "2022-05-25T07:41:06Z",
+            "name": "segment",
+            "relationships": {
+               "organization": {
+                  "data": {
+                     "guid": "c4ec4de2-2233-40b2-ac14-c223c2943047"
+                  }
+               },
+               "quota": {
+                  "data": null
+               }
+            },
+            "metadata": {
+               "labels": {},
+               "annotations": {}
+            },
+            "links": {
+               "self": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/spaces/492f716d-3cad-4494-98c0-70a28376b558"
+               },
+               "organization": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organizations/c4ec4de2-2233-40b2-ac14-c223c2943047"
+               },
+               "features": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/spaces/492f716d-3cad-4494-98c0-70a28376b558/features"
+               },
+               "apply_manifest": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/spaces/492f716d-3cad-4494-98c0-70a28376b558/actions/apply_manifest",
+                  "method": "POST"
+               }
+            }
+         },
+         {
+            "guid": "be9018e3-aeb2-45ce-91d0-8c4148112638",
+            "created_at": "2022-05-31T12:14:23Z",
+            "updated_at": "2022-05-31T12:14:23Z",
+            "name": "cats",
+            "relationships": {
+               "organization": {
+                  "data": {
+                     "guid": "53ed4ba9-c687-4fd0-92ed-ed7c478a6c20"
+                  }
+               },
+               "quota": {
+                  "data": null
+               }
+            },
+            "metadata": {
+               "labels": {},
+               "annotations": {}
+            },
+            "links": {
+               "self": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/spaces/be9018e3-aeb2-45ce-91d0-8c4148112638"
+               },
+               "organization": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organizations/53ed4ba9-c687-4fd0-92ed-ed7c478a6c20"
+               },
+               "features": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/spaces/be9018e3-aeb2-45ce-91d0-8c4148112638/features"
+               },
+               "apply_manifest": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/spaces/be9018e3-aeb2-45ce-91d0-8c4148112638/actions/apply_manifest",
+                  "method": "POST"
+               }
+            }
+         },
+         {
+            "guid": "f3995fa0-d74d-43cd-b077-f6a0964b4856",
+            "created_at": "2022-06-30T14:00:00Z",
+            "updated_at": "2022-06-30T14:00:00Z",
+            "name": "windows-space",
+            "relationships": {
+               "organization": {
+                  "data": {
+                     "guid": "98bb30ea-d4c2-4623-aa5c-07eccd018bad"
+                  }
+               },
+               "quota": {
+                  "data": null
+               }
+            },
+            "metadata": {
+               "labels": {},
+               "annotations": {}
+            },
+            "links": {
+               "self": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/spaces/f3995fa0-d74d-43cd-b077-f6a0964b4856"
+               },
+               "organization": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organizations/98bb30ea-d4c2-4623-aa5c-07eccd018bad"
+               },
+               "features": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/spaces/f3995fa0-d74d-43cd-b077-f6a0964b4856/features"
+               },
+               "apply_manifest": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/spaces/f3995fa0-d74d-43cd-b077-f6a0964b4856/actions/apply_manifest",
+                  "method": "POST"
+               }
+            }
+         },
+         {
+            "guid": "1346b0df-ee66-41e6-9b2d-7b071aad0741",
+            "created_at": "2022-07-04T09:37:25Z",
+            "updated_at": "2022-07-04T09:37:25Z",
+            "name": "windows-2-space",
+            "relationships": {
+               "organization": {
+                  "data": {
+                     "guid": "02f55541-c4ff-442a-9067-ccb375873a43"
+                  }
+               },
+               "quota": {
+                  "data": null
+               }
+            },
+            "metadata": {
+               "labels": {},
+               "annotations": {}
+            },
+            "links": {
+               "self": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/spaces/1346b0df-ee66-41e6-9b2d-7b071aad0741"
+               },
+               "organization": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organizations/02f55541-c4ff-442a-9067-ccb375873a43"
+               },
+               "features": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/spaces/1346b0df-ee66-41e6-9b2d-7b071aad0741/features"
+               },
+               "apply_manifest": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/spaces/1346b0df-ee66-41e6-9b2d-7b071aad0741/actions/apply_manifest",
+                  "method": "POST"
+               }
+            }
+         }
+      ],
+      "organizations": [
+         {
+            "guid": "ce7f834a-b4d5-4097-8097-a8b20513b71f",
+            "created_at": "2022-04-04T16:06:51Z",
+            "updated_at": "2022-04-04T16:06:51Z",
+            "name": "services",
+            "suspended": false,
+            "relationships": {
+               "quota": {
+                  "data": {
+                     "guid": "51c8a510-d2c8-4c7b-ba7d-d928b77027cd"
+                  }
+               }
+            },
+            "metadata": {
+               "labels": {},
+               "annotations": {}
+            },
+            "links": {
+               "self": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organizations/ce7f834a-b4d5-4097-8097-a8b20513b71f"
+               },
+               "domains": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organizations/ce7f834a-b4d5-4097-8097-a8b20513b71f/domains"
+               },
+               "default_domain": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organizations/ce7f834a-b4d5-4097-8097-a8b20513b71f/domains/default"
+               },
+               "quota": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organization_quotas/51c8a510-d2c8-4c7b-ba7d-d928b77027cd"
+               }
+            }
+         },
+         {
+            "guid": "c4ec4de2-2233-40b2-ac14-c223c2943047",
+            "created_at": "2022-05-25T07:40:31Z",
+            "updated_at": "2022-05-25T09:11:00Z",
+            "name": "segment",
+            "suspended": false,
+            "relationships": {
+               "quota": {
+                  "data": {
+                     "guid": "51c8a510-d2c8-4c7b-ba7d-d928b77027cd"
+                  }
+               }
+            },
+            "metadata": {
+               "labels": {},
+               "annotations": {}
+            },
+            "links": {
+               "self": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organizations/c4ec4de2-2233-40b2-ac14-c223c2943047"
+               },
+               "domains": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organizations/c4ec4de2-2233-40b2-ac14-c223c2943047/domains"
+               },
+               "default_domain": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organizations/c4ec4de2-2233-40b2-ac14-c223c2943047/domains/default"
+               },
+               "quota": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organization_quotas/51c8a510-d2c8-4c7b-ba7d-d928b77027cd"
+               }
+            }
+         },
+         {
+            "guid": "53ed4ba9-c687-4fd0-92ed-ed7c478a6c20",
+            "created_at": "2022-05-31T12:14:05Z",
+            "updated_at": "2022-05-31T12:14:05Z",
+            "name": "cats-and-dogs",
+            "suspended": false,
+            "relationships": {
+               "quota": {
+                  "data": {
+                     "guid": "51c8a510-d2c8-4c7b-ba7d-d928b77027cd"
+                  }
+               }
+            },
+            "metadata": {
+               "labels": {},
+               "annotations": {}
+            },
+            "links": {
+               "self": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organizations/53ed4ba9-c687-4fd0-92ed-ed7c478a6c20"
+               },
+               "domains": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organizations/53ed4ba9-c687-4fd0-92ed-ed7c478a6c20/domains"
+               },
+               "default_domain": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organizations/53ed4ba9-c687-4fd0-92ed-ed7c478a6c20/domains/default"
+               },
+               "quota": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organization_quotas/51c8a510-d2c8-4c7b-ba7d-d928b77027cd"
+               }
+            }
+         },
+         {
+            "guid": "98bb30ea-d4c2-4623-aa5c-07eccd018bad",
+            "created_at": "2022-06-30T13:59:41Z",
+            "updated_at": "2022-06-30T13:59:41Z",
+            "name": "windows-org",
+            "suspended": false,
+            "relationships": {
+               "quota": {
+                  "data": {
+                     "guid": "51c8a510-d2c8-4c7b-ba7d-d928b77027cd"
+                  }
+               }
+            },
+            "metadata": {
+               "labels": {},
+               "annotations": {}
+            },
+            "links": {
+               "self": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organizations/98bb30ea-d4c2-4623-aa5c-07eccd018bad"
+               },
+               "domains": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organizations/98bb30ea-d4c2-4623-aa5c-07eccd018bad/domains"
+               },
+               "default_domain": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organizations/98bb30ea-d4c2-4623-aa5c-07eccd018bad/domains/default"
+               },
+               "quota": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organization_quotas/51c8a510-d2c8-4c7b-ba7d-d928b77027cd"
+               }
+            }
+         },
+         {
+            "guid": "02f55541-c4ff-442a-9067-ccb375873a43",
+            "created_at": "2022-07-04T09:37:08Z",
+            "updated_at": "2022-07-04T09:37:08Z",
+            "name": "windows-2-org",
+            "suspended": false,
+            "relationships": {
+               "quota": {
+                  "data": {
+                     "guid": "51c8a510-d2c8-4c7b-ba7d-d928b77027cd"
+                  }
+               }
+            },
+            "metadata": {
+               "labels": {},
+               "annotations": {}
+            },
+            "links": {
+               "self": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organizations/02f55541-c4ff-442a-9067-ccb375873a43"
+               },
+               "domains": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organizations/02f55541-c4ff-442a-9067-ccb375873a43/domains"
+               },
+               "default_domain": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organizations/02f55541-c4ff-442a-9067-ccb375873a43/domains/default"
+               },
+               "quota": {
+                  "href": "https://api.system.codex.starkandwayne.com/v3/organization_quotas/51c8a510-d2c8-4c7b-ba7d-d928b77027cd"
+               }
+            }
+         }
+      ]
+   }
+}
