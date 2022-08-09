@@ -83,6 +83,12 @@ resources:
     paths:
     - ((append))
     - ci
+- name: config-repo
+  type: git
+  icon: github
+  source:
+    uri: ((grab cf-mgmt.dev.git_repo_uri))
+    branch: ((grab cf-mgmt.dev.git_repo_branch))
 - name: dev-config-repo
   type: git
   icon: github
@@ -108,6 +114,7 @@ jobs:
 - name: autoscale-dev-cf
   plan:
   - get: dev-changes
+  - get: config-repo
   - get: baby-bosh-cache
     trigger: true
     passed: [dev-cf]
@@ -118,7 +125,7 @@ jobs:
     input_mapping:
       changes: dev-changes
     output_mapping:
-      changes: dev-changes
+      changes-autoscale: dev-changes-autoscale
     params:
       SCRIPT: ci/scripts/cf_scale/cf_scale 
       ENV: dev
@@ -126,31 +133,9 @@ jobs:
       VAULT_ROLE: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
       VAULT_SECRET: (( vault "secret/exodus/ci/genesis-pipelines:approle-secret" ))
       VAULT_SKIP_VERIFY: true
-  - task: store-autoscale-results
-    config:
-      platform: linux
-      image_resource:
-        name: ""
-        source:
-          repository: starkandwayne/concourse
-          tag: latest
-        type: registry-image
-      inputs:
-      - name: dev-changes
-      outputs:
-      - name: dev-changes
-      run:
-        path: sh
-        args:
-        - cx
-        - |
-          cd dev-changes
-          git status
-          git add ./ci/config/
-          git commit -m '[CI] Store latest result of cf_scale'
   - put: dev-changes
     params:
-      repository: dev-changes
+      repository: dev-changes-autoscale
 - name: dev-cf-config
   plan:
   - get: dev-config-repo

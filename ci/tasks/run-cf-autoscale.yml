@@ -9,6 +9,9 @@ image_resource:
 inputs:
 - name: changes
 
+outputs:
+- name: changes-autoscale
+
 params:
   SCRIPT: ((SCRIPT))
   ENV: ((ENV))
@@ -20,9 +23,14 @@ params:
 run:
   path: sh
   args:
-  - -ce
+  - -c
   - |
-    BASE_PATH=$(pwd)/changes
+    # stop on non-0, prompt non-existing vars
+    set -eu
+    # clone it to make clear output of modified 
+    git clone changes changes-autoscale
+
+    BASE_PATH=$(pwd)/changes-autoscale
     cd $BASE_PATH
 
     VERIFY=$([ "$VAULT_SKIP_VERIFY" ] && echo "-k" || echo "")
@@ -40,3 +48,10 @@ run:
     cd "$BASE_PATH/ci/config/$ENV"
     echo ">> Running \".$BASE_PATH/$SCRIPT\" against CF..."
     bash $BASE_PATH/$SCRIPT
+
+    # if all good lets commit that
+    git add .
+
+    git config user.name "Concourse Bot"
+    git config user.email "concourse@pipeline"
+    git commit -m "[AUTOSCALE] Push latest results of cf_scale"
