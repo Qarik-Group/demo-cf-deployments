@@ -70,7 +70,7 @@ generate_scale_cmds() {
     # shellcheck disable=SC2086
     while IFS=$'\t' read -r -u 3 ${column_names:?} 
     do
-        [[ "${direction}" == "down" ]] && process_instances=1
+        [[ "${direction}" == "down" ]] && process_instances=0
         echo cf target -o "${org_name:?}" -s "${space_name:?}"
         echo cf scale "${app_name:?}" --process "${process_type:?}" -i "${process_instances:?}"
     done >&4
