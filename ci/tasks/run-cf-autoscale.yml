@@ -56,4 +56,4 @@ run:
 
     # rebase, as there is non-0 chance something will be commited between our commit
     git pull -r origin $GIT_BRANCH
-    git push
+    echo "yes" | git push
