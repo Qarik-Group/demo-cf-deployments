@@ -56,4 +56,9 @@ run:
 
     # rebase, as there is non-0 chance something will be commited between our commit
     git pull -r origin $GIT_BRANCH
-    echo "yes" | git push
+    ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+    # alternatively use this echo below
+    # this is not bullet-proof and is a subject of MITM attack this way
+    # best would be to actually retrieve and validate fingerprint but that's rare on CI 
+    #echo -e "StrictHostKeyChecking no\n" >> ~/.ssh/config
+    git push
