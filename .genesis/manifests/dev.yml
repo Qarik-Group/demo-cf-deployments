@@ -502,11 +502,11 @@ exodus:
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.25.0
   cf-deployment-version: 16.25.0
   core_network: cf-core
-  dated: 2022-08-10 13:23:51 +0000
+  dated: 2022-08-10 13:28:34 +0000
   db_network: cf-core
   deployer: unknown
   edge_network: cf-edge
-  features: postgres-db,aws-blobstore,small-footprint,ssh-proxy-on-routers,app-scheduler-integration,smb-test-server,smb-volume-services,smb-volume-services-releases,app-autoscaler-integration,custom-router-group,cf-mgmt-uaa-client
+  features: postgres-db,aws-blobstore,small-footprint,ssh-proxy-on-routers,app-scheduler-integration,smb-test-server,smb-volume-services,smb-volume-services-releases,app-autoscaler-integration,windows-releases,custom-router-group,cf-mgmt-uaa-client
   is_director: false
   kit_is_dev: false
   kit_name: cf
@@ -2299,6 +2299,7 @@ kit:
   - smb-volume-services
   - smb-volume-services-releases
   - app-autoscaler-integration
+  - windows-releases
   - custom-router-group
   - cf-mgmt-uaa-client
   name: cf
@@ -2811,6 +2812,14 @@ releases:
   sha1: 5565d59f1baea51a0acb59256ae2b2118f4631da
   url: https://bosh.io/d/github.com/cloudfoundry/smb-volume-release?v=3.1.2
   version: 3.1.2
+- name: windowsfs
+  sha1: 36fcc451396ef259150548f5ae1073007a56fc75
+  url: https://bosh.io/d/github.com/cloudfoundry/windowsfs-online-release?v=2.35.0
+  version: 2.35.0
+- name: winc
+  sha1: 3f14f65ca0b523bbabb3631820d3388674875110
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/winc-release?v=2.5.0
+  version: 2.5.0
 - name: nfs-volume
   version: 7.1.1+dev.1
 stemcells:
