@@ -164,8 +164,8 @@ jobs:
         args:
         - -ce
         - |
-        ./dev-autoscale-repo/ci/scripts/login-cf.sh
-        ./dev-autoscale-repo/ci/config/dev/scale_down
+          ./dev-autoscale-repo/ci/scripts/login-cf.sh
+          ./dev-autoscale-repo/ci/config/dev/scale_down
 - name: scale-up-dev
   plan:
   - get: dev-autoscale-repo
@@ -185,8 +185,8 @@ jobs:
         args:
         - -ce
         - |
-        ./dev-autoscale-repo/ci/scripts/login-cf.sh
-        ./dev-autoscale-repo/ci/config/dev/scale_up
+          ./dev-autoscale-repo/ci/scripts/login-cf.sh
+          ./dev-autoscale-repo/ci/config/dev/scale_up
 ###########
 ### cf-mgmt
 ###########
