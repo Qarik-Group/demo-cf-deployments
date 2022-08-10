@@ -78,11 +78,6 @@ cf-mgmt:
 #### dev cf-mgmt pipeline configuration
 #############################################
 resources:
-- name: dev-changes
-  source:
-    paths:
-    - ((append))
-    - ci
 - name: dev-config-repo
   type: git
   icon: github
