@@ -42,6 +42,11 @@ groups:
   - dev-cf-config
   - baby-bosh-cf-config
   - autoscale-dev-cf
+- name: autoscale
+  jobs:
+  - autoscale-dev-cf
+  - scale-down-dev
+  - scale-up-dev
 
 ##### CF-MGMT stuff #####
 ##### dev.yml configuration #####
@@ -109,6 +114,9 @@ resources:
 
 jobs:
 - ((append))
+############
+### cf_scale
+############
 - name: autoscale-dev-cf
   plan:
   - get: dev-autoscale-repo
@@ -134,6 +142,47 @@ jobs:
   - put: dev-autoscale-repo
     params:
       repository: dev-autoscale-repo
+- name: scale-down-dev
+  plan:
+  - get: dev-autoscale-repo
+  - task: scale-down
+    config:
+      platform: linux
+      inputs:
+      - name: dev-autoscale-repo
+      image_resource:
+        name: ""
+        source:
+          repository: starkandwayne/concourse
+          tag: latest
+        type: registry-image
+      run:
+        path: sh
+        args:
+        - -ce
+        - ./dev-autoscale-repo/ci/config/dev/scale_down
+- name: scale-up-dev
+  plan:
+  - get: dev-autoscale-repo
+  - task: scale-up
+    config:
+      platform: linux
+      inputs:
+      - name: dev-autoscale-repo
+      image_resource:
+        name: ""
+        source:
+          repository: starkandwayne/concourse
+          tag: latest
+        type: registry-image
+      run:
+        path: sh
+        args:
+        - -ce
+        - ./dev-autoscale-repo/ci/config/dev/scale_up
+###########
+### cf-mgmt
+###########
 - name: dev-cf-config
   plan:
   - get: dev-config-repo
