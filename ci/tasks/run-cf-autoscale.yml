@@ -32,6 +32,7 @@ run:
     cp -r changes changes-autoscale
     BASE_PATH=$(pwd)/changes-autoscale
     cd $BASE_PATH
+    ls -ltr
 
     # setup Vault
     VERIFY=$([ "$VAULT_SKIP_VERIFY" ] && echo "-k" || echo "")
