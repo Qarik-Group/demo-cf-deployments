@@ -134,7 +134,7 @@ jobs:
     params:
       SCRIPT: ci/scripts/cf_scale/cf_scale 
       ENV: dev
-      CF_LOGIN: ci/scripts/login-cf.sh
+      LOGIN_CF: ci/scripts/login-cf.sh
       GIT_BRANCH: (( grab cf-mgmt.dev.git_repo_branch ))
       VAULT_ADDR: (( grab pipeline.vault.url ))
       VAULT_ROLE: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
@@ -159,13 +159,20 @@ jobs:
         type: registry-image
       params:
         CF_LOGIN: ci/scripts/login-cf.sh
+      params:
+        ENV: dev
+        VAULT_ADDR: (( grab pipeline.vault.url ))
+        VAULT_ROLE: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
+        VAULT_SECRET: (( vault "secret/exodus/ci/genesis-pipelines:approle-secret" ))
+        VAULT_SKIP_VERIFY: true
       run:
         path: sh
         args:
         - -ce
         - |
-          ./dev-autoscale-repo/ci/scripts/login-cf.sh
-          ./dev-autoscale-repo/ci/config/dev/scale_down
+          cd ./dev-autoscale-repo/
+          ./ci/scripts/login-cf.sh
+          ./ci/config/dev/scale_down
 - name: scale-up-dev
   plan:
   - get: dev-autoscale-repo
@@ -180,13 +187,20 @@ jobs:
           repository: starkandwayne/concourse
           tag: latest
         type: registry-image
+      params:
+        ENV: dev
+        VAULT_ADDR: (( grab pipeline.vault.url ))
+        VAULT_ROLE: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
+        VAULT_SECRET: (( vault "secret/exodus/ci/genesis-pipelines:approle-secret" ))
+        VAULT_SKIP_VERIFY: true
       run:
         path: sh
         args:
         - -ce
         - |
-          ./dev-autoscale-repo/ci/scripts/login-cf.sh
-          ./dev-autoscale-repo/ci/config/dev/scale_up
+          cd ./dev-autoscale-repo/
+          ./ci/scripts/login-cf.sh
+          ./ci/config/dev/scale_up
 ###########
 ### cf-mgmt
 ###########
