@@ -58,6 +58,8 @@ run:
     git config user.email "concourse@pipeline"
     git commit -m "[AUTOSCALE] Push latest results of cf_scale"
 
+    git status
+
     #CURRENT: lets try to use put task instead of manual push
     # echo ">> Setting ssh known_hosts"
     # SHA=$(ssh-keyscan -t ecdsa github.com 2>&1 |ssh-keygen -lf - | grep -E -o 'SHA256:[0-9a-zA-Z/]+')
