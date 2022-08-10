@@ -90,6 +90,7 @@ resources:
     uri: ((grab cf-mgmt.dev.git_repo_uri))
     branch: ((grab cf-mgmt.dev.git_repo_branch))
     paths: ["((grab cf-mgmt.dev.config_dir))"]
+    ignore_paths: [((concat cf-mgmt.dev.config_dir "/results"))]
 - name: dev-autoscale-repo
   type: git
   icon: github
@@ -104,6 +105,7 @@ resources:
     uri: ((grab cf-mgmt.baby-bosh.git_repo_uri))
     branch: ((grab cf-mgmt.baby-bosh.git_repo_branch))
     paths: ["((grab cf-mgmt.baby-bosh.config_dir))"]
+    ignore_paths: [((concat cf-mgmt.baby-bosh.config_dir "/results"))]
 - name: every-1h
   type: time
   icon: clock-outline
