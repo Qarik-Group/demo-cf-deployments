@@ -14,6 +14,7 @@ outputs:
 
 params:
   SCRIPT: ((SCRIPT))
+  LOGIN_CF: ((LOGIN_CF))
   ENV: ((ENV))
   VAULT_ADDR: ((VAULT_ADDR))
   VAULT_ROLE: ((VAULT_ROLE))
@@ -33,20 +34,7 @@ run:
     BASE_PATH=$(pwd)/changes-autoscale
     cd $BASE_PATH
     ls -ltr
-
-    # setup Vault
-    VERIFY=$([ "$VAULT_SKIP_VERIFY" ] && echo "-k" || echo "")
-    safe target $VERIFY $VAULT_ADDR vault
-    {
-      echo $VAULT_ROLE
-      echo $VAULT_SECRET
-    } | safe auth approle
-    echo ">> Show genesis info"
-    genesis info $ENV -q
-    echo ">> Setting up CLI"
-    genesis do $ENV -q -- setup-cli -f
-    echo ">> Login to CF..."
-    genesis do $ENV -q -- login
+    ./$LOGIN_CF
     cd "$BASE_PATH/ci/config/$ENV"
 
     # Execute script passed using $BASE_PATH to solve relative pathing inside script
