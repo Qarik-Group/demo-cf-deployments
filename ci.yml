@@ -97,7 +97,6 @@ resources:
     uri: git@github.com:starkandwayne/demo-cf-deployments
     private_key: (( vault "concourse/demo/cf/github:private_key" ))
     branch: ((grab cf-mgmt.dev.git_repo_branch))
-    paths: [((concat cf-mgmt.dev.config_dir "/results"))]
 - name: baby-bosh-config-repo
   type: git
   icon: github

@@ -29,7 +29,7 @@ run:
     # stop on non-0, prompt non-existing vars
     set -eu
     # do everything in task using output
-    cp -r changes changes-autoscale
+    git clone changes changes-autoscale
     BASE_PATH=$(pwd)/changes-autoscale
     cd $BASE_PATH
     ls -ltr
