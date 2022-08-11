@@ -20,6 +20,7 @@ PATH="${cmd_dir}/lib:$PATH"
 
 # shellcheck source=lib/cli.sh
 source cli.sh
+declare use_data_from=""
 
 handle_exit() {
   #/ Add cleanup code here
@@ -27,7 +28,7 @@ handle_exit() {
   #/ exit with an appropriate status code
   cli::info List of file created during cf_scale run
   # shellcheck disable=SC2046
-  ls -l $(find . -type f -regex "./results/.*" -o -name scale_up -o -name scale_down | sed 's/^.\///')
+  ls -l $(find . -type f -regex "./${use_data_from:-results}/.*" -o -name scale_up -o -name scale_down | sed 's/^.\///') | sort -s -t/ -k2 -V -k4
 }
 
 trap handle_exit EXIT SIGHUP SIGINT SIGQUIT SIGABRT SIGTERM
@@ -53,22 +54,22 @@ generate_scale_cmds() {
 
     cli::step Creating "scale_${direction}" script
 
-    exec 3<results/combined_sorted.tsv
+    exec 3<"${use_data_from}/combined_sorted.tsv"
     exec 4>"scale_${direction}"
 
-    IFS=$'\t' read -r -u 3 column_names 
+    IFS=$'\t' read -r -u 3 column_names
 
     echo -e "#!/usr/bin/env bash\n" >&4
     echo -e "set +e\n" >&4
-    
+
     if [[ "${direction}" == "down" ]]
-    then 
+    then
         echo -e "export CF_STARTUP_TIMEOUT=${scale_down_timeout}\n" >&4
     else
         echo -e "export CF_STARTUP_TIMEOUT=${scale_up_timeout}\n" >&4
     fi
     # shellcheck disable=SC2086
-    while IFS=$'\t' read -r -u 3 ${column_names:?} 
+    while IFS=$'\t' read -r -u 3 ${column_names:?}
     do
         [[ "${direction}" == "down" ]] && process_instances=0
         echo cf target -o "${org_name:?}" -s "${space_name:?}"
@@ -79,10 +80,11 @@ generate_scale_cmds() {
     exec 4>&-
 
     # shellcheck disable=SC2046
+    chmod +x "scale_${direction}"
     cli::echo "\nOK  " $(wc -l <"scale_${direction}") "lines\n"
 }
 
-collect_scale_data() {
+check_software_dependencies() {
     cli::step "Checking software dependencies."
 
     dependency::add_tool_check "cf" "7.4" "cf --version"
@@ -91,65 +93,68 @@ collect_scale_data() {
     dependency::checks "cf" "jq" || exit 1
 
     cli::echo "\nOK\n"
+}
 
+collect_scale_data() {
     cli::step collecting application data
 
-    rm -rf scale_up scale_down results/*
-    mkdir -p results
+    rm -rf scale_up scale_down "${use_data_from}"/*
+    mkdir -p "${use_data_from}"
 
     # Get applications and transform into simplier JSON
 
-    query::cf_api '/v3/apps?include=space,space.organization&per_page='"${apps_per_page}" v3_apps 
-    jq '. as {resources: $resources, included: $included}| 
+    query::cf_api '/v3/apps?include=space,space.organization&per_page='"${apps_per_page}" v3_apps
+    jq '. as {resources: $resources, included: $included}|
          $included as {spaces: $spaces, organizations: $orgs}|
           $resources | .[]| . as $app | .relationships.space.data.guid as $space_guid |
           ($spaces[]|select(.guid==$space_guid)) | . as $space | .relationships.organization.data.guid as $org_guid |
-          ($orgs[]|select(.guid==$org_guid)) | . as $org | 
-           { "app_name": $app.name, "app_guid": $app.guid, 
+          ($orgs[]|select(.guid==$org_guid)) | . as $org |
+           { "app_name": $app.name, "app_guid": $app.guid,
             "space_name": $space.name, "space_guid":  $space.guid,
-            "org_name": $org.name, "org_guid": $org_guid, 
+            "org_name": $org.name, "org_guid": $org_guid,
             "processes_url": ($app.links.processes.href|match(".*?//.*?(/.*)")|.captures[0].string),
-            "app_file": input_filename}' results/v3_apps/parts.$$/*  &> results/apps_list.json
+            "app_file": input_filename}' "${use_data_from}"/v3_apps/parts.$$/*  &> "${use_data_from}"/apps_list.json
 
-    cli::echo "\nOK  " "$(jq -s '.|length' results/apps_list.json)" "applications\n" 
+    cli::echo "\nOK  " "$(jq -s '.|length' "${use_data_from}"/apps_list.json)" "applications\n"
 
     cli::step collecting process data
 
     query::cf_api '/v3/processes?per_page='"${processes_per_page}" v3_processes
-    jq '.| .resources as $resources| $resources[] as $procs| 
+    jq '.| .resources as $resources| $resources[] as $procs|
         { "process_guid": $procs.guid, "process_type": $procs.type,
-          "process_instances": $procs.instances, 
-          "app_guid": $procs.relationships.app.data.guid,  
-          "process_file": input_filename}' results/v3_processes/parts.$$/*  &> results/processes_list.json
+          "process_instances": $procs.instances,
+          "app_guid": $procs.relationships.app.data.guid,
+          "process_file": input_filename}' "${use_data_from}"/v3_processes/parts.$$/*  &> "${use_data_from}"/processes_list.json
 
-    cli::echo "\nOK  " "$(jq -s '.|length' results/processes_list.json)" "processes\n" 
+    cli::echo "\nOK  " "$(jq -s '.|length' "${use_data_from}"/processes_list.json)" "processes\n"
+}
 
+merge_collected_data() {
     # Merge applications and processes objects into a single object
     cli::step merging collected data
 
-    jq -S --slurpfile apps_list results/apps_list.json '. | . as $procs |
+    jq -S --slurpfile apps_list "${use_data_from}"/apps_list.json '. | . as $procs |
         ($apps_list[]| select($procs.app_guid == .app_guid)) |. as $apps |
-        $procs + { "space_name": $apps.space_name, 
-                   "space_guid": $apps.space_guid, 
-                   "org_name": $apps.org_name, 
-                   "org_guid": $apps.org_guid, 
+        $procs + { "space_name": $apps.space_name,
+                   "space_guid": $apps.space_guid,
+                   "org_name": $apps.org_name,
+                   "org_guid": $apps.org_guid,
                    "app_file": $apps.app_file,
-                   "app_name": $apps.app_name }' results/processes_list.json &>results/combined.json
+                   "app_name": $apps.app_name }' "${use_data_from}"/processes_list.json &>"${use_data_from}"/combined.json
 
     # Sort the data by organization, space and application name
 
-    jq -Ss '.|sort_by(.org_name, .space_name, .app_name)' results/combined.json  &>results/combined_sorted.json
+    jq -Ss '.|sort_by(.org_name, .space_name, .app_name)' "${use_data_from}"/combined.json  &>"${use_data_from}"/combined_sorted.json
 
-    cli::echo "\nOK  " "$(jq length results/combined_sorted.json)" "merged records\n"
+    cli::echo "\nOK  " "$(jq length "${use_data_from}"/combined_sorted.json)" "merged records\n"
 
-    # Generate a TSV file to simplify use of the in the shell 
+    # Generate a TSV file to simplify use of the in the shell
     cli::step Generate a TSV file
 
-    jq -r '(map(keys)|add|unique) as $cols | map(. as $row | $cols | map($row[.])) as $rows | $cols, $rows[] | @tsv' results/combined_sorted.json &>results/combined_sorted.tsv
+    jq -r '(map(keys)|add|unique) as $cols | map(. as $row | $cols | map($row[.])) as $rows | $cols, $rows[] | @tsv' "${use_data_from}"/combined_sorted.json &>"${use_data_from}"/combined_sorted.tsv
 
     # shellcheck disable=SC2046
-    cli::echo "\nOK  " $(wc -l <results/combined_sorted.tsv) "tsv records\n"
-
+    cli::echo "\nOK  " $(wc -l <"${use_data_from}"/combined_sorted.tsv) "tsv records\n"
 }
 
 
@@ -171,6 +176,8 @@ usage() {
   echo ""
   echo "--scale_down_timeout|--scale_down_timeout= 1-60   sets the CF_STARTUP_TIMEOUT variable"
   echo "--scale_up_timeout|--scale_up_timeout= 1-60       sets the CF_STARTUP_TIMEOUT variable"
+  echo ""
+  echo "--use_data_from|--use_data_from= <directory>  use collected data contained in <directory>"
   echo ""
   echo "-d|--debug|--debug= curl|checks   curl   - enables debug information for CF api calls"
   echo "-d|--debug|--debug= curl|checks   checks - enables debug information for tools existence checking"
@@ -200,15 +207,15 @@ usage() {
 while (($# > 0))
 do
     case $1 in
-    -h|help|--help) 
+    -h|help|--help)
         usage long 0
         ;;
-    -d|--debug|--debug=*) 
+    -d|--debug|--debug=*)
         declare arg=""
         if [[ $1 == --debug=* ]]; then
             arg="${1#"--debug="}"
         else
-            if (( $# > 1 )); then 
+            if (( $# > 1 )); then
               shift;
               arg="$1"
             fi
@@ -288,6 +295,23 @@ do
           usage short
         fi
         ;;
+    --use_data_from|--use_data_from=*)
+        declare directory=""
+        if [[ $1 == --use_data_from=* ]]; then
+            directory="${1#"--use_data_from="}"
+        else
+            if (( $# > 1 )); then
+              shift;
+              directory="$1"
+            fi
+        fi
+        if [[ -n "${directory}" && -d "${directory}" ]]; then
+          use_data_from="${directory}"
+        else
+          cli::error "Missing or invalid --use_data_from directory argument"
+          usage short
+        fi
+        ;;
     *) usage
         cli::error "invalid parameter(s) $*"
         usage short
@@ -300,6 +324,11 @@ if debug::is_enabled paths; then
     cli::debug paths "PATH ${PATH}"
 fi
 
-collect_scale_data
+check_software_dependencies
+if [[ -z "${use_data_from}" ]]; then
+  use_data_from="results"
+  collect_scale_data
+fi
+merge_collected_data
 generate_scale_cmds up
 generate_scale_cmds down
