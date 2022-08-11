@@ -91,7 +91,7 @@ resources:
     branch: ((grab cf-mgmt.dev.git_repo_branch))
     paths: ["((grab cf-mgmt.dev.config_dir))"]
     ignore_paths: [((concat cf-mgmt.dev.config_dir "/results"))]
-- name: dev-autoscale-repo
+- name: autoscale-repo
   type: git
   icon: github
   source:
@@ -119,72 +119,49 @@ jobs:
 ############
 - name: autoscale-dev-cf
   plan:
-  - get: dev-autoscale-repo
+  - get: autoscale-repo
   - get: baby-bosh-cache
     trigger: true
     passed: [dev-cf]
   - get: every-1h
     trigger: true
   - task: autoscale-fetch
-    file: dev-autoscale-repo/ci/tasks/run-cf-autoscale.yml
+    file: autoscale-repo/ci/tasks/run-cf-autoscale.yml
     input_mapping:
-      changes: dev-autoscale-repo
+      changes: autoscale-repo
     output_mapping:
-      changes-autoscale: dev-autoscale-repo
+      changes-autoscale: autoscale-repo
     params:
-      SCRIPT: ci/scripts/cf_scale/cf_scale 
-      ENV: dev
-      LOGIN_CF: ci/scripts/login-cf.sh
-      GIT_BRANCH: (( grab cf-mgmt.dev.git_repo_branch ))
-      VAULT_ADDR: (( grab pipeline.vault.url ))
-      VAULT_ROLE: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
-      VAULT_SECRET: (( vault "secret/exodus/ci/genesis-pipelines:approle-secret" ))
-      VAULT_SKIP_VERIFY: true
-  - put: dev-autoscale-repo
-    params:
-      repository: dev-autoscale-repo
-- name: scale-down-dev
-  plan:
-  - get: dev-autoscale-repo
-  - task: scale-down
-    file: dev-autoscale-repo/ci/tasks/cf-script-run.yml
-    input_mapping:
-      changes: dev-autoscale-repo
-    params:
-      SCRIPT: ci/config/dev/scale_down
-      ENV: dev
-      VAULT_ADDR: (( grab pipeline.vault.url ))
-      VAULT_ROLE: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
-      VAULT_SECRET: (( vault "secret/exodus/ci/genesis-pipelines:approle-secret" ))
-      VAULT_SKIP_VERIFY: true
-- name: scale-up-dev
-  plan:
-  - get: dev-autoscale-repo
-  - task: scale-up
-    config:
-      platform: linux
-      inputs:
-      - name: dev-autoscale-repo
-      image_resource:
-        name: ""
-        source:
-          repository: starkandwayne/concourse
-          tag: latest
-        type: registry-image
-      params:
+      <<: &scale-params
+        SCRIPT: ci/scripts/cf_scale/cf_scale 
         ENV: dev
         VAULT_ADDR: (( grab pipeline.vault.url ))
         VAULT_ROLE: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
         VAULT_SECRET: (( vault "secret/exodus/ci/genesis-pipelines:approle-secret" ))
         VAULT_SKIP_VERIFY: true
-      run:
-        path: sh
-        args:
-        - -ce
-        - |
-          cd ./dev-autoscale-repo/
-          ./ci/scripts/login-cf.sh
-          ./ci/config/dev/scale_up
+  - put: autoscale-repo
+    params:
+      repository: autoscale-repo
+- name: scale-down-dev
+  plan:
+  - get: autoscale-repo
+  - task: run-cf-script
+    file: autoscale-repo/ci/tasks/cf-script-run.yml
+    input_mapping:
+      changes: autoscale-repo
+    params:
+      <<: *scale-params
+      SCRIPT: ci/config/dev/scale_down
+- name: scale-up-dev
+  plan:
+  - get: autoscale-repo
+  - task: run-cf-script
+    file: autoscale-repo/ci/tasks/cf-script-run.yml
+    input_mapping:
+      changes: autoscale-repo
+    params:
+      <<: *scale-params
+      SCRIPT: ci/config/dev/scale_down
 ###########
 ### cf-mgmt
 ###########
