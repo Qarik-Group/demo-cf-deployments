@@ -32,7 +32,7 @@ run:
     BASE_PATH=$(pwd)/changes-autoscale
     cd $BASE_PATH
     ls -ltr
-    ./$BASE_PATH/ci/scripts/login-cf.sh
+    ./ci/scripts/login-cf.sh
     cd "$BASE_PATH/ci/config/$ENV"
 
     # Execute script passed using $BASE_PATH to solve relative pathing inside script
