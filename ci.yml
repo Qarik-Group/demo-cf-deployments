@@ -147,32 +147,16 @@ jobs:
   plan:
   - get: dev-autoscale-repo
   - task: scale-down
-    config:
-      platform: linux
-      inputs:
-      - name: dev-autoscale-repo
-      image_resource:
-        name: ""
-        source:
-          repository: starkandwayne/concourse
-          tag: latest
-        type: registry-image
-      params:
-        CF_LOGIN: ci/scripts/login-cf.sh
-      params:
-        ENV: dev
-        VAULT_ADDR: (( grab pipeline.vault.url ))
-        VAULT_ROLE: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
-        VAULT_SECRET: (( vault "secret/exodus/ci/genesis-pipelines:approle-secret" ))
-        VAULT_SKIP_VERIFY: true
-      run:
-        path: sh
-        args:
-        - -ce
-        - |
-          cd ./dev-autoscale-repo/
-          ./ci/scripts/login-cf.sh
-          ./ci/config/dev/scale_down
+    file: dev-autoscale-repo/ci/tasks/cf-script-run.yml
+    input_mapping:
+      changes: dev-autoscale-repo
+    params:
+      SCRIPT: ci/config/dev/scale_down
+      ENV: dev
+      VAULT_ADDR: (( grab pipeline.vault.url ))
+      VAULT_ROLE: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
+      VAULT_SECRET: (( vault "secret/exodus/ci/genesis-pipelines:approle-secret" ))
+      VAULT_SKIP_VERIFY: true
 - name: scale-up-dev
   plan:
   - get: dev-autoscale-repo
