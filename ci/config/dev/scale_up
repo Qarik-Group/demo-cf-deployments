@@ -11,7 +11,7 @@ cf scale backend --process web -i 0
 cf target -o segment -s segment
 cf scale spring-java-simple --process web -i 0
 cf target -o services -s services
-cf scale cf-env --process web -i 0
+cf scale cf-env --process web -i 1
 cf target -o services -s services
 cf scale frontend-shared --process web -i 0
 cf target -o services -s services
