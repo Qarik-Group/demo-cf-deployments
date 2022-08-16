@@ -502,7 +502,7 @@ exodus:
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.25.0
   cf-deployment-version: 16.25.0
   core_network: cf-core
-  dated: 2022-08-11 15:12:49 +0000
+  dated: 2022-08-16 13:29:11 +0000
   db_network: cf-core
   deployer: unknown
   edge_network: cf-edge
@@ -2569,6 +2569,22 @@ networks:
     - 10.4.25.0-10.4.25.5
     static:
     - 10.4.25.6-10.4.25.16
+  type: manual
+- name: concourse-ips
+  subnets:
+  - azs:
+    - z1
+    cloud_properties:
+      subnet: subnet-004e38051f36dae09
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.68.1
+    range: 10.4.68.0/24
+    reserved:
+    - 10.4.68.0-10.4.68.5
+    static:
+    - 10.4.68.6-10.4.68.16
   type: manual
 - name: blacksmith
   subnets:
