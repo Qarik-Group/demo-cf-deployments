@@ -17,7 +17,7 @@ cf scale cf-env-new --process web -i 0
 cf target -o services -s services
 cf scale frontend-shared --process web -i 0
 cf target -o services -s services
-cf scale pora --process web -i 0
+cf scale pora (crazy) --process web -i 0
 cf target -o services -s services
 cf scale rabbitmq-example-app --process web -i 0
 cf target -o services -s services
