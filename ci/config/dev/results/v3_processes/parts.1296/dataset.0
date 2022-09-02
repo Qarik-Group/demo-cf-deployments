@@ -1,6 +1,6 @@
 {
    "pagination": {
-      "total_results": 13,
+      "total_results": 12,
       "total_pages": 1,
       "first": {
          "href": "https://api.system.codex.starkandwayne.com/v3/processes?page=1&per_page=500"
@@ -617,57 +617,6 @@
             },
             "stats": {
                "href": "https://api.system.codex.starkandwayne.com/v3/processes/f136797f-2f71-4bd7-a79b-0fc5457c4d84/stats"
-            }
-         }
-      },
-      {
-         "guid": "865fdf56-8a55-4f26-8005-6b01bb55bdf7",
-         "created_at": "2022-08-30T20:38:52Z",
-         "updated_at": "2022-08-30T20:39:26Z",
-         "type": "web",
-         "command": "[PRIVATE DATA HIDDEN IN LISTS]",
-         "instances": 1,
-         "memory_in_mb": 512,
-         "disk_in_mb": 1024,
-         "health_check": {
-            "type": "port",
-            "data": {
-               "timeout": null,
-               "invocation_timeout": null
-            }
-         },
-         "relationships": {
-            "app": {
-               "data": {
-                  "guid": "865fdf56-8a55-4f26-8005-6b01bb55bdf7"
-               }
-            },
-            "revision": {
-               "data": {
-                  "guid": "8cf9199e-e057-49ee-896d-4d30ae6b72d4"
-               }
-            }
-         },
-         "metadata": {
-            "labels": {},
-            "annotations": {}
-         },
-         "links": {
-            "self": {
-               "href": "https://api.system.codex.starkandwayne.com/v3/processes/865fdf56-8a55-4f26-8005-6b01bb55bdf7"
-            },
-            "scale": {
-               "href": "https://api.system.codex.starkandwayne.com/v3/processes/865fdf56-8a55-4f26-8005-6b01bb55bdf7/actions/scale",
-               "method": "POST"
-            },
-            "app": {
-               "href": "https://api.system.codex.starkandwayne.com/v3/apps/865fdf56-8a55-4f26-8005-6b01bb55bdf7"
-            },
-            "space": {
-               "href": "https://api.system.codex.starkandwayne.com/v3/spaces/d01ec187-f0e4-49e1-a443-6efb165b1cd3"
-            },
-            "stats": {
-               "href": "https://api.system.codex.starkandwayne.com/v3/processes/865fdf56-8a55-4f26-8005-6b01bb55bdf7/stats"
             }
          }
       }
