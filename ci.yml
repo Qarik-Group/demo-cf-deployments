@@ -14,22 +14,35 @@ pipeline:
     verify: no
     # run setup-approle from concourse-kit deployment ex. genesis do [env] -- setup-approle
   
-  slack:
-    channel: '#botspam'
-    webhook: (( vault "concourse/genesis/slack:webhook" ))
+  # slack:
+  #   channel: '#botspam'
+  #   webhook: (( vault "concourse/genesis/slack:webhook" ))
+
+  # email: 
+  #   to: ncoker@qarik.com
+  #   from: 
+  #   smtp:
+  #     host:
+  #     port: 
+  #     username:
+  #     password:
+
 
   boshes:
     dev: # sandbox
+      alias: sandbox
       url:      https://10.4.16.4:25555
       ca_cert:  (( vault "secret/dev/bosh/ssl/ca:certificate" ))
       username: admin
       password: (( vault "secret/dev/bosh/users/admin:password" ))
     baby-bosh: # lab
+      alias: lab
       url:      https://10.4.63.4:25555
       ca_cert:  (( vault "secret/baby/bosh/bosh/ssl/ca:certificate" ))
       username: admin
       password: (( vault "secret/baby/bosh/bosh/users/admin:password" ))
-    uswest2demo:
+    uswest2demo: # some-name
+      alias: test
       url:      https://10.4.1.4:25555
       ca_cert:  (( vault "secret/uswest2demo/bosh/ssl/ca:certificate" ))
       username: admin
