@@ -14,9 +14,9 @@ pipeline:
     verify: no
     # run setup-approle from concourse-kit deployment ex. genesis do [env] -- setup-approle
   
-  # slack:
-  #   channel: '#botspam'
-  #   webhook: (( vault "concourse/genesis/slack:webhook" ))
+  slack:
+    channel: '#botspam'
+    webhook: (( vault "concourse/genesis/slack:webhook" ))
 
   # email: 
   #   to: ncoker@qarik.com
