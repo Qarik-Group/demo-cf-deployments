@@ -19,399 +19,404 @@ pipeline:
     webhook: (( vault "concourse/genesis/slack:webhook" ))
 
   boshes:
-    dev:
+    dev: # sandbox
       url:      https://10.4.16.4:25555
       ca_cert:  (( vault "secret/dev/bosh/ssl/ca:certificate" ))
       username: admin
       password: (( vault "secret/dev/bosh/users/admin:password" ))
-    baby-bosh:
+    baby-bosh: # lab
       url:      https://10.4.63.4:25555
       ca_cert:  (( vault "secret/baby/bosh/bosh/ssl/ca:certificate" ))
       username: admin
       password: (( vault "secret/baby/bosh/bosh/users/admin:password" ))
+    uswest2demo:
+      url:      https://10.4.1.4:25555
+      ca_cert:  (( vault "secret/uswest2demo/bosh/ssl/ca:certificate" ))
+      username: admin
+      password: (( vault "secret/uswest2demo/bosh/users/admin:password" ))
   
   layouts:
     default: |+
       auto *dev
-      dev -> baby-bosh
+      dev -> baby-bosh -> uswest2demo
 
-groups:
-- name: cf-platform-pipeline
-  jobs:
-  - ((append))
-  - dev-cf-config
-  - baby-bosh-cf-config
-  - autoscale-dev-cf
-- name: autoscale
-  jobs:
-  - autoscale-dev-cf
-  - scale-down-dev
-  - scale-up-dev
-
-##### CF-MGMT stuff #####
-##### dev.yml configuration #####
-## CONFIGURATION VARIABLES FOR ENV ##
-## cf-mgmt: $env: (...) ##
-cf-mgmt:
-  dev:
-    git_repo_uri: "https://github.com/starkandwayne/demo-cf-deployments.git"
-    git_repo_branch: latest-cf-aws-codex
-    system_domain: "system.codex.starkandwayne.com"
-    user_id: "cf_mgmt_client"
-    client_secret: (( vault "secret/dev/bosh/uaa/clients/cf_mgmt_client:secret" ))
-    log_level: INFO
-    time-trigger: 15m
-    config_dir: ci/config/dev
-    ldap_server: ""
-    ldap_user: ""
-    ldap_password: ""
-    password: ""
-  baby-bosh:
-    git_repo_uri: "https://github.com/starkandwayne/demo-cf-deployments.git"
-    git_repo_branch: latest-cf-aws-codex
-    system_domain: "system.codex.starkandwayne.com"
-    user_id: "cf_mgmt_client"
-    client_secret: (( vault "secret/dev/bosh/uaa/clients/cf_mgmt_client:secret" ))
-    log_level: INFO
-    time-trigger: 15m
-    config_dir: ci/config/baby-bosh
-    ldap_server: ""
-    ldap_user: ""
-    ldap_password: ""
-    password: ""
-#############################################
-#### dev cf-mgmt pipeline configuration
-#############################################
-resources:
-- name: dev-config-repo
-  type: git
-  icon: github
-  source:
-    uri: ((grab cf-mgmt.dev.git_repo_uri))
-    branch: ((grab cf-mgmt.dev.git_repo_branch))
-    paths: ["((grab cf-mgmt.dev.config_dir))"]
-    ignore_paths: [((concat cf-mgmt.dev.config_dir "/results"))]
-- name: autoscale-repo
-  type: git
-  icon: github
-  source:
-    uri: git@github.com:starkandwayne/demo-cf-deployments
-    private_key: (( vault "concourse/demo/cf/github:private_key" ))
-    branch: ((grab cf-mgmt.dev.git_repo_branch))
-- name: baby-bosh-config-repo
-  type: git
-  icon: github
-  source:
-    uri: ((grab cf-mgmt.baby-bosh.git_repo_uri))
-    branch: ((grab cf-mgmt.baby-bosh.git_repo_branch))
-    paths: ["((grab cf-mgmt.baby-bosh.config_dir))"]
-    ignore_paths: [((concat cf-mgmt.baby-bosh.config_dir "/results"))]
-- name: every-1h
-  type: time
-  icon: clock-outline
-  source:
-    interval: 1h
-
-jobs:
-- ((append))
-############
-### cf_scale
-############
-- name: autoscale-dev-cf
-  plan:
-  - get: autoscale-repo
-  - get: baby-bosh-cache
-    trigger: true
-    passed: [dev-cf]
-  - get: every-1h
-    trigger: true
-  - task: autoscale-fetch
-    file: autoscale-repo/ci/tasks/run-cf-autoscale.yml
-    input_mapping:
-      changes: autoscale-repo
-    output_mapping:
-      changes-autoscale: autoscale-repo
-    params:
-      <<: &scale-params
-        SCRIPT: ci/scripts/cf_scale/cf_scale 
-        ENV: dev
-        VAULT_ADDR: (( grab pipeline.vault.url ))
-        VAULT_ROLE: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
-        VAULT_SECRET: (( vault "secret/exodus/ci/genesis-pipelines:approle-secret" ))
-        VAULT_SKIP_VERIFY: true
-  - put: autoscale-repo
-    params:
-      repository: autoscale-repo
-- name: scale-down-dev
-  plan:
-  - get: autoscale-repo
-  - task: run-cf-script
-    file: autoscale-repo/ci/tasks/cf-script-run.yml
-    input_mapping:
-      changes: autoscale-repo
-    params:
-      <<: *scale-params
-      SCRIPT: ci/config/dev/scale_down
-- name: scale-up-dev
-  plan:
-  - get: autoscale-repo
-  - task: run-cf-script
-    file: autoscale-repo/ci/tasks/cf-script-run.yml
-    input_mapping:
-      changes: autoscale-repo
-    params:
-      <<: *scale-params
-      SCRIPT: ci/config/dev/scale_down
-###########
-### cf-mgmt
-###########
-- name: dev-cf-config
-  plan:
-  - get: dev-config-repo
-    trigger: true
-  - get: dev-changes
-    passed: [dev-cf]
-  - get: baby-bosh-cache
-    trigger: true
-    passed: [dev-cf]
-  - task: create-orgs
-    <<: &dev-task
-      file: dev-config-repo/ci/tasks/cf-mgmt.yml
-      input_mapping:
-        config-repo: dev-config-repo
-    params:
-      <<: &dev-params
-        SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-        USER_ID: ((grab cf-mgmt.dev.user_id))
-        PASSWORD: ((grab cf-mgmt.dev.password))
-        CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-        CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-        LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
-      CF_MGMT_COMMAND: create-orgs
-  - task: shared-domains
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: shared-domains
-  - task: create-security-groups
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: create-security-groups
-  - task: assign-default-security-groups
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: assign-default-security-groups
-  - task: delete-orgs
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: delete-orgs
-  - task: update-orgs-metadata
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: update-orgs-metadata
-  - task: create-org-private-domains
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: create-org-private-domains
-  - task: service-access
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: service-access
-  - task: share-org-private-domains
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: share-org-private-domains
-  - task: create-spaces
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: create-spaces
-  - task: delete-spaces
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: delete-spaces
-  - task: update-spaces
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: update-spaces
-  - task: update-spaces-metadata
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: update-spaces-metadata
-  - task: update-space-users
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: update-space-users
-  - task: update-space-quotas
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: update-space-quotas
-  - task: update-space-security-groups
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: update-space-security-groups
-  - task: update-org-users
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: update-org-users
-  - task: update-org-quotas
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: update-org-quotas
-  - task: isolation-segments
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: isolation-segments
-  - task: cleanup-org-users
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: cleanup-org-users
-  - task: uaac-script-run
-    input_mapping:
-      config-repo: dev-config-repo
-    params:
-      <<: *dev-params
-      UAAC_SCRIPT: ci/scripts/uaac-script-example.sh
-    file: dev-config-repo/ci/tasks/uaac-cli.yml
-- name: baby-bosh-cf-config
-  plan:
-  - get: baby-bosh-config-repo
-    trigger: true
-  - get: baby-bosh-changes
-    passed: [baby-bosh-cf]
-  - get: baby-bosh-cache
-    trigger: true
-    passed: [baby-bosh-cf]
-  - task: create-orgs
-    <<: &baby-bosh-task
-      file: baby-bosh-config-repo/ci/tasks/cf-mgmt.yml
-      input_mapping:
-        config-repo: baby-bosh-config-repo
-    params:
-      <<: &baby-bosh-params
-        SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-        USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-        PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-        CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-        CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-        LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
-      CF_MGMT_COMMAND: create-orgs
-  - task: shared-domains
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: shared-domains
-  - task: create-security-groups
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: create-security-groups
-  - task: assign-default-security-groups
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: assign-default-security-groups
-  - task: delete-orgs
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: delete-orgs
-  - task: update-orgs-metadata
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: update-orgs-metadata
-  - task: create-org-private-domains
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: create-org-private-domains
-  - task: service-access
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: service-access
-  - task: share-org-private-domains
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: share-org-private-domains
-  - task: create-spaces
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: create-spaces
-  - task: delete-spaces
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: delete-spaces
-  - task: update-spaces
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: update-spaces
-  - task: update-spaces-metadata
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: update-spaces-metadata
-  - task: update-space-users
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: update-space-users
-  - task: update-space-quotas
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: update-space-quotas
-  - task: update-space-security-groups
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: update-space-security-groups
-  - task: update-org-users
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: update-org-users
-  - task: update-org-quotas
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: update-org-quotas
-  - task: isolation-segments
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: isolation-segments
-  - task: cleanup-org-users
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: cleanup-org-users
-  - task: uaac-script-run
-    input_mapping:
-      config-repo: baby-bosh-config-repo
-    params:
-      <<: *baby-bosh-params
-      UAAC_SCRIPT: ci/scripts/uaac-script-example.sh
-    file: baby-bosh-config-repo/ci/tasks/uaac-cli.yml
+# groups:
+# - name: cf-platform-pipeline
+#   jobs:
+#   - ((append))
+#   - dev-cf-config
+#   - baby-bosh-cf-config
+#   - autoscale-dev-cf
+# - name: autoscale
+#   jobs:
+#   - autoscale-dev-cf
+#   - scale-down-dev
+#   - scale-up-dev
+# 
+# ##### CF-MGMT stuff #####
+# ##### dev.yml configuration #####
+# ## CONFIGURATION VARIABLES FOR ENV ##
+# ## cf-mgmt: $env: (...) ##
+# cf-mgmt:
+#   dev:
+#     git_repo_uri: "https://github.com/starkandwayne/demo-cf-deployments.git"
+#     git_repo_branch: latest-cf-aws-codex
+#     system_domain: "system.codex.starkandwayne.com"
+#     user_id: "cf_mgmt_client"
+#     client_secret: (( vault "secret/dev/bosh/uaa/clients/cf_mgmt_client:secret" ))
+#     log_level: INFO
+#     time-trigger: 15m
+#     config_dir: ci/config/dev
+#     ldap_server: ""
+#     ldap_user: ""
+#     ldap_password: ""
+#     password: ""
+#   baby-bosh:
+#     git_repo_uri: "https://github.com/starkandwayne/demo-cf-deployments.git"
+#     git_repo_branch: latest-cf-aws-codex
+#     system_domain: "system.codex.starkandwayne.com"
+#     user_id: "cf_mgmt_client"
+#     client_secret: (( vault "secret/dev/bosh/uaa/clients/cf_mgmt_client:secret" ))
+#     log_level: INFO
+#     time-trigger: 15m
+#     config_dir: ci/config/baby-bosh
+#     ldap_server: ""
+#     ldap_user: ""
+#     ldap_password: ""
+#     password: ""
+# #############################################
+# #### dev cf-mgmt pipeline configuration
+# #############################################
+# resources:
+# - name: dev-config-repo
+#   type: git
+#   icon: github
+#   source:
+#     uri: ((grab cf-mgmt.dev.git_repo_uri))
+#     branch: ((grab cf-mgmt.dev.git_repo_branch))
+#     paths: ["((grab cf-mgmt.dev.config_dir))"]
+#     ignore_paths: [((concat cf-mgmt.dev.config_dir "/results"))]
+# - name: autoscale-repo
+#   type: git
+#   icon: github
+#   source:
+#     uri: git@github.com:starkandwayne/demo-cf-deployments
+#     private_key: (( vault "concourse/demo/cf/github:private_key" ))
+#     branch: ((grab cf-mgmt.dev.git_repo_branch))
+# - name: baby-bosh-config-repo
+#   type: git
+#   icon: github
+#   source:
+#     uri: ((grab cf-mgmt.baby-bosh.git_repo_uri))
+#     branch: ((grab cf-mgmt.baby-bosh.git_repo_branch))
+#     paths: ["((grab cf-mgmt.baby-bosh.config_dir))"]
+#     ignore_paths: [((concat cf-mgmt.baby-bosh.config_dir "/results"))]
+# - name: every-1h
+#   type: time
+#   icon: clock-outline
+#   source:
+#     interval: 1h
+# 
+# jobs:
+# - ((append))
+# ############
+# ### cf_scale
+# ############
+# - name: autoscale-dev-cf
+#   plan:
+#   - get: autoscale-repo
+#   - get: baby-bosh-cache
+#     trigger: true
+#     passed: [dev-cf]
+#   - get: every-1h
+#     trigger: true
+#   - task: autoscale-fetch
+#     file: autoscale-repo/ci/tasks/run-cf-autoscale.yml
+#     input_mapping:
+#       changes: autoscale-repo
+#     output_mapping:
+#       changes-autoscale: autoscale-repo
+#     params:
+#       <<: &scale-params
+#         SCRIPT: ci/scripts/cf_scale/cf_scale 
+#         ENV: dev
+#         VAULT_ADDR: (( grab pipeline.vault.url ))
+#         VAULT_ROLE: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
+#         VAULT_SECRET: (( vault "secret/exodus/ci/genesis-pipelines:approle-secret" ))
+#         VAULT_SKIP_VERIFY: true
+#   - put: autoscale-repo
+#     params:
+#       repository: autoscale-repo
+# - name: scale-down-dev
+#   plan:
+#   - get: autoscale-repo
+#   - task: run-cf-script
+#     file: autoscale-repo/ci/tasks/cf-script-run.yml
+#     input_mapping:
+#       changes: autoscale-repo
+#     params:
+#       <<: *scale-params
+#       SCRIPT: ci/config/dev/scale_down
+# - name: scale-up-dev
+#   plan:
+#   - get: autoscale-repo
+#   - task: run-cf-script
+#     file: autoscale-repo/ci/tasks/cf-script-run.yml
+#     input_mapping:
+#       changes: autoscale-repo
+#     params:
+#       <<: *scale-params
+#       SCRIPT: ci/config/dev/scale_down
+# ###########
+# ### cf-mgmt
+# ###########
+# - name: dev-cf-config
+#   plan:
+#   - get: dev-config-repo
+#     trigger: true
+#   - get: dev-changes
+#     passed: [dev-cf]
+#   - get: baby-bosh-cache
+#     trigger: true
+#     passed: [dev-cf]
+#   - task: create-orgs
+#     <<: &dev-task
+#       file: dev-config-repo/ci/tasks/cf-mgmt.yml
+#       input_mapping:
+#         config-repo: dev-config-repo
+#     params:
+#       <<: &dev-params
+#         SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
+#         USER_ID: ((grab cf-mgmt.dev.user_id))
+#         PASSWORD: ((grab cf-mgmt.dev.password))
+#         CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
+#         CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
+#         LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+#       CF_MGMT_COMMAND: create-orgs
+#   - task: shared-domains
+#     <<: *dev-task
+#     params:
+#       <<: *dev-params
+#       CF_MGMT_COMMAND: shared-domains
+#   - task: create-security-groups
+#     <<: *dev-task
+#     params:
+#       <<: *dev-params
+#       CF_MGMT_COMMAND: create-security-groups
+#   - task: assign-default-security-groups
+#     <<: *dev-task
+#     params:
+#       <<: *dev-params
+#       CF_MGMT_COMMAND: assign-default-security-groups
+#   - task: delete-orgs
+#     <<: *dev-task
+#     params:
+#       <<: *dev-params
+#       CF_MGMT_COMMAND: delete-orgs
+#   - task: update-orgs-metadata
+#     <<: *dev-task
+#     params:
+#       <<: *dev-params
+#       CF_MGMT_COMMAND: update-orgs-metadata
+#   - task: create-org-private-domains
+#     <<: *dev-task
+#     params:
+#       <<: *dev-params
+#       CF_MGMT_COMMAND: create-org-private-domains
+#   - task: service-access
+#     <<: *dev-task
+#     params:
+#       <<: *dev-params
+#       CF_MGMT_COMMAND: service-access
+#   - task: share-org-private-domains
+#     <<: *dev-task
+#     params:
+#       <<: *dev-params
+#       CF_MGMT_COMMAND: share-org-private-domains
+#   - task: create-spaces
+#     <<: *dev-task
+#     params:
+#       <<: *dev-params
+#       CF_MGMT_COMMAND: create-spaces
+#   - task: delete-spaces
+#     <<: *dev-task
+#     params:
+#       <<: *dev-params
+#       CF_MGMT_COMMAND: delete-spaces
+#   - task: update-spaces
+#     <<: *dev-task
+#     params:
+#       <<: *dev-params
+#       CF_MGMT_COMMAND: update-spaces
+#   - task: update-spaces-metadata
+#     <<: *dev-task
+#     params:
+#       <<: *dev-params
+#       CF_MGMT_COMMAND: update-spaces-metadata
+#   - task: update-space-users
+#     <<: *dev-task
+#     params:
+#       <<: *dev-params
+#       CF_MGMT_COMMAND: update-space-users
+#   - task: update-space-quotas
+#     <<: *dev-task
+#     params:
+#       <<: *dev-params
+#       CF_MGMT_COMMAND: update-space-quotas
+#   - task: update-space-security-groups
+#     <<: *dev-task
+#     params:
+#       <<: *dev-params
+#       CF_MGMT_COMMAND: update-space-security-groups
+#   - task: update-org-users
+#     <<: *dev-task
+#     params:
+#       <<: *dev-params
+#       CF_MGMT_COMMAND: update-org-users
+#   - task: update-org-quotas
+#     <<: *dev-task
+#     params:
+#       <<: *dev-params
+#       CF_MGMT_COMMAND: update-org-quotas
+#   - task: isolation-segments
+#     <<: *dev-task
+#     params:
+#       <<: *dev-params
+#       CF_MGMT_COMMAND: isolation-segments
+#   - task: cleanup-org-users
+#     <<: *dev-task
+#     params:
+#       <<: *dev-params
+#       CF_MGMT_COMMAND: cleanup-org-users
+#   - task: uaac-script-run
+#     input_mapping:
+#       config-repo: dev-config-repo
+#     params:
+#       <<: *dev-params
+#       UAAC_SCRIPT: ci/scripts/uaac-script-example.sh
+#     file: dev-config-repo/ci/tasks/uaac-cli.yml
+# - name: baby-bosh-cf-config
+#   plan:
+#   - get: baby-bosh-config-repo
+#     trigger: true
+#   - get: baby-bosh-changes
+#     passed: [baby-bosh-cf]
+#   - get: baby-bosh-cache
+#     trigger: true
+#     passed: [baby-bosh-cf]
+#   - task: create-orgs
+#     <<: &baby-bosh-task
+#       file: baby-bosh-config-repo/ci/tasks/cf-mgmt.yml
+#       input_mapping:
+#         config-repo: baby-bosh-config-repo
+#     params:
+#       <<: &baby-bosh-params
+#         SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
+#         USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
+#         PASSWORD: ((grab cf-mgmt.baby-bosh.password))
+#         CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
+#         CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
+#         LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
+#       CF_MGMT_COMMAND: create-orgs
+#   - task: shared-domains
+#     <<: *baby-bosh-task
+#     params:
+#       <<: *baby-bosh-params
+#       CF_MGMT_COMMAND: shared-domains
+#   - task: create-security-groups
+#     <<: *baby-bosh-task
+#     params:
+#       <<: *baby-bosh-params
+#       CF_MGMT_COMMAND: create-security-groups
+#   - task: assign-default-security-groups
+#     <<: *baby-bosh-task
+#     params:
+#       <<: *baby-bosh-params
+#       CF_MGMT_COMMAND: assign-default-security-groups
+#   - task: delete-orgs
+#     <<: *baby-bosh-task
+#     params:
+#       <<: *baby-bosh-params
+#       CF_MGMT_COMMAND: delete-orgs
+#   - task: update-orgs-metadata
+#     <<: *baby-bosh-task
+#     params:
+#       <<: *baby-bosh-params
+#       CF_MGMT_COMMAND: update-orgs-metadata
+#   - task: create-org-private-domains
+#     <<: *baby-bosh-task
+#     params:
+#       <<: *baby-bosh-params
+#       CF_MGMT_COMMAND: create-org-private-domains
+#   - task: service-access
+#     <<: *baby-bosh-task
+#     params:
+#       <<: *baby-bosh-params
+#       CF_MGMT_COMMAND: service-access
+#   - task: share-org-private-domains
+#     <<: *baby-bosh-task
+#     params:
+#       <<: *baby-bosh-params
+#       CF_MGMT_COMMAND: share-org-private-domains
+#   - task: create-spaces
+#     <<: *baby-bosh-task
+#     params:
+#       <<: *baby-bosh-params
+#       CF_MGMT_COMMAND: create-spaces
+#   - task: delete-spaces
+#     <<: *baby-bosh-task
+#     params:
+#       <<: *baby-bosh-params
+#       CF_MGMT_COMMAND: delete-spaces
+#   - task: update-spaces
+#     <<: *baby-bosh-task
+#     params:
+#       <<: *baby-bosh-params
+#       CF_MGMT_COMMAND: update-spaces
+#   - task: update-spaces-metadata
+#     <<: *baby-bosh-task
+#     params:
+#       <<: *baby-bosh-params
+#       CF_MGMT_COMMAND: update-spaces-metadata
+#   - task: update-space-users
+#     <<: *baby-bosh-task
+#     params:
+#       <<: *baby-bosh-params
+#       CF_MGMT_COMMAND: update-space-users
+#   - task: update-space-quotas
+#     <<: *baby-bosh-task
+#     params:
+#       <<: *baby-bosh-params
+#       CF_MGMT_COMMAND: update-space-quotas
+#   - task: update-space-security-groups
+#     <<: *baby-bosh-task
+#     params:
+#       <<: *baby-bosh-params
+#       CF_MGMT_COMMAND: update-space-security-groups
+#   - task: update-org-users
+#     <<: *baby-bosh-task
+#     params:
+#       <<: *baby-bosh-params
+#       CF_MGMT_COMMAND: update-org-users
+#   - task: update-org-quotas
+#     <<: *baby-bosh-task
+#     params:
+#       <<: *baby-bosh-params
+#       CF_MGMT_COMMAND: update-org-quotas
+#   - task: isolation-segments
+#     <<: *baby-bosh-task
+#     params:
+#       <<: *baby-bosh-params
+#       CF_MGMT_COMMAND: isolation-segments
+#   - task: cleanup-org-users
+#     <<: *baby-bosh-task
+#     params:
+#       <<: *baby-bosh-params
+#       CF_MGMT_COMMAND: cleanup-org-users
+#   - task: uaac-script-run
+#     input_mapping:
+#       config-repo: baby-bosh-config-repo
+#     params:
+#       <<: *baby-bosh-params
+#       UAAC_SCRIPT: ci/scripts/uaac-script-example.sh
+#     file: baby-bosh-config-repo/ci/tasks/uaac-cli.yml
