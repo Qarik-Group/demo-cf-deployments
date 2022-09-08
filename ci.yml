@@ -109,13 +109,13 @@ resources:
     branch: ((grab cf-mgmt.dev.git_repo_branch))
     paths: ["((grab cf-mgmt.dev.config_dir))"]
     ignore_paths: [((concat cf-mgmt.dev.config_dir "/results"))]
-- name: autoscale-repo
-  type: git
-  icon: github
-  source:
-    uri: git@github.com:starkandwayne/demo-cf-deployments
-    private_key: (( vault "concourse/demo/cf/github:private_key" ))
-    branch: ((grab cf-mgmt.dev.git_repo_branch))
+# - name: autoscale-repo
+#   type: git
+#   icon: github
+#   source:
+#     uri: git@github.com:starkandwayne/demo-cf-deployments
+#     private_key: (( vault "concourse/demo/cf/github:private_key" ))
+#     branch: ((grab cf-mgmt.dev.git_repo_branch))
 - name: baby-bosh-config-repo
   type: git
   icon: github
@@ -124,11 +124,11 @@ resources:
     branch: ((grab cf-mgmt.baby-bosh.git_repo_branch))
     paths: ["((grab cf-mgmt.baby-bosh.config_dir))"]
     ignore_paths: [((concat cf-mgmt.baby-bosh.config_dir "/results"))]
-- name: every-1h
-  type: time
-  icon: clock-outline
-  source:
-    interval: 1h
+# - name: every-1h
+#   type: time
+#   icon: clock-outline
+#   source:
+#     interval: 1h
 
 jobs:
 - ((append))
@@ -187,11 +187,11 @@ jobs:
   plan:
   - get: dev-config-repo
     trigger: true
-  - get: dev-changes
-    passed: [dev-cf]
-  - get: baby-bosh-cache
+  - get: sandbox-changes # dev-changes
+    passed: [sandbox-cf] # dev-cf
+  - get: lab-cache # baby-bosh-cache
     trigger: true
-    passed: [dev-cf]
+    passed: [sandbox-cf] # dev-cf
   - task: create-orgs
     <<: &dev-task
       file: dev-config-repo/ci/tasks/cf-mgmt.yml
@@ -310,13 +310,13 @@ jobs:
     file: dev-config-repo/ci/tasks/uaac-cli.yml
 - name: lab-cf-config # baby-bosh-cf-config
   plan:
-  - get: baby-bosh-config-repo
+  - get: lab-config-repo # baby-bosh-config-repo
     trigger: true
-  - get: baby-bosh-changes
-    passed: [baby-bosh-cf]
-  - get: baby-bosh-cache
+  - get: baby-bosh-changes # baby-bosh-changes
+    passed: [lab-cf] # baby-bosh-cf
+  - get: lab-cache # baby-bosh-cache
     trigger: true
-    passed: [baby-bosh-cf]
+    passed: [lab-cf] # baby-bosh-cf
   - task: create-orgs
     <<: &baby-bosh-task
       file: baby-bosh-config-repo/ci/tasks/cf-mgmt.yml
