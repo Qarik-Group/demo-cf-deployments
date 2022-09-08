@@ -310,9 +310,9 @@ jobs:
     file: dev-config-repo/ci/tasks/uaac-cli.yml
 - name: lab-cf-config # baby-bosh-cf-config
   plan:
-  - get: lab-config-repo # baby-bosh-config-repo
+  - get: baby-bosh-config-repo 
     trigger: true
-  - get: baby-bosh-changes # baby-bosh-changes
+  - get: lab-changes # baby-bosh-changes
     passed: [lab-cf] # baby-bosh-cf
   - get: lab-cache # baby-bosh-cache
     trigger: true
