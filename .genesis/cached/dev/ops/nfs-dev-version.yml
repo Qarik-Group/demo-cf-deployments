@@ -2,4 +2,6 @@
   path: /releases/name=nfs-volume?
   value:
     name: nfs-volume
-    version: 7.1.1+dev.17
+    url: https://github.com/cloudfoundry/nfs-volume-release/releases/download/v5.0.17/nfs-volume-5.0.17.tgz
+    version: 5.0.17
+    # version: 7.1.1+dev.17

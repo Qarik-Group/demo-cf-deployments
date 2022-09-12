@@ -189,10 +189,10 @@ instance_groups:
             redirect-uri: https://apps.dev.codex.starkandwayne.com/pp/vl/auth/sso_login_callback
             autoapprove: true # Bypass users approval
             # The following properties copied from those of the default 'Cf ' client:
-            access-token-validity: 1200
+            access-token-validity: 1200 # 20 minutes
             authorities: uaa.none
             override: true
-            refresh-token-validity: 2592000
+            refresh-token-validity: 2592000 # 30 days
             scope: network.admin,network.write, cloud_controller.read,cloud_controller.write,openid,password.write,cloud_controller.admin,scim.read,scim.write.doppler.firehose,uaa.user,routing.router_groups.read,routing.router_groups.write,cloud_controller.admin_read_only,cloud_controller.global_auditor,perm.admin,clients.read
             secret: "((stratos_client_secret))"
 
