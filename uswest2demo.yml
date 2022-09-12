@@ -16,7 +16,7 @@ kit:
     - smb-test-server
     - smb-volume-services
     - smb-volume-services-releases
-    - app-autoscaler-integration
+    #- autoscaler
     #- apps-trust-redis-dev-crt
     #- routing-api-username
     #- nfs-volume-services
@@ -24,18 +24,17 @@ kit:
     #- compiled-releases
     #- enable-service-discovery
     ### Windows features
-    #- windows-dev-bosh-dns-alias
-    #- windows-diego-cells
+    - windows-dev-bosh-dns-alias
+    - windows-diego-cells
     - windows-releases
     #- windows-ofline-2019fs
     #- windows-remove-default-network
     #- windows-smoke-tests
     #- prometheus-integration
     - custom-router-group
-    #- add-persistent-isolation-segment-diego-cell
-    #- add-windows-isolation-segment
+    - add-persistent-isolation-segment-diego-cell
+    - add-windows-isolation-segment
     #- app-security-groups
-    - cf-mgmt-uaa-client
 
 params:
   external_db_ca: |
@@ -109,8 +108,8 @@ params:
   tcp_router_instances: 1
   uaa_instances: 1
   diego_cell_instances: 2
-  #windows_diego_cell_instances: 1 # Required for Windows, 3 one for each az
-  #windows_diego_cell_vm_type: diego-cell # Required for Windows
+  windows_diego_cell_instances: 1 # Required for Windows, 3 one for each az
+  windows_diego_cell_vm_type: diego-cell # Required for Windows
   #windows2019_cell_vm_type: cell
   #windows2019_cell_instances: 2
 
