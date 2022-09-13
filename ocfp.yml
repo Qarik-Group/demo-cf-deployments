@@ -11,6 +11,7 @@ kit:
     # - aws-blobstore
     - small-footprint
     - ssh-proxy-on-routers
+    - local-postgres-db
     # - app-scheduler-integration
     #- no-tcp-routers
     #    - smb-test-server

@@ -2,11 +2,6 @@
 genesis:
   env:      ocfp-dev-prod
 
-kit:
-  features:
-    - (( append ))
-    - local-postgres-db
-
 params:
 
   # Cloud Foundry base domain
