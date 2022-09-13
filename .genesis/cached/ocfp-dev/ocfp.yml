@@ -1,0 +1,110 @@
+---
+genesis:
+  env:         dev
+  min_version: 2.8.4
+
+kit:
+  name: cf
+  version: 2.2.0-rc.14
+  features:
+    #  - postgres-db
+    # - aws-blobstore
+    - small-footprint
+    - ssh-proxy-on-routers
+    - local-postgres-db
+    # - app-scheduler-integration
+    #- no-tcp-routers
+    #    - smb-test-server
+    #    - smb-volume-services
+    #    - smb-volume-services-releases
+    #    - app-autoscaler-integration
+    #    #- apps-trust-redis-dev-crt
+    #- routing-api-username
+    #- nfs-volume-services
+    #- nfs-dev-version
+    #- compiled-releases
+    #- enable-service-discovery
+    ### Windows features
+    #- windows-dev-bosh-dns-alias
+    #- windows-diego-cells
+    #- windows-releases
+    #- windows-ofline-2019fs
+    #- windows-remove-default-network
+    #- windows-smoke-tests
+    #- prometheus-integration
+    - custom-router-group
+    #- add-persistent-isolation-segment-diego-cell
+    #- add-windows-isolation-segment
+    #- app-security-groups
+    - cf-mgmt-uaa-client
+
+params:
+
+  # CF Databases
+  #uaadb_password:          ((uaa_db_password))
+  #ccdb_password:           ((cloud_controller_db_password))
+  #diegodb_password:        ((diego_db_password))
+  #policyserverdb_password: ((network_policy_db_password))
+  #silkdb_password:         ((network_connectivity_db_password))
+  #routingapidb_password:   ((routing_api_db_password))
+  #locketdb_password:       ((locket_db_password))
+  #credhubdb_password:      ((credhub_db_password))
+
+
+  # Skip SSL validation since we use self-signed certs
+  skip_ssl_validation: true
+
+  # Instances Scaling
+  api_instances: 1
+  cc_worker_instances: 1
+  credhub_instances: 1
+  diego_api_instances:  1
+  doppler_instances: 1
+  log_api_instances: 1
+  nats_instances: 1
+  router_instances: 1
+  scheduler_instances: 1
+  tcp_router_instances: 1
+  uaa_instances: 1
+  diego_cell_instances: 2
+  #windows_diego_cell_instances: 1 # Required for Windows, 3 one for each az
+  #windows_diego_cell_vm_type: diego-cell # Required for Windows
+  #windows2019_cell_vm_type: cell
+  #windows2019_cell_instances: 2
+
+  # Cloud Config instance vm_type mappings
+  api_vm_type:        api
+  cc_worker_vm_type:  cc-worker
+  credhub_vm_type:    credhub
+  diego_api_vm_type:  diego-api
+  diego_cell_vm_type: diego-cell
+  doppler_vm_type:    doppler
+  nats_vm_type:       nats
+  log_api_vm_type:    log-api
+  router_vm_type:     router
+  errand_vm_type:     errand
+  scheduler_vm_type:  scheduler
+  tcp_router_vm_type: tcp-router
+  uaa_vm_type:        uaa
+
+instance_groups:
+
+- name: nats
+  jobs:
+  - name: nats-tls
+    release: nats
+    custom_provider_definitions:
+      - name: nats-tls-address
+        type: address
+        #      properties:
+        #          - machines
+
+- name: diego-cell
+  update:
+    max_in_flight: 3
+
+stemcells:
+- alias: default
+  os: ubuntu-bionic
+  version: latest
+
