@@ -1,0 +1,57 @@
+---
+genesis:
+  env:      ocfp-dev-lab
+  bosh_env: baby-bosh
+
+kit:
+  features:
+    - (( append ))
+    - local-postgres-db
+
+params:
+
+  # Cloud Foundry base domain
+  base_domain: lab.codex.starkandwayne.com
+  system_domain: system.lab.codex.starkandwayne.com
+  apps_domains: apps.lab.codex.starkandwayne.com
+
+  # Instances Scaling
+  api_instances: 1
+  cc_worker_instances: 1
+  credhub_instances: 1
+  diego_api_instances:  1
+  doppler_instances: 1
+  log_api_instances: 1
+  nats_instances: 1
+  router_instances: 1
+  scheduler_instances: 1
+  tcp_router_instances: 1
+  uaa_instances: 1
+  diego_cell_instances: 2
+  #windows_diego_cell_instances: 1 # Required for Windows, 3 one for each az
+  #windows_diego_cell_vm_type: diego-cell # Required for Windows
+  #windows2019_cell_vm_type: cell
+  #windows2019_cell_instances: 2
+
+  # Cloud Config instance vm_type mappings
+  api_vm_type:        api
+  cc_worker_vm_type:  cc-worker
+  credhub_vm_type:    credhub
+  diego_api_vm_type:  diego-api
+  diego_cell_vm_type: diego-cell
+  doppler_vm_type:    doppler
+  nats_vm_type:       nats
+  log_api_vm_type:    log-api
+  router_vm_type:     router
+  errand_vm_type:     errand
+  scheduler_vm_type:  scheduler
+  tcp_router_vm_type: tcp-router
+  uaa_vm_type:        uaa
+
+instance_groups:
+
+- name: router
+  vm_extensions:
+    - cf-router-network-properties
+    #- dev-alb
+    #- dev-nlb
