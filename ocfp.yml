@@ -107,6 +107,3 @@ stemcells:
   os: ubuntu-bionic
   version: latest
 
-releases:
-- name: nfs-volume
-  version: 7.1.1+dev.1
