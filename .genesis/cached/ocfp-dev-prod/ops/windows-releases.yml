@@ -1,0 +1,14 @@
+- type: replace
+  path: /releases/name=windowsfs?
+  value:
+    name: "windowsfs"
+    version: "2.35.0"
+    url: "https://bosh.io/d/github.com/cloudfoundry/windowsfs-online-release?v=2.35.0"
+    sha1: "36fcc451396ef259150548f5ae1073007a56fc75"
+- path: /releases/name=winc?
+  type: replace
+  value:
+    name: winc
+    sha1: 3f14f65ca0b523bbabb3631820d3388674875110
+    url: https://bosh.io/d/github.com/cloudfoundry-incubator/winc-release?v=2.5.0
+    version: 2.5.0

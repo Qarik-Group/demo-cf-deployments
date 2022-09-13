@@ -1,0 +1,3 @@
+- type: replace
+  path: /instance_groups/name=api/jobs=routing-api/properties/routing_api/sqldb/username
+  value: routing_api
