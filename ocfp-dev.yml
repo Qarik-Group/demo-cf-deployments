@@ -1,7 +1,6 @@
 ---
 genesis:
   env:      ocfp-dev 
-  bosh_env: dev
 
 kit:
   name: cf

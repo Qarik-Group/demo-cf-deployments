@@ -29,41 +29,29 @@ pipeline:
 
 
   boshes:
-    dev:
+    ocfp-dev:
       alias: sandbox
-      url:      https://10.4.16.4:25555
-      ca_cert:  (( vault "secret/dev/bosh/ssl/ca:certificate" ))
+      url:      https://10.4.16.5:25555
+      ca_cert:  (( vault "secret/ocfp/dev/bosh/ssl/ca:certificate" ))
       username: admin
-      password: (( vault "secret/dev/bosh/users/admin:password" ))
-#     baby-bosh:
-#       alias: lab
-#       url:      https://10.4.63.4:25555
-#       ca_cert:  (( vault "secret/baby/bosh/bosh/ssl/ca:certificate" ))
-#       username: admin
-#       password: (( vault "secret/baby/bosh/bosh/users/admin:password" ))
-    baby-bosh:
+      password: (( vault "secret/ocfp/dev/bosh/users/admin:password" ))
+    ocfp-dev-lab:
       alias: lab
-      url:      https://10.4.16.4:25555
-      ca_cert:  (( vault "secret/dev/bosh/ssl/ca:certificate" ))
+      url:      https://10.4.63.5:25555
+      ca_cert:  (( vault "secret/ocfp/dev/lab/bosh/ssl/ca:certificate" ))
       username: admin
-      password: (( vault "secret/dev/bosh/users/admin:password" ))
-#     uswest2demo:
-#       alias: prod
-#       url:      https://10.4.1.4:25555
-#       ca_cert:  (( vault "secret/uswest2demo/bosh/ssl/ca:certificate" ))
-#       username: admin
-#       password: (( vault "secret/uswest2demo/bosh/users/admin:password" ))
-    uswest2demo: # prod
+      password: (( vault "secret/ocfp/dev/lab/bosh/users/admin:password" ))
+    ocfp-dev-prod:
       alias: prod
-      url:      https://10.4.16.4:25555
-      ca_cert:  (( vault "secret/dev/bosh/ssl/ca:certificate" ))
+      url:      https://10.4.63.6:25555
+      ca_cert:  (( vault "secret/ocfp/dev/prod/bosh/ssl/ca:certificate" ))
       username: admin
-      password: (( vault "secret/dev/bosh/users/admin:password" ))
+      password: (( vault "secret/ocfp/dev/prod/bosh/users/admin:password" ))
   
   layouts:
     default: |+
-      auto *dev
-      dev -> baby-bosh -> uswest2demo
+      auto *ocfp-dev
+      ocfp-dev -> ocfp-dev-lab -> ocfp-dev-prod 
 
 groups:
   - name: cf-platform-pipeline
