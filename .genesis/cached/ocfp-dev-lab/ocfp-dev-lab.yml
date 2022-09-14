@@ -6,4 +6,4 @@ params:
   # Cloud Foundry base domain
   base_domain: lab.codex.starkandwayne.com
   system_domain: system.lab.codex.starkandwayne.com
-  apps_domains: apps.lab.codex.starkandwayne.com
+  apps_domains: [ apps.lab.codex.starkandwayne.com ]
