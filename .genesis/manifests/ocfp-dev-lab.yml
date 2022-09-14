@@ -436,7 +436,7 @@ exodus:
   cf_mgmt_client: cf_mgmt_client
   cf_mgmt_secret: ((cf_mgmt_client_secret))
   core_network: cf-core
-  dated: 2022-09-14 14:34:55 +0000
+  dated: 2022-09-14 17:17:51 +0000
   db_network: cf-core
   deployer: unknown
   edge_network: cf-edge
@@ -2203,7 +2203,8 @@ meta:
     uaa:
       name: uaa
       user: uaa
-  default_apps_domains: apps.lab.codex.starkandwayne.com
+  default_apps_domains:
+  - apps.lab.codex.starkandwayne.com
   default_azs:
   - z1
   - z2
@@ -2285,7 +2286,8 @@ params:
   app_domains:
   - apps.lab.codex.starkandwayne.com
   apps_domain: apps.lab.codex.starkandwayne.com
-  apps_domains: apps.lab.codex.starkandwayne.com
+  apps_domains:
+  - apps.lab.codex.starkandwayne.com
   base_domain: lab.codex.starkandwayne.com
   cc_worker_instances: 1
   cc_worker_vm_type: cc-worker
