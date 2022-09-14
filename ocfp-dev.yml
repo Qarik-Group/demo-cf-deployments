@@ -1,6 +1,6 @@
 ---
 genesis:
-  env:      ocfp-dev 
+  env: ocfp-dev
 
 params:
   # Cloud Foundry base domain
