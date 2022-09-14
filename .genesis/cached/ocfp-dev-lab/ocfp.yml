@@ -7,35 +7,35 @@ kit:
   name: cf
   version: 2.2.0-rc.14
   features:
-    #  - postgres-db
+    # - postgres-db
     # - aws-blobstore
     - small-footprint
     - ssh-proxy-on-routers
     - local-postgres-db
     # - app-scheduler-integration
-    #- no-tcp-routers
-    #    - smb-test-server
-    #    - smb-volume-services
-    #    - smb-volume-services-releases
-    #    - app-autoscaler-integration
-    #    #- apps-trust-redis-dev-crt
-    #- routing-api-username
-    #- nfs-volume-services
-    #- nfs-dev-version
-    #- compiled-releases
-    #- enable-service-discovery
+    - no-tcp-routers
+    # - smb-test-server
+    # - smb-volume-services
+    # - smb-volume-services-releases
+    # - app-autoscaler-integration
+    # - apps-trust-redis-dev-crt
+    # - routing-api-username
+    # - nfs-volume-services
+    # - nfs-dev-version
+    # - compiled-releases
+    # - enable-service-discovery
     ### Windows features
-    #- windows-dev-bosh-dns-alias
-    #- windows-diego-cells
-    #- windows-releases
-    #- windows-ofline-2019fs
-    #- windows-remove-default-network
-    #- windows-smoke-tests
-    #- prometheus-integration
+    # - windows-dev-bosh-dns-alias
+    # - windows-diego-cells
+    # - windows-releases
+    # - windows-ofline-2019fs
+    # - windows-remove-default-network
+    # - windows-smoke-tests
+    # - prometheus-integration
     - custom-router-group
-    #- add-persistent-isolation-segment-diego-cell
-    #- add-windows-isolation-segment
-    #- app-security-groups
+    # - add-persistent-isolation-segment-diego-cell
+    # - add-windows-isolation-segment
+    # - app-security-groups
     - cf-mgmt-uaa-client
 
 params:
@@ -63,13 +63,13 @@ params:
   nats_instances: 1
   router_instances: 1
   scheduler_instances: 1
-  tcp_router_instances: 1
+  # tcp_router_instances: 1
   uaa_instances: 1
   diego_cell_instances: 2
-  #windows_diego_cell_instances: 1 # Required for Windows, 3 one for each az
-  #windows_diego_cell_vm_type: diego-cell # Required for Windows
-  #windows2019_cell_vm_type: cell
-  #windows2019_cell_instances: 2
+  # windows_diego_cell_instances: 1 # Required for Windows, 3 one for each az
+  # windows_diego_cell_vm_type: diego-cell # Required for Windows
+  # windows2019_cell_vm_type: cell
+  # windows2019_cell_instances: 2
 
   # Cloud Config instance vm_type mappings
   api_vm_type:        api
@@ -83,7 +83,7 @@ params:
   router_vm_type:     router
   errand_vm_type:     errand
   scheduler_vm_type:  scheduler
-  tcp_router_vm_type: tcp-router
+  # tcp_router_vm_type: tcp-router
   uaa_vm_type:        uaa
 
 instance_groups:
