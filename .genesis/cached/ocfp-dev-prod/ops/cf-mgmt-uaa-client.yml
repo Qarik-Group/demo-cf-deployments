@@ -1,3 +1,7 @@
+exodus:
+  cf_mgmt_client: cf_mgmt_client
+  cf_mgmt_secret: (( grab instance_groups.uaa.jobs.uaa.properties.uaa.clients.cf_mgmt_client.secret ))
+
 instance_groups:
 - name: uaa
   jobs:
