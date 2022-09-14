@@ -13,17 +13,17 @@ pipeline:
     url:    https://10.4.1.7
     verify: no
     # run setup-approle from concourse-kit deployment ex. genesis do [env] -- setup-approle
-  
+
   slack:
     channel: '#botspam'
     webhook: (( vault "concourse/genesis/slack:webhook" ))
 
-  # email: 
+  # email:
   #   to: ncoker@qarik.com
-  #   from: 
+  #   from:
   #   smtp:
   #     host:
-  #     port: 
+  #     port:
   #     username:
   #     password:
 
@@ -47,11 +47,11 @@ pipeline:
       ca_cert:  (( vault "secret/ocfp/dev/prod/bosh/ssl/ca:certificate" ))
       username: admin
       password: (( vault "secret/ocfp/dev/prod/bosh/users/admin:password" ))
-  
+
   layouts:
     default: |+
       auto *ocfp-dev
-      ocfp-dev -> ocfp-dev-lab -> ocfp-dev-prod 
+      ocfp-dev -> ocfp-dev-lab -> ocfp-dev-prod
 
 groups:
   - name: cf-platform-pipeline
@@ -62,6 +62,7 @@ groups:
 
       - sandbox-cf-config
       - lab-cf-config
+      - prod-cf-config
 
 #       - autoscale-dev-cf
 #   - name: autoscale
@@ -80,7 +81,7 @@ cf-mgmt:
     git_repo_branch: latest-cf-aws-codex
     system_domain: "system.codex.starkandwayne.com"
     user_id: "cf_mgmt_client"
-    client_secret: (( vault "secret/dev/bosh/uaa/clients/cf_mgmt_client:secret" ))
+    client_secret: (( vault "secret/exodus/ocfp-dev/cf:cf_mgmt_secret" ))
     log_level: INFO
     time-trigger: 15m
     config_dir: ci/config/dev
@@ -91,9 +92,9 @@ cf-mgmt:
   ocfp-dev-lab:
     git_repo_uri: "https://github.com/starkandwayne/demo-cf-deployments.git"
     git_repo_branch: latest-cf-aws-codex
-    system_domain: "system.codex.starkandwayne.com"
+    system_domain: "system.lab.codex.starkandwayne.com"
     user_id: "cf_mgmt_client"
-    client_secret: (( vault "secret/dev/bosh/uaa/clients/cf_mgmt_client:secret" ))
+    client_secret: (( vault "secret/exodus/ocfp-dev-lab/cf:cf_mgmt_secret" ))
     log_level: INFO
     time-trigger: 15m
     config_dir: ci/config/baby-bosh
@@ -101,398 +102,549 @@ cf-mgmt:
     ldap_user: ""
     ldap_password: ""
     password: ""
+  ocfp-dev-prod:
+    git_repo_uri: "https://github.com/starkandwayne/demo-cf-deployments.git"
+    git_repo_branch: latest-cf-aws-codex
+    system_domain: "system.prd.codex.starkandwayne.com"
+    user_id: "cf_mgmt_client"
+    client_secret: (( vault "secret/exodus/ocfp-dev-prod/cf:cf_mgmt_secret" ))
+    log_level: INFO
+    time-trigger: 15m
+    config_dir: ci/config/baby-bosh
+    ldap_server: ""
+    ldap_user: ""
+    ldap_password: ""
+    password: ""
+
 #############################################
 #### dev cf-mgmt pipeline configuration
 #############################################
 resources:
-- name: ocfp-dev-config-repo
-  type: git
-  icon: github
-  source:
-    uri: ((grab cf-mgmt.ocfp-dev.git_repo_uri))
-    branch: ((grab cf-mgmt.ocfp-dev.git_repo_branch))
-    paths: ["((grab cf-mgmt.ocfp-dev.config_dir))"]
-    ignore_paths: [((concat cf-mgmt.ocfp-dev.config_dir "/results"))]
-# - name: autoscale-repo
-#   type: git
-#   icon: github
-#   source:
-#     uri: git@github.com:starkandwayne/demo-cf-deployments
-#     private_key: (( vault "concourse/demo/cf/github:private_key" ))
-#     branch: ((grab cf-mgmt.dev.git_repo_branch))
-- name: ocfp-dev-lab-config-repo
-  type: git
-  icon: github
-  source:
-    uri: ((grab cf-mgmt.ocfp-dev-lab.git_repo_uri))
-    branch: ((grab cf-mgmt.ocfp-dev-lab.git_repo_branch))
-    paths: ["((grab cf-mgmt.ocfp-dev-lab.config_dir))"]
-    ignore_paths: [((concat cf-mgmt.ocfp-dev-lab.config_dir "/results"))]
-# - name: every-1h
-#   type: time
-#   icon: clock-outline
-#   source:
-#     interval: 1h
+  - name: ocfp-dev-config-repo
+    type: git
+    icon: github
+    source:
+      uri:          (( grab cf-mgmt.ocfp-dev.git_repo_uri ))
+      branch:       (( grab cf-mgmt.ocfp-dev.git_repo_branch ))
+      paths:        [ (( grab cf-mgmt.ocfp-dev.config_dir )) ]
+      ignore_paths: [ (( concat cf-mgmt.ocfp-dev.config_dir "/results" )) ]
+
+  - name: ocfp-dev-lab-config-repo
+    type: git
+    icon: github
+    source:
+      uri:          (( grab cf-mgmt.ocfp-dev-lab.git_repo_uri ))
+      branch:       (( grab cf-mgmt.ocfp-dev-lab.git_repo_branch ))
+      paths:        [ (( grab cf-mgmt.ocfp-dev-lab.config_dir )) ]
+      ignore_paths: [ (( concat cf-mgmt.ocfp-dev-lab.config_dir "/results" )) ]
+
+  - name: ocfp-dev-prod-config-repo
+    type: git
+    icon: github
+    source:
+      uri:          (( grab cf-mgmt.ocfp-dev-prod.git_repo_uri ))
+      branch:       (( grab cf-mgmt.ocfp-dev-prod.git_repo_branch ))
+      paths:        [ (( grab cf-mgmt.ocfp-dev-prod.config_dir )) ]
+      ignore_paths: [ (( concat cf-mgmt.ocfp-dev-prod.config_dir "/results" )) ]
+
+  # - name: autoscale-repo
+  #   type: git
+  #   icon: github
+  #   source:
+  #     uri: git@github.com:starkandwayne/demo-cf-deployments
+  #     private_key: (( vault "concourse/demo/cf/github:private_key" ))
+  #     branch: ((grab cf-mgmt.dev.git_repo_branch))
+  # - name: every-1h
+  #   type: time
+  #   icon: clock-outline
+  #   source:
+  #     interval: 1h
 
 jobs:
-- ((append))
-############
-### cf_scale
-############
-# - name: autoscale-dev-cf
-#   plan:
-#   - get: autoscale-repo
-#   - get: baby-bosh-cache
-#     trigger: true
-#     passed: [dev-cf]
-#   - get: every-1h
-#     trigger: true
-#   - task: autoscale-fetch
-#     file: autoscale-repo/ci/tasks/run-cf-autoscale.yml
-#     input_mapping:
-#       changes: autoscale-repo
-#     output_mapping:
-#       changes-autoscale: autoscale-repo
-#     params:
-#       <<: &scale-params
-#         SCRIPT: ci/scripts/cf_scale/cf_scale 
-#         ENV: dev
-#         VAULT_ADDR: (( grab pipeline.vault.url ))
-#         VAULT_ROLE: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
-#         VAULT_SECRET: (( vault "secret/exodus/ci/genesis-pipelines:approle-secret" ))
-#         VAULT_SKIP_VERIFY: true
-#   - put: autoscale-repo
-#     params:
-#       repository: autoscale-repo
-# - name: scale-down-dev
-#   plan:
-#   - get: autoscale-repo
-#   - task: run-cf-script
-#     file: autoscale-repo/ci/tasks/cf-script-run.yml
-#     input_mapping:
-#       changes: autoscale-repo
-#     params:
-#       <<: *scale-params
-#       SCRIPT: ci/config/dev/scale_down
-# - name: scale-up-dev
-#   plan:
-#   - get: autoscale-repo
-#   - task: run-cf-script
-#     file: autoscale-repo/ci/tasks/cf-script-run.yml
-#     input_mapping:
-#       changes: autoscale-repo
-#     params:
-#       <<: *scale-params
-#       SCRIPT: ci/config/dev/scale_down
-###########
-### cf-mgmt
-###########
-- name: sandbox-cf-config # dev-cf-config
-  plan:
-  - get: ocfp-dev-config-repo
-    trigger: true
-  - get: sandbox-changes # dev-changes
-    passed: [sandbox-cf] # dev-cf
-  - get: lab-cache # baby-bosh-cache
-    trigger: true
-    passed: [sandbox-cf] # dev-cf
-  - task: create-orgs
-    <<: &dev-task
-      file: ocfp-dev-config-repo/ci/tasks/cf-mgmt.yml
-      input_mapping:
-        config-repo: ocfp-dev-config-repo
-    params:
-      <<: &dev-params
-        SYSTEM_DOMAIN: ((grab cf-mgmt.ocfp-dev.system_domain))
-        USER_ID: ((grab cf-mgmt.ocfp-dev.user_id))
-        PASSWORD: ((grab cf-mgmt.ocfp-dev.password))
-        CONFIG_DIR: ((grab cf-mgmt.ocfp-dev.config_dir))
-        CLIENT_SECRET: ((grab cf-mgmt.ocfp-dev.client_secret))
-        LOG_LEVEL: ((grab cf-mgmt.ocfp-dev.log_level))
-      CF_MGMT_COMMAND: create-orgs
-  - task: shared-domains
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: shared-domains
-  - task: create-security-groups
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: create-security-groups
-  - task: assign-default-security-groups
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: assign-default-security-groups
-  - task: delete-orgs
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: delete-orgs
-  - task: update-orgs-metadata
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: update-orgs-metadata
-  - task: create-org-private-domains
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: create-org-private-domains
-  - task: service-access
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: service-access
-  - task: share-org-private-domains
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: share-org-private-domains
-  - task: create-spaces
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: create-spaces
-  - task: delete-spaces
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: delete-spaces
-  - task: update-spaces
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: update-spaces
-  - task: update-spaces-metadata
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: update-spaces-metadata
-  - task: update-space-users
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: update-space-users
-  - task: update-space-quotas
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: update-space-quotas
-  - task: update-space-security-groups
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: update-space-security-groups
-  - task: update-org-users
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: update-org-users
-  - task: update-org-quotas
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: update-org-quotas
-  - task: isolation-segments
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: isolation-segments
-  - task: cleanup-org-users
-    <<: *dev-task
-    params:
-      <<: *dev-params
-      CF_MGMT_COMMAND: cleanup-org-users
-  - task: uaac-script-run
-    input_mapping:
-      config-repo: dev-config-repo
-    params:
-      <<: *dev-params
-      UAAC_SCRIPT: ci/scripts/uaac-script-example.sh
-    file: ocfp-dev-config-repo/ci/tasks/uaac-cli.yml
-- name: lab-cf-config # baby-bosh-cf-config
-  plan:
-  - get: ocfp-dev-lab-config-repo 
-    trigger: true
-  - get: lab-changes # baby-bosh-changes
-    passed: [lab-cf] # baby-bosh-cf
-  - get: lab-cache # baby-bosh-cache
-    trigger: true
-    passed: [lab-cf] # baby-bosh-cf
-  - task: create-orgs
-    <<: &baby-bosh-task
-      file: ocfp-dev-lab-config-repo/ci/tasks/cf-mgmt.yml
-      input_mapping:
-        config-repo: ocfp-dev-lab-config-repo
-    params:
-      <<: &baby-bosh-params
-        SYSTEM_DOMAIN: ((grab cf-mgmt.ocfp-dev-lab.system_domain))
-        USER_ID: ((grab cf-mgmt.ocfp-dev-lab.user_id))
-        PASSWORD: ((grab cf-mgmt.ocfp-dev-lab.password))
-        CONFIG_DIR: ((grab cf-mgmt.ocfp-dev-lab.config_dir))
-        CLIENT_SECRET: ((grab cf-mgmt.ocfp-dev-lab.client_secret))
-        LOG_LEVEL: ((grab cf-mgmt.ocfp-dev-lab.log_level))
-      CF_MGMT_COMMAND: create-orgs
-  - task: shared-domains
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: shared-domains
-  - task: create-security-groups
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: create-security-groups
-  - task: assign-default-security-groups
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: assign-default-security-groups
-  - task: delete-orgs
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: delete-orgs
-  - task: update-orgs-metadata
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: update-orgs-metadata
-  - task: create-org-private-domains
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: create-org-private-domains
-  - task: service-access
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: service-access
-  - task: share-org-private-domains
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: share-org-private-domains
-  - task: create-spaces
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: create-spaces
-  - task: delete-spaces
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: delete-spaces
-  - task: update-spaces
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: update-spaces
-  - task: update-spaces-metadata
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: update-spaces-metadata
-  - task: update-space-users
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: update-space-users
-  - task: update-space-quotas
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: update-space-quotas
-  - task: update-space-security-groups
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: update-space-security-groups
-  - task: update-org-users
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: update-org-users
-  - task: update-org-quotas
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: update-org-quotas
-  - task: isolation-segments
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: isolation-segments
-  - task: cleanup-org-users
-    <<: *baby-bosh-task
-    params:
-      <<: *baby-bosh-params
-      CF_MGMT_COMMAND: cleanup-org-users
-  - task: uaac-script-run
-    input_mapping:
-      config-repo: ocfp-dev-lab-config-repo
-    params:
-      <<: *baby-bosh-params
-      UAAC_SCRIPT: ci/scripts/uaac-script-example.sh
-    file: ocfp-dev-lab-config-repo/ci/tasks/uaac-cli.yml
+  - (( append ))
+  ############
+  ### cf_scale
+  ############
+  # - name: autoscale-dev-cf
+  #   plan:
+  #   - get: autoscale-repo
+  #   - get: baby-bosh-cache
+  #     trigger: true
+  #     passed: [dev-cf]
+  #   - get: every-1h
+  #     trigger: true
+  #   - task: autoscale-fetch
+  #     file: autoscale-repo/ci/tasks/run-cf-autoscale.yml
+  #     input_mapping:
+  #       changes: autoscale-repo
+  #     output_mapping:
+  #       changes-autoscale: autoscale-repo
+  #     params:
+  #       <<: &scale-params
+  #         SCRIPT: ci/scripts/cf_scale/cf_scale
+  #         ENV: dev
+  #         VAULT_ADDR: (( grab pipeline.vault.url ))
+  #         VAULT_ROLE: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
+  #         VAULT_SECRET: (( vault "secret/exodus/ci/genesis-pipelines:approle-secret" ))
+  #         VAULT_SKIP_VERIFY: true
+  #   - put: autoscale-repo
+  #     params:
+  #       repository: autoscale-repo
+  # - name: scale-down-dev
+  #   plan:
+  #   - get: autoscale-repo
+  #   - task: run-cf-script
+  #     file: autoscale-repo/ci/tasks/cf-script-run.yml
+  #     input_mapping:
+  #       changes: autoscale-repo
+  #     params:
+  #       <<: *scale-params
+  #       SCRIPT: ci/config/dev/scale_down
+  # - name: scale-up-dev
+  #   plan:
+  #   - get: autoscale-repo
+  #   - task: run-cf-script
+  #     file: autoscale-repo/ci/tasks/cf-script-run.yml
+  #     input_mapping:
+  #       changes: autoscale-repo
+  #     params:
+  #       <<: *scale-params
+  #       SCRIPT: ci/config/dev/scale_down
+  ###########
+  ### cf-mgmt
+  ###########
+  - name: sandbox-cf-config # dev-cf-config
+    plan:
+      - get: ocfp-dev-config-repo
+        trigger: true
+      - get: sandbox-changes # dev-changes
+        passed: [ sandbox-cf ] # dev-cf
+      - get: lab-cache # baby-bosh-cache
+        trigger: true
+        passed: [ sandbox-cf ] # dev-cf
+      - task: create-orgs
+        <<: &dev-task
+          file: ocfp-dev-config-repo/ci/tasks/cf-mgmt.yml
+          input_mapping:
+            config-repo: ocfp-dev-config-repo
+        params:
+          <<: &dev-params
+            SYSTEM_DOMAIN: (( grab cf-mgmt.ocfp-dev.system_domain ))
+            USER_ID:       (( grab cf-mgmt.ocfp-dev.user_id ))
+            PASSWORD:      (( grab cf-mgmt.ocfp-dev.password ))
+            CONFIG_DIR:    (( grab cf-mgmt.ocfp-dev.config_dir ))
+            CLIENT_SECRET: (( grab cf-mgmt.ocfp-dev.client_secret ))
+            LOG_LEVEL:     (( grab cf-mgmt.ocfp-dev.log_level ))
+          CF_MGMT_COMMAND: create-orgs
+      - task: shared-domains
+        <<: *dev-task
+        params:
+          <<: *dev-params
+          CF_MGMT_COMMAND: shared-domains
+      - task: create-security-groups
+        <<: *dev-task
+        params:
+          <<: *dev-params
+          CF_MGMT_COMMAND: create-security-groups
+      - task: assign-default-security-groups
+        <<: *dev-task
+        params:
+          <<: *dev-params
+          CF_MGMT_COMMAND: assign-default-security-groups
+      - task: delete-orgs
+        <<: *dev-task
+        params:
+          <<: *dev-params
+          CF_MGMT_COMMAND: delete-orgs
+      - task: update-orgs-metadata
+        <<: *dev-task
+        params:
+          <<: *dev-params
+          CF_MGMT_COMMAND: update-orgs-metadata
+      - task: create-org-private-domains
+        <<: *dev-task
+        params:
+          <<: *dev-params
+          CF_MGMT_COMMAND: create-org-private-domains
+      - task: service-access
+        <<: *dev-task
+        params:
+          <<: *dev-params
+          CF_MGMT_COMMAND: service-access
+      - task: share-org-private-domains
+        <<: *dev-task
+        params:
+          <<: *dev-params
+          CF_MGMT_COMMAND: share-org-private-domains
+      - task: create-spaces
+        <<: *dev-task
+        params:
+          <<: *dev-params
+          CF_MGMT_COMMAND: create-spaces
+      - task: delete-spaces
+        <<: *dev-task
+        params:
+          <<: *dev-params
+          CF_MGMT_COMMAND: delete-spaces
+      - task: update-spaces
+        <<: *dev-task
+        params:
+          <<: *dev-params
+          CF_MGMT_COMMAND: update-spaces
+      - task: update-spaces-metadata
+        <<: *dev-task
+        params:
+          <<: *dev-params
+          CF_MGMT_COMMAND: update-spaces-metadata
+      - task: update-space-users
+        <<: *dev-task
+        params:
+          <<: *dev-params
+          CF_MGMT_COMMAND: update-space-users
+      - task: update-space-quotas
+        <<: *dev-task
+        params:
+          <<: *dev-params
+          CF_MGMT_COMMAND: update-space-quotas
+      - task: update-space-security-groups
+        <<: *dev-task
+        params:
+          <<: *dev-params
+          CF_MGMT_COMMAND: update-space-security-groups
+      - task: update-org-users
+        <<: *dev-task
+        params:
+          <<: *dev-params
+          CF_MGMT_COMMAND: update-org-users
+      - task: update-org-quotas
+        <<: *dev-task
+        params:
+          <<: *dev-params
+          CF_MGMT_COMMAND: update-org-quotas
+      - task: isolation-segments
+        <<: *dev-task
+        params:
+          <<: *dev-params
+          CF_MGMT_COMMAND: isolation-segments
+      - task: cleanup-org-users
+        <<: *dev-task
+        params:
+          <<: *dev-params
+          CF_MGMT_COMMAND: cleanup-org-users
+      - task: uaac-script-run
+        input_mapping:
+          config-repo: dev-config-repo
+        params:
+          <<: *dev-params
+          UAAC_SCRIPT: ci/scripts/uaac-script-example.sh
+        file: ocfp-dev-config-repo/ci/tasks/uaac-cli.yml
+
+  - name: lab-cf-config # baby-bosh-cf-config
+    plan:
+      - get: ocfp-dev-lab-config-repo
+        trigger: true
+      - get: lab-changes # baby-bosh-changes
+        passed: [ lab-cf ] # baby-bosh-cf
+      - get: lab-cache # baby-bosh-cache
+        trigger: true
+        passed: [ lab-cf ] # baby-bosh-cf
+      - task: create-orgs
+        <<: &baby-bosh-task
+          file: ocfp-dev-lab-config-repo/ci/tasks/cf-mgmt.yml
+          input_mapping:
+            config-repo: ocfp-dev-lab-config-repo
+        params:
+          <<: &baby-bosh-params
+            SYSTEM_DOMAIN: (( grab cf-mgmt.ocfp-dev-lab.system_domain ))
+            USER_ID:       (( grab cf-mgmt.ocfp-dev-lab.user_id ))
+            PASSWORD:      (( grab cf-mgmt.ocfp-dev-lab.password ))
+            CONFIG_DIR:    (( grab cf-mgmt.ocfp-dev-lab.config_dir ))
+            CLIENT_SECRET: (( grab cf-mgmt.ocfp-dev-lab.client_secret ))
+            LOG_LEVEL:     (( grab cf-mgmt.ocfp-dev-lab.log_level ))
+          CF_MGMT_COMMAND: create-orgs
+      - task: shared-domains
+        <<: *baby-bosh-task
+        params:
+          <<: *baby-bosh-params
+          CF_MGMT_COMMAND: shared-domains
+      - task: create-security-groups
+        <<: *baby-bosh-task
+        params:
+          <<: *baby-bosh-params
+          CF_MGMT_COMMAND: create-security-groups
+      - task: assign-default-security-groups
+        <<: *baby-bosh-task
+        params:
+          <<: *baby-bosh-params
+          CF_MGMT_COMMAND: assign-default-security-groups
+      - task: delete-orgs
+        <<: *baby-bosh-task
+        params:
+          <<: *baby-bosh-params
+          CF_MGMT_COMMAND: delete-orgs
+      - task: update-orgs-metadata
+        <<: *baby-bosh-task
+        params:
+          <<: *baby-bosh-params
+          CF_MGMT_COMMAND: update-orgs-metadata
+      - task: create-org-private-domains
+        <<: *baby-bosh-task
+        params:
+          <<: *baby-bosh-params
+          CF_MGMT_COMMAND: create-org-private-domains
+      - task: service-access
+        <<: *baby-bosh-task
+        params:
+          <<: *baby-bosh-params
+          CF_MGMT_COMMAND: service-access
+      - task: share-org-private-domains
+        <<: *baby-bosh-task
+        params:
+          <<: *baby-bosh-params
+          CF_MGMT_COMMAND: share-org-private-domains
+      - task: create-spaces
+        <<: *baby-bosh-task
+        params:
+          <<: *baby-bosh-params
+          CF_MGMT_COMMAND: create-spaces
+      - task: delete-spaces
+        <<: *baby-bosh-task
+        params:
+          <<: *baby-bosh-params
+          CF_MGMT_COMMAND: delete-spaces
+      - task: update-spaces
+        <<: *baby-bosh-task
+        params:
+          <<: *baby-bosh-params
+          CF_MGMT_COMMAND: update-spaces
+      - task: update-spaces-metadata
+        <<: *baby-bosh-task
+        params:
+          <<: *baby-bosh-params
+          CF_MGMT_COMMAND: update-spaces-metadata
+      - task: update-space-users
+        <<: *baby-bosh-task
+        params:
+          <<: *baby-bosh-params
+          CF_MGMT_COMMAND: update-space-users
+      - task: update-space-quotas
+        <<: *baby-bosh-task
+        params:
+          <<: *baby-bosh-params
+          CF_MGMT_COMMAND: update-space-quotas
+      - task: update-space-security-groups
+        <<: *baby-bosh-task
+        params:
+          <<: *baby-bosh-params
+          CF_MGMT_COMMAND: update-space-security-groups
+      - task: update-org-users
+        <<: *baby-bosh-task
+        params:
+          <<: *baby-bosh-params
+          CF_MGMT_COMMAND: update-org-users
+      - task: update-org-quotas
+        <<: *baby-bosh-task
+        params:
+          <<: *baby-bosh-params
+          CF_MGMT_COMMAND: update-org-quotas
+      - task: isolation-segments
+        <<: *baby-bosh-task
+        params:
+          <<: *baby-bosh-params
+          CF_MGMT_COMMAND: isolation-segments
+      - task: cleanup-org-users
+        <<: *baby-bosh-task
+        params:
+          <<: *baby-bosh-params
+          CF_MGMT_COMMAND: cleanup-org-users
+      - task: uaac-script-run
+        input_mapping:
+          config-repo: ocfp-dev-lab-config-repo
+        params:
+          <<: *baby-bosh-params
+          UAAC_SCRIPT: ci/scripts/uaac-script-example.sh
+        file: ocfp-dev-lab-config-repo/ci/tasks/uaac-cli.yml
+
+  - name: prod-cf-config # prod-cf-config
+    plan:
+      - get: ocfp-dev-prod-config-repo
+        trigger: true
+      - get: prod-changes
+        passed: [ prod-cf ]
+      - get: prod-cache
+        trigger: true
+        passed: [ prod-cf ]
+      - task: create-orgs
+        <<: &prod-task
+          file: ocfp-dev-prod-config-repo/ci/tasks/cf-mgmt.yml
+          input_mapping:
+            config-repo: ocfp-dev-prod-config-repo
+        params:
+          <<: &prod-params
+            SYSTEM_DOMAIN: (( grab cf-mgmt.ocfp-dev-prod.system_domain ))
+            USER_ID:       (( grab cf-mgmt.ocfp-dev-prod.user_id ))
+            PASSWORD:      (( grab cf-mgmt.ocfp-dev-prod.password ))
+            CONFIG_DIR:    (( grab cf-mgmt.ocfp-dev-prod.config_dir ))
+            CLIENT_SECRET: (( grab cf-mgmt.ocfp-dev-prod.client_secret ))
+            LOG_LEVEL:     (( grab cf-mgmt.ocfp-dev-prod.log_level ))
+          CF_MGMT_COMMAND: create-orgs
+      - task: shared-domains
+        <<: *prod-task
+        params:
+          <<: *prod-params
+          CF_MGMT_COMMAND: shared-domains
+      - task: create-security-groups
+        <<: *prod-task
+        params:
+          <<: *prod-params
+          CF_MGMT_COMMAND: create-security-groups
+      - task: assign-default-security-groups
+        <<: *prod-task
+        params:
+          <<: *prod-params
+          CF_MGMT_COMMAND: assign-default-security-groups
+      - task: delete-orgs
+        <<: *prod-task
+        params:
+          <<: *prod-params
+          CF_MGMT_COMMAND: delete-orgs
+      - task: update-orgs-metadata
+        <<: *prod-task
+        params:
+          <<: *prod-params
+          CF_MGMT_COMMAND: update-orgs-metadata
+      - task: create-org-private-domains
+        <<: *prod-task
+        params:
+          <<: *prod-params
+          CF_MGMT_COMMAND: create-org-private-domains
+      - task: service-access
+        <<: *prod-task
+        params:
+          <<: *prod-params
+          CF_MGMT_COMMAND: service-access
+      - task: share-org-private-domains
+        <<: *prod-task
+        params:
+          <<: *prod-params
+          CF_MGMT_COMMAND: share-org-private-domains
+      - task: create-spaces
+        <<: *prod-task
+        params:
+          <<: *prod-params
+          CF_MGMT_COMMAND: create-spaces
+      - task: delete-spaces
+        <<: *prod-task
+        params:
+          <<: *prod-params
+          CF_MGMT_COMMAND: delete-spaces
+      - task: update-spaces
+        <<: *prod-task
+        params:
+          <<: *prod-params
+          CF_MGMT_COMMAND: update-spaces
+      - task: update-spaces-metadata
+        <<: *prod-task
+        params:
+          <<: *prod-params
+          CF_MGMT_COMMAND: update-spaces-metadata
+      - task: update-space-users
+        <<: *prod-task
+        params:
+          <<: *prod-params
+          CF_MGMT_COMMAND: update-space-users
+      - task: update-space-quotas
+        <<: *prod-task
+        params:
+          <<: *prod-params
+          CF_MGMT_COMMAND: update-space-quotas
+      - task: update-space-security-groups
+        <<: *prod-task
+        params:
+          <<: *prod-params
+          CF_MGMT_COMMAND: update-space-security-groups
+      - task: update-org-users
+        <<: *prod-task
+        params:
+          <<: *prod-params
+          CF_MGMT_COMMAND: update-org-users
+      - task: update-org-quotas
+        <<: *prod-task
+        params:
+          <<: *prod-params
+          CF_MGMT_COMMAND: update-org-quotas
+      - task: isolation-segments
+        <<: *prod-task
+        params:
+          <<: *prod-params
+          CF_MGMT_COMMAND: isolation-segments
+      - task: cleanup-org-users
+        <<: *prod-task
+        params:
+          <<: *prod-params
+          CF_MGMT_COMMAND: cleanup-org-users
+      - task: uaac-script-run
+        input_mapping:
+          config-repo: ocfp-dev-prod-config-repo
+        params:
+          <<: *prod-params
+          UAAC_SCRIPT: ci/scripts/uaac-script-example.sh
+        file: ocfp-dev-prod-config-repo/ci/tasks/uaac-cli.yml
 
 
+  - name: trigger-lab-dr
+    public: false
+    serial: true
+    plan:
+      - get: lab-changes
+        passed:
+          - lab-cf
+        trigger: true
+      - task: trigger-job
+        params:
+          # VAULT_ADDR: https://10.4.1.7
+          # VAULT_ROLE_ID: (( vault "secret/uswest2demo/full/concourse/approle/concourse:approle-id" ))
+          # VAULT_SECRET_ID: (( vault "secret/uswest2demo/full/concourse/approle/concourse:approle-secret" ))
+          # VAULT_SKIP_VERIFY: true
+          CONCOURSE_URL:      (( vault "secret/dr/dev/concourse:url" ))
+          CONCOURSE_USERNAME: (( vault "secret/dr/dev/concourse:username" ))
+          CONCOURSE_PASSWORD: (( vault "secret/dr/dev/concourse:password" ))
+          WORKING_DIR: lab-changes
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: starkandwayne/concourse
+              tag: latest
+          inputs:
+            - name: dev-changes
+          run:
+            path: bash
+            args:
+            - "-ec"
+            - |
+              # echo "Creating Vault target using safe";
+              # safe target ${VAULT_ADDR} deployments-vault --no-strongbox -k
+              # echo "Logging into Vault";
+              # printf "${VAULT_ROLE_ID}\n${VAULT_SECRET_ID}\n" \
+              #     | safe auth approle;
+              # CONCOURSEDR_URL=$(safe get secret/dr/dev/concourse:url)
+              # CONCOURSEDR_UN=$(safe get secret/dr/dev/concourse:username)
+              # CONCOURSEDR_PW=$(safe get secret/dr/dev/concourse:password)
 
-- name: trigger-lab-dr
-  public: false
-  serial: true
-  plan:
-    - get: lab-changes
-      passed:
-        - lab-cf
-      trigger: true
-    - task: trigger-job
-      params:
-        # VAULT_ADDR: https://10.4.1.7
-        # VAULT_ROLE_ID: (( vault "secret/uswest2demo/full/concourse/approle/concourse:approle-id" ))
-        # VAULT_SECRET_ID: (( vault "secret/uswest2demo/full/concourse/approle/concourse:approle-secret" ))
-        # VAULT_SKIP_VERIFY: true
-        CONCOURSE_URL:      (( vault "secret/dr/dev/concourse:url" ))
-        CONCOURSE_USERNAME: (( vault "secret/dr/dev/concourse:username" ))
-        CONCOURSE_PASSWORD: (( vault "secret/dr/dev/concourse:password" ))
-        WORKING_DIR: lab-changes
-      config:
-        platform: linux
-        image_resource:
-          type: registry-image
-          source:
-            repository: starkandwayne/concourse
-            tag: latest
-        inputs:
-          - name: dev-changes
-        run:
-          path: bash
-          args:
-          - "-ec"
-          - |
-            # echo "Creating Vault target using safe";
-            # safe target ${VAULT_ADDR} deployments-vault --no-strongbox -k
-            # echo "Logging into Vault";
-            # printf "${VAULT_ROLE_ID}\n${VAULT_SECRET_ID}\n" \
-            #     | safe auth approle;
-            # CONCOURSEDR_URL=$(safe get secret/dr/dev/concourse:url)
-            # CONCOURSEDR_UN=$(safe get secret/dr/dev/concourse:username)
-            # CONCOURSEDR_PW=$(safe get secret/dr/dev/concourse:password)
-
-            curl --silent --fail --location --show-error \
-                --url "https://github.com/concourse/concourse/releases/download/v7.7.1/fly-7.7.1-linux-amd64.tgz" \
-                --output "fly-7.7.1-linux-amd64.tgz"
-            tar -zxvf "fly-7.7.1-linux-amd64.tgz"
-            echo 'login...............'
-            ./fly --target="codexdr" login --insecure --team-name="main" \
-                --concourse-url="${CONCOURSE_URL}" \
-                --username="${CONCOURSE_USERNAME}" \
-                --password="${CONCOURSEDR_PASSWORD}"
-            (
-              set -x
-              ./fly targets
-              ./fly --target "codexdr" trigger-job --job "test_pipeline/job-hello-world"
-            )
+              curl --silent --fail --location --show-error \
+                  --url "https://github.com/concourse/concourse/releases/download/v7.7.1/fly-7.7.1-linux-amd64.tgz" \
+                  --output "fly-7.7.1-linux-amd64.tgz"
+              tar -zxvf "fly-7.7.1-linux-amd64.tgz"
+              echo 'login...............'
+              ./fly --target="codexdr" login --insecure --team-name="main" \
+                  --concourse-url="${CONCOURSE_URL}" \
+                  --username="${CONCOURSE_USERNAME}" \
+                  --password="${CONCOURSEDR_PASSWORD}"
+              (
+                set -x
+                ./fly targets
+                ./fly --target "codexdr" trigger-job --job "test_pipeline/job-hello-world"
+              )
 
