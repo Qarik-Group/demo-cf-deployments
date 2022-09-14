@@ -605,9 +605,9 @@ jobs:
           # VAULT_ROLE_ID: (( vault "secret/uswest2demo/full/concourse/approle/concourse:approle-id" ))
           # VAULT_SECRET_ID: (( vault "secret/uswest2demo/full/concourse/approle/concourse:approle-secret" ))
           # VAULT_SKIP_VERIFY: true
-          CONCOURSE_URL:      (( vault "secret/dr/dev/concourse:url" ))
-          CONCOURSE_USERNAME: (( vault "secret/dr/dev/concourse:username" ))
-          CONCOURSE_PASSWORD: (( vault "secret/dr/dev/concourse:password" ))
+          CONCOURSE_URL:      (( vault "secret/exodus/uswest2demo-full-dr/concourse:external_url" ))
+          CONCOURSE_USERNAME: (( vault "secret/exodus/uswest2demo-full-dr/concourse:username" ))
+          CONCOURSE_PASSWORD: (( vault "secret/exodus/uswest2demo-full-dr/concourse:password" ))
         config:
           platform: linux
           image_resource:
@@ -634,13 +634,13 @@ jobs:
                   --output "fly-7.7.1-linux-amd64.tgz"
               tar -zxvf "fly-7.7.1-linux-amd64.tgz"
               echo 'login...............'
-              ./fly --target="codexdr" login --insecure --team-name="main" \
+              ./fly --target="concourse-dr" login --insecure --team-name="main" \
                   --concourse-url="${CONCOURSE_URL}" \
                   --username="${CONCOURSE_USERNAME}" \
                   --password="${CONCOURSEDR_PASSWORD}"
               (
                 set -x
                 ./fly targets
-                ./fly --target "codexdr" trigger-job --job "test_pipeline/job-hello-world"
+                ./fly --target "concourse-dr" trigger-job --job "test_pipeline/job-hello-world"
               )
 
