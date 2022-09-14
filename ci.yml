@@ -105,14 +105,14 @@ cf-mgmt:
 #### dev cf-mgmt pipeline configuration
 #############################################
 resources:
-- name: dev-config-repo
+- name: ocfp-dev-config-repo
   type: git
   icon: github
   source:
-    uri: ((grab cf-mgmt.dev.git_repo_uri))
-    branch: ((grab cf-mgmt.dev.git_repo_branch))
-    paths: ["((grab cf-mgmt.dev.config_dir))"]
-    ignore_paths: [((concat cf-mgmt.dev.config_dir "/results"))]
+    uri: ((grab cf-mgmt.ocfp-dev.git_repo_uri))
+    branch: ((grab cf-mgmt.ocfp-dev.git_repo_branch))
+    paths: ["((grab cf-mgmt.ocfp-dev.config_dir))"]
+    ignore_paths: [((concat cf-mgmt.ocfp-dev.config_dir "/results"))]
 # - name: autoscale-repo
 #   type: git
 #   icon: github
@@ -120,14 +120,14 @@ resources:
 #     uri: git@github.com:starkandwayne/demo-cf-deployments
 #     private_key: (( vault "concourse/demo/cf/github:private_key" ))
 #     branch: ((grab cf-mgmt.dev.git_repo_branch))
-- name: baby-bosh-config-repo
+- name: ocfp-dev-lab-config-repo
   type: git
   icon: github
   source:
-    uri: ((grab cf-mgmt.baby-bosh.git_repo_uri))
-    branch: ((grab cf-mgmt.baby-bosh.git_repo_branch))
-    paths: ["((grab cf-mgmt.baby-bosh.config_dir))"]
-    ignore_paths: [((concat cf-mgmt.baby-bosh.config_dir "/results"))]
+    uri: ((grab cf-mgmt.ocfp-dev-lab.git_repo_uri))
+    branch: ((grab cf-mgmt.ocfp-dev-lab.git_repo_branch))
+    paths: ["((grab cf-mgmt.ocfp-dev-lab.config_dir))"]
+    ignore_paths: [((concat cf-mgmt.ocfp-dev-lab.config_dir "/results"))]
 # - name: every-1h
 #   type: time
 #   icon: clock-outline
@@ -189,7 +189,7 @@ jobs:
 ###########
 - name: sandbox-cf-config # dev-cf-config
   plan:
-  - get: dev-config-repo
+  - get: ocfp-dev-config-repo
     trigger: true
   - get: sandbox-changes # dev-changes
     passed: [sandbox-cf] # dev-cf
@@ -198,17 +198,17 @@ jobs:
     passed: [sandbox-cf] # dev-cf
   - task: create-orgs
     <<: &dev-task
-      file: dev-config-repo/ci/tasks/cf-mgmt.yml
+      file: ocfp-dev-config-repo/ci/tasks/cf-mgmt.yml
       input_mapping:
-        config-repo: dev-config-repo
+        config-repo: ocfp-dev-config-repo
     params:
       <<: &dev-params
-        SYSTEM_DOMAIN: ((grab cf-mgmt.dev.system_domain))
-        USER_ID: ((grab cf-mgmt.dev.user_id))
-        PASSWORD: ((grab cf-mgmt.dev.password))
-        CONFIG_DIR: ((grab cf-mgmt.dev.config_dir))
-        CLIENT_SECRET: ((grab cf-mgmt.dev.client_secret))
-        LOG_LEVEL: ((grab cf-mgmt.dev.log_level))
+        SYSTEM_DOMAIN: ((grab cf-mgmt.ocfp-dev.system_domain))
+        USER_ID: ((grab cf-mgmt.ocfp-dev.user_id))
+        PASSWORD: ((grab cf-mgmt.ocfp-dev.password))
+        CONFIG_DIR: ((grab cf-mgmt.ocfp-dev.config_dir))
+        CLIENT_SECRET: ((grab cf-mgmt.ocfp-dev.client_secret))
+        LOG_LEVEL: ((grab cf-mgmt.ocfp-dev.log_level))
       CF_MGMT_COMMAND: create-orgs
   - task: shared-domains
     <<: *dev-task
@@ -311,10 +311,10 @@ jobs:
     params:
       <<: *dev-params
       UAAC_SCRIPT: ci/scripts/uaac-script-example.sh
-    file: dev-config-repo/ci/tasks/uaac-cli.yml
+    file: ocfp-dev-config-repo/ci/tasks/uaac-cli.yml
 - name: lab-cf-config # baby-bosh-cf-config
   plan:
-  - get: baby-bosh-config-repo 
+  - get: ocfp-dev-lab-config-repo 
     trigger: true
   - get: lab-changes # baby-bosh-changes
     passed: [lab-cf] # baby-bosh-cf
@@ -323,17 +323,17 @@ jobs:
     passed: [lab-cf] # baby-bosh-cf
   - task: create-orgs
     <<: &baby-bosh-task
-      file: baby-bosh-config-repo/ci/tasks/cf-mgmt.yml
+      file: ocfp-dev-lab-config-repo/ci/tasks/cf-mgmt.yml
       input_mapping:
-        config-repo: baby-bosh-config-repo
+        config-repo: ocfp-dev-lab-config-repo
     params:
       <<: &baby-bosh-params
-        SYSTEM_DOMAIN: ((grab cf-mgmt.baby-bosh.system_domain))
-        USER_ID: ((grab cf-mgmt.baby-bosh.user_id))
-        PASSWORD: ((grab cf-mgmt.baby-bosh.password))
-        CONFIG_DIR: ((grab cf-mgmt.baby-bosh.config_dir))
-        CLIENT_SECRET: ((grab cf-mgmt.baby-bosh.client_secret))
-        LOG_LEVEL: ((grab cf-mgmt.baby-bosh.log_level))
+        SYSTEM_DOMAIN: ((grab cf-mgmt.ocfp-dev-lab.system_domain))
+        USER_ID: ((grab cf-mgmt.ocfp-dev-lab.user_id))
+        PASSWORD: ((grab cf-mgmt.ocfp-dev-lab.password))
+        CONFIG_DIR: ((grab cf-mgmt.ocfp-dev-lab.config_dir))
+        CLIENT_SECRET: ((grab cf-mgmt.ocfp-dev-lab.client_secret))
+        LOG_LEVEL: ((grab cf-mgmt.ocfp-dev-lab.log_level))
       CF_MGMT_COMMAND: create-orgs
   - task: shared-domains
     <<: *baby-bosh-task
@@ -432,11 +432,11 @@ jobs:
       CF_MGMT_COMMAND: cleanup-org-users
   - task: uaac-script-run
     input_mapping:
-      config-repo: baby-bosh-config-repo
+      config-repo: ocfp-dev-lab-config-repo
     params:
       <<: *baby-bosh-params
       UAAC_SCRIPT: ci/scripts/uaac-script-example.sh
-    file: baby-bosh-config-repo/ci/tasks/uaac-cli.yml
+    file: ocfp-dev-lab-config-repo/ci/tasks/uaac-cli.yml
 
 
 
