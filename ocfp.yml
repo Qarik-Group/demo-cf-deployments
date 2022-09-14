@@ -7,35 +7,35 @@ kit:
   name: cf
   version: 2.2.0-rc.14
   features:
-    #  - postgres-db
+    # - postgres-db
     # - aws-blobstore
     - small-footprint
     - ssh-proxy-on-routers
     - local-postgres-db
     # - app-scheduler-integration
-    #- no-tcp-routers
-    #    - smb-test-server
-    #    - smb-volume-services
-    #    - smb-volume-services-releases
-    #    - app-autoscaler-integration
-    #    #- apps-trust-redis-dev-crt
-    #- routing-api-username
-    #- nfs-volume-services
-    #- nfs-dev-version
-    #- compiled-releases
-    #- enable-service-discovery
+    - no-tcp-routers
+    # - smb-test-server
+    # - smb-volume-services
+    # - smb-volume-services-releases
+    # - app-autoscaler-integration
+    # - apps-trust-redis-dev-crt
+    # - routing-api-username
+    # - nfs-volume-services
+    # - nfs-dev-version
+    # - compiled-releases
+    # - enable-service-discovery
     ### Windows features
-    #- windows-dev-bosh-dns-alias
-    #- windows-diego-cells
-    #- windows-releases
-    #- windows-ofline-2019fs
-    #- windows-remove-default-network
-    #- windows-smoke-tests
-    #- prometheus-integration
+    # - windows-dev-bosh-dns-alias
+    # - windows-diego-cells
+    # - windows-releases
+    # - windows-ofline-2019fs
+    # - windows-remove-default-network
+    # - windows-smoke-tests
+    # - prometheus-integration
     - custom-router-group
-    #- add-persistent-isolation-segment-diego-cell
-    #- add-windows-isolation-segment
-    #- app-security-groups
+    # - add-persistent-isolation-segment-diego-cell
+    # - add-windows-isolation-segment
+    # - app-security-groups
     - cf-mgmt-uaa-client
 
 params:
