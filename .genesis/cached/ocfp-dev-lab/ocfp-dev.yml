@@ -1,15 +1,9 @@
 ---
 genesis:
   env:      ocfp-dev 
+
 params:
   # Cloud Foundry base domain
   base_domain: codex.starkandwayne.com
   system_domain: system.codex.starkandwayne.com
   apps_domains: apps.codex.starkandwayne.com
-
-instance_groups:
-- name: router
-  vm_extensions:
-    - cf-router-network-properties
-    #- dev-alb
-    #- dev-nlb
