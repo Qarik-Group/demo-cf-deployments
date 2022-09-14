@@ -77,44 +77,44 @@ groups:
 ## cf-mgmt: $env: (...) ##
 cf-mgmt:
   ocfp-dev:
-    git_repo_uri: "https://github.com/starkandwayne/demo-cf-deployments.git"
+    git_repo_uri:    https://github.com/starkandwayne/demo-cf-deployments.git
     git_repo_branch: latest-cf-aws-codex
-    system_domain: "system.codex.starkandwayne.com"
-    user_id: "cf_mgmt_client"
-    client_secret: (( vault "secret/exodus/ocfp-dev/cf:cf_mgmt_secret" ))
-    log_level: INFO
-    time-trigger: 15m
-    config_dir: ci/config/dev
-    ldap_server: ""
-    ldap_user: ""
-    ldap_password: ""
-    password: ""
+    system_domain:   system.codex.starkandwayne.com
+    user_id:         cf_mgmt_client
+    client_secret:   (( vault "secret/exodus/ocfp-dev/cf:cf_mgmt_secret" ))
+    log_level:       INFO
+    time-trigger:    15m
+    config_dir:      ci/config/dev
+    ldap_server:     ""
+    ldap_user:       ""
+    ldap_password:   ""
+    password:        ""
   ocfp-dev-lab:
-    git_repo_uri: "https://github.com/starkandwayne/demo-cf-deployments.git"
+    git_repo_uri:    https://github.com/starkandwayne/demo-cf-deployments.git
     git_repo_branch: latest-cf-aws-codex
-    system_domain: "system.lab.codex.starkandwayne.com"
-    user_id: "cf_mgmt_client"
-    client_secret: (( vault "secret/exodus/ocfp-dev-lab/cf:cf_mgmt_secret" ))
-    log_level: INFO
-    time-trigger: 15m
-    config_dir: ci/config/baby-bosh
-    ldap_server: ""
-    ldap_user: ""
-    ldap_password: ""
-    password: ""
+    system_domain:   system.lab.codex.starkandwayne.com
+    user_id:         cf_mgmt_client
+    client_secret:   (( vault "secret/exodus/ocfp-dev-lab/cf:cf_mgmt_secret" ))
+    log_level:       INFO
+    time-trigger:    15m
+    config_dir:      ci/config/baby-bosh
+    ldap_server:     ""
+    ldap_user:       ""
+    ldap_password:   ""
+    password:        ""
   ocfp-dev-prod:
-    git_repo_uri: "https://github.com/starkandwayne/demo-cf-deployments.git"
+    git_repo_uri:    https://github.com/starkandwayne/demo-cf-deployments.git
     git_repo_branch: latest-cf-aws-codex
-    system_domain: "system.prd.codex.starkandwayne.com"
-    user_id: "cf_mgmt_client"
-    client_secret: (( vault "secret/exodus/ocfp-dev-prod/cf:cf_mgmt_secret" ))
-    log_level: INFO
-    time-trigger: 15m
-    config_dir: ci/config/baby-bosh
-    ldap_server: ""
-    ldap_user: ""
-    ldap_password: ""
-    password: ""
+    system_domain:   system.prd.codex.starkandwayne.com
+    user_id:         cf_mgmt_client
+    client_secret:   (( vault "secret/exodus/ocfp-dev-prod/cf:cf_mgmt_secret" ))
+    log_level:       INFO
+    time-trigger:    15m
+    config_dir:      ci/config/baby-bosh
+    ldap_server:     ""
+    ldap_user:       ""
+    ldap_password:   ""
+    password:        ""
 
 #############################################
 #### dev cf-mgmt pipeline configuration
@@ -333,7 +333,7 @@ jobs:
           CF_MGMT_COMMAND: cleanup-org-users
       - task: uaac-script-run
         input_mapping:
-          config-repo: dev-config-repo
+          config-repo: ocfp-dev-config-repo
         params:
           <<: *dev-params
           UAAC_SCRIPT: ci/scripts/uaac-script-example.sh
@@ -597,10 +597,9 @@ jobs:
     serial: true
     plan:
       - get: lab-changes
-        passed:
-          - lab-cf
+        passed: [ lab-cf ]
         trigger: true
-      - task: trigger-job
+      - task: trigger-dr
         params:
           # VAULT_ADDR: https://10.4.1.7
           # VAULT_ROLE_ID: (( vault "secret/uswest2demo/full/concourse/approle/concourse:approle-id" ))
@@ -609,7 +608,6 @@ jobs:
           CONCOURSE_URL:      (( vault "secret/dr/dev/concourse:url" ))
           CONCOURSE_USERNAME: (( vault "secret/dr/dev/concourse:username" ))
           CONCOURSE_PASSWORD: (( vault "secret/dr/dev/concourse:password" ))
-          WORKING_DIR: lab-changes
         config:
           platform: linux
           image_resource:
@@ -617,8 +615,6 @@ jobs:
             source:
               repository: starkandwayne/concourse
               tag: latest
-          inputs:
-            - name: dev-changes
           run:
             path: bash
             args:
