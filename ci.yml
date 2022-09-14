@@ -628,6 +628,6 @@ jobs:
               (
                 set -x
                 ./fly targets
-                ./fly --target "concourse-dr" trigger-job --job "test_pipeline/job-hello-world"
+                ./fly --target "concourse-dr" trigger-job --job "hello-world/hello-world"
               )
 
