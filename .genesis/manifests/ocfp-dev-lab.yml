@@ -436,7 +436,7 @@ exodus:
   cf_mgmt_client: cf_mgmt_client
   cf_mgmt_secret: ((cf_mgmt_client_secret))
   core_network: cf-core
-  dated: 2022-09-14 13:33:07 +0000
+  dated: 2022-09-14 14:14:30 +0000
   db_network: cf-core
   deployer: unknown
   edge_network: cf-edge
@@ -3336,11 +3336,11 @@ vm_extensions:
   name: 50GB_ephemeral_disk
 - cloud_properties:
     elbs:
-    - snw-dev-cf-elb
+    - snw-staging-cf-elb
   name: cf-router-network-properties
 - cloud_properties:
     elbs:
-    - dev-cf-tcp-lb
+    - staging-cf-tcp-lb
   name: cf-tcp-router-network-properties
 - name: diego-ssh-proxy-network-properties
 vm_types:
