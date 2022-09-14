@@ -4,6 +4,6 @@ genesis:
 
 params:
   # Cloud Foundry base domain
-  base_domain: prd.codex.starkandwayne.com
-  system_domain: system.prd.codex.starkandwayne.com
-  apps_domains: apps.prd.codex.starkandwayne.com
+  base_domain: prod.codex.starkandwayne.com
+  system_domain: system.prod.codex.starkandwayne.com
+  apps_domains: apps.prod.codex.starkandwayne.com

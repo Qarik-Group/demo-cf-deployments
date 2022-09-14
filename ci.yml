@@ -79,7 +79,7 @@ cf-mgmt:
   ocfp-dev:
     git_repo_uri:    https://github.com/starkandwayne/demo-cf-deployments.git
     git_repo_branch: latest-cf-aws-codex
-    system_domain:   system.codex.starkandwayne.com
+    system_domain:   (( vault "secret/exodus/ocfp-dev/cf:system_domain "))
     user_id:         cf_mgmt_client
     client_secret:   (( vault "secret/exodus/ocfp-dev/cf:cf_mgmt_secret" ))
     log_level:       INFO
@@ -92,7 +92,7 @@ cf-mgmt:
   ocfp-dev-lab:
     git_repo_uri:    https://github.com/starkandwayne/demo-cf-deployments.git
     git_repo_branch: latest-cf-aws-codex
-    system_domain:   system.lab.codex.starkandwayne.com
+    system_domain:   (( vault "secret/exodus/ocfp-dev-lab/cf:system_domain "))
     user_id:         cf_mgmt_client
     client_secret:   (( vault "secret/exodus/ocfp-dev-lab/cf:cf_mgmt_secret" ))
     log_level:       INFO
@@ -105,7 +105,7 @@ cf-mgmt:
   ocfp-dev-prod:
     git_repo_uri:    https://github.com/starkandwayne/demo-cf-deployments.git
     git_repo_branch: latest-cf-aws-codex
-    system_domain:   system.prd.codex.starkandwayne.com
+    system_domain:   (( vault "secret/exodus/ocfp-dev-prod/cf:system_domain "))
     user_id:         cf_mgmt_client
     client_secret:   (( vault "secret/exodus/ocfp-dev-prod/cf:cf_mgmt_secret" ))
     log_level:       INFO
