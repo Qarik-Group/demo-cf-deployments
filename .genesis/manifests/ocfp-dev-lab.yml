@@ -436,11 +436,11 @@ exodus:
   cf_mgmt_client: cf_mgmt_client
   cf_mgmt_secret: ((cf_mgmt_client_secret))
   core_network: cf-core
-  dated: 2022-09-14 14:14:30 +0000
+  dated: 2022-09-14 14:34:55 +0000
   db_network: cf-core
   deployer: unknown
   edge_network: cf-edge
-  features: small-footprint,ssh-proxy-on-routers,local-postgres-db,custom-router-group,cf-mgmt-uaa-client
+  features: small-footprint,ssh-proxy-on-routers,local-postgres-db,no-tcp-routers,custom-router-group,cf-mgmt-uaa-client
   is_director: false
   kit_is_dev: false
   kit_name: cf
@@ -1713,39 +1713,6 @@ instance_groups:
   - z1
   instances: 1
   jobs:
-  - name: tcp_router
-    properties:
-      tcp_router:
-        oauth_secret: ((uaa_clients_tcp_router_secret))
-        router_group: default-tcp
-      uaa:
-        ca_cert: ((uaa_ssl.ca))
-        tls_port: 8443
-    release: routing
-  - name: loggr-udp-forwarder
-    properties:
-      loggregator:
-        tls:
-          ca: ((loggregator_tls_agent.ca))
-          cert: ((loggregator_tls_agent.certificate))
-          key: ((loggregator_tls_agent.private_key))
-      metrics:
-        ca_cert: ((loggr_udp_forwarder_tls.ca))
-        cert: ((loggr_udp_forwarder_tls.certificate))
-        key: ((loggr_udp_forwarder_tls.private_key))
-        server_name: loggr_udp_forwarder_metrics
-    release: loggregator-agent
-  name: tcp-router
-  networks:
-  - name: ((cf_edge_network))
-  stemcell: default
-  vm_extensions:
-  - cf-tcp-router-network-properties
-  vm_type: tcp-router
-- azs:
-  - z1
-  instances: 1
-  jobs:
   - name: doppler
     properties:
       loggregator:
@@ -2195,6 +2162,7 @@ kit:
   - small-footprint
   - ssh-proxy-on-routers
   - local-postgres-db
+  - no-tcp-routers
   - custom-router-group
   - cf-mgmt-uaa-client
   name: cf
@@ -2345,8 +2313,6 @@ params:
   scheduler_vm_type: scheduler
   skip_ssl_validation: true
   system_domain: system.lab.codex.starkandwayne.com
-  tcp_router_instances: 1
-  tcp_router_vm_type: tcp-router
   uaa_instances: 1
   uaa_vm_type: uaa
 releases:
