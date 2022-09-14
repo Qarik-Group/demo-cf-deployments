@@ -39,7 +39,6 @@ kit:
     - cf-mgmt-uaa-client
 
 params:
-
   # CF Databases
   #uaadb_password:          ((uaa_db_password))
   #ccdb_password:           ((cloud_controller_db_password))
@@ -88,23 +87,23 @@ params:
   uaa_vm_type:        uaa
 
 instance_groups:
+  - name: router
+    vm_extensions:
+      - cf-router-network-properties
 
-- name: nats
-  jobs:
-  - name: nats-tls
-    release: nats
-    custom_provider_definitions:
-      - name: nats-tls-address
-        type: address
-        #      properties:
-        #          - machines
+  - name: nats
+    jobs:
+    - name: nats-tls
+      release: nats
+      custom_provider_definitions:
+        - name: nats-tls-address
+          type: address
 
-- name: diego-cell
-  update:
-    max_in_flight: 3
+  - name: diego-cell
+    update:
+      max_in_flight: 3
 
 stemcells:
-- alias: default
-  os: ubuntu-bionic
-  version: latest
-
+  - alias: default
+    os: ubuntu-bionic
+    version: latest
