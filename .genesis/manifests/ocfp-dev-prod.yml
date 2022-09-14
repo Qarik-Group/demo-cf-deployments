@@ -343,7 +343,7 @@ bosh-variables:
   cf_edge_network: cf-edge
   cf_runtime_network: cf-runtime
   deployment_name: ocfp-dev-prod-cf
-  system_domain: system.prd.codex.starkandwayne.com
+  system_domain: system.prod.codex.starkandwayne.com
 compilation:
   az: z1
   network: default
@@ -429,11 +429,11 @@ disk_types:
 exodus:
   admin_password: ((cf_admin_password))
   admin_username: admin
-  api_domain: api.system.prd.codex.starkandwayne.com
+  api_domain: api.system.prod.codex.starkandwayne.com
   app_domains:
-  - apps.prd.codex.starkandwayne.com
-  apps_domain: apps.prd.codex.starkandwayne.com
-  base_domain: prd.codex.starkandwayne.com
+  - apps.prod.codex.starkandwayne.com
+  apps_domain: apps.prod.codex.starkandwayne.com
+  base_domain: prod.codex.starkandwayne.com
   bosh: ocfp-dev-prod
   cf-deployment-date: 2022-Feb-14 03:48:47 UTC
   cf-deployment-hotfixes: true
@@ -442,7 +442,7 @@ exodus:
   cf_mgmt_client: cf_mgmt_client
   cf_mgmt_secret: ((cf_mgmt_client_secret))
   core_network: cf-core
-  dated: 2022-09-14 14:51:18 +0000
+  dated: 2022-09-14 15:03:44 +0000
   db_network: cf-core
   deployer: unknown
   edge_network: cf-edge
@@ -452,7 +452,7 @@ exodus:
   kit_name: cf
   kit_version: 2.2.0-rc.14
   runtime_network: cf-runtime
-  system_domain: system.prd.codex.starkandwayne.com
+  system_domain: system.prod.codex.starkandwayne.com
   system_org: system
   system_space: system
   use_create_env: false
@@ -480,7 +480,7 @@ instance_groups:
         enabled: true
       smoke_tests:
         api: https://api.((system_domain))
-        apps_domain: apps.prd.codex.starkandwayne.com
+        apps_domain: apps.prod.codex.starkandwayne.com
         cf_dial_timeout_in_seconds: 300
         client: cf_smoke_tests
         client_secret: ((uaa_clients_cf_smoke_tests_secret))
@@ -752,8 +752,8 @@ instance_groups:
           product_logo: null
           square_logo: null
         links:
-          passwd: https://login.system.prd.codex.starkandwayne.com/forgot_password
-          signup: https://login.system.prd.codex.starkandwayne.com/create_account
+          passwd: https://login.system.prod.codex.starkandwayne.com/forgot_password
+          signup: https://login.system.prod.codex.starkandwayne.com/create_account
         saml:
           activeKeyId: key-1
           keys:
@@ -970,7 +970,7 @@ instance_groups:
   - name: cloud_controller_ng
     properties:
       app_domains:
-      - apps.prd.codex.starkandwayne.com
+      - apps.prod.codex.starkandwayne.com
       app_ssh:
         host_key_fingerprint: ((diego_ssh_proxy_host_key.public_key_fingerprint))
       build: cf-genesis-kit v2.2.0-rc.14
@@ -2176,7 +2176,7 @@ kit:
 manifest_version: v16.25.0
 meta:
   app_domains:
-  - run.prd.codex.starkandwayne.com
+  - run.prod.codex.starkandwayne.com
   azs:
   - z1
   branding:
@@ -2209,7 +2209,7 @@ meta:
     uaa:
       name: uaa
       user: uaa
-  default_apps_domains: apps.prd.codex.starkandwayne.com
+  default_apps_domains: apps.prod.codex.starkandwayne.com
   default_azs:
   - z1
   - z2
@@ -2625,10 +2625,10 @@ params:
   api_instances: 1
   api_vm_type: api
   app_domains:
-  - apps.prd.codex.starkandwayne.com
-  apps_domain: apps.prd.codex.starkandwayne.com
-  apps_domains: apps.prd.codex.starkandwayne.com
-  base_domain: prd.codex.starkandwayne.com
+  - apps.prod.codex.starkandwayne.com
+  apps_domain: apps.prod.codex.starkandwayne.com
+  apps_domains: apps.prod.codex.starkandwayne.com
+  base_domain: prod.codex.starkandwayne.com
   cc_worker_instances: 1
   cc_worker_vm_type: cc-worker
   cf_core_network: cf-core
@@ -2654,7 +2654,7 @@ params:
   scheduler_instances: 1
   scheduler_vm_type: scheduler
   skip_ssl_validation: true
-  system_domain: system.prd.codex.starkandwayne.com
+  system_domain: system.prod.codex.starkandwayne.com
   uaa_instances: 1
   uaa_vm_type: uaa
 releases:
