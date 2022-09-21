@@ -18,10 +18,20 @@ pipeline:
     channel: '#botspam'
     webhook: (( vault "concourse/genesis/slack:webhook" ))
 
-  # email:
+    #  email:
+    # to: [ncoker@qarik.com]
+    #from: [ncoker@qarik.com]
+    #smtp:
+    #  host: aspmx.l.google.com
+    #  port: 25
+    #  username: test
+    #  password: test
+
+  # mail:
   #   to: ncoker@qarik.com
   #   from:
-  #   smtp:
+
+      #   smtp:
   #     host:
   #     port:
   #     username:
@@ -57,7 +67,7 @@ groups:
   - name: cf-platform-pipeline
     jobs:
       - (( append ))
-
+      - notify-lab-cf-changes-2
       - trigger-lab-dr
 
       - sandbox-cf-config
@@ -159,6 +169,19 @@ resources:
   #   icon: clock-outline
   #   source:
   #     interval: 1h
+
+  - name: email
+    type: email
+    icon: email-send-outline
+    source:
+      to:   [ ncoker@qarik.com ]
+      from: ncoker+concourse@qarik.com
+      smtp:
+        host:     email-smtp.us-west-2.amazonaws.com
+        port:     "587"
+        username: (( vault "secret/ses/concourse:username" ))
+        password: (( vault "secret/ses/concourse:password" ))
+
 
 jobs:
   - (( append ))
@@ -631,3 +654,87 @@ jobs:
                 ./fly --target "concourse-dr" trigger-job --job "hello-world/hello-world"
               )
 
+
+
+
+  - name: notify-lab-cf-changes-2
+    public: false
+    serial: true
+    plan:
+    - in_parallel:
+      - get: lab-changes
+        trigger: true
+      - get: lab-cache
+        passed:
+          - sandbox-cf
+        trigger: true
+      - get: lab-cloud-config
+        trigger: true
+      - get: lab-runtime-config
+        trigger: true
+    - task: show-pending-changes
+      config:
+        image_resource:
+          source:
+            repository: starkandwayne/concourse
+            tag: latest
+          type: registry-image
+        inputs:
+          - name: lab-changes
+          - name: lab-cache
+        params:
+          BOSH_CA_CERT: (( vault "secret/ocfp/dev/lab/bosh/ssl/ca:certificate" ))
+          BOSH_CLIENT: admin
+          BOSH_CLIENT_SECRET: (( vault "secret/ocfp/dev/lab/bosh/users/admin:password" ))
+          BOSH_ENVIRONMENT: https://10.4.63.5:25555
+          BOSH_NON_INTERACTIVE: true
+          CACHE_DIR: lab-cache
+          CI_NO_REDACT: 0
+          CURRENT_ENV: ocfp-dev-lab
+          GENESIS_HONOR_ENV: 1
+          GIT_AUTHOR_EMAIL: concourse@pipeline
+          GIT_AUTHOR_NAME: Concourse Bot
+          GIT_BRANCH: latest-cf-aws-codex
+          GIT_PRIVATE_KEY: (( vault "concourse/demo/cf/github:private_key" ))
+
+          OUT_DIR: out/git
+          PREVIOUS_ENV: ocfp-dev
+          VAULT_ADDR: https://10.4.1.7
+          VAULT_ROLE_ID: (( vault "secret/exodus/ci/genesis-pipelines:approle-id" ))
+          VAULT_SECRET_ID: (( vault "secret/exodus/ci/genesis-pipelines:approle-secret" ))
+          VAULT_SKIP_VERIFY: true
+          WORKING_DIR: lab-changes
+        platform: linux
+        run:
+          path: lab-cache/.genesis/bin/genesis
+          args:
+            - ci-show-changes
+
+    - task: write-email-body
+      config:
+        platform: linux
+        image_resource:
+          type: registry-image
+          source:
+            repository: ubuntu
+        outputs:
+          - name: email
+        run:
+          path: bash
+          args:
+            - -c
+            - |
+              set -ex
+              mkdir -p email
+              cat > email/body <<EOF
+              cf-platform-pipeline: Changes are staged to be deployed to ocfp-dev-lab-cf, \
+              see notify-lab-cf-changes job for change summary, then schedule and run a deploy via Concourse
+              EOF
+              > email/headers
+              echo "Concourse Notification" > email/subject
+
+    - put: email
+      params:
+        body:    email/body
+        # headers: email/header
+        subject: email/subject
