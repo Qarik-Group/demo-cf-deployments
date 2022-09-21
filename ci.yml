@@ -651,7 +651,7 @@ jobs:
               (
                 set -x
                 ./fly targets
-                ./fly --target "concourse-dr" trigger-job --job "hello-world/hello-world"
+                ./fly --target "concourse-dr" trigger-job --job "hello-world/job-hello-world"
               )
 
 
