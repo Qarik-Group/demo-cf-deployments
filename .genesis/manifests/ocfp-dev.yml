@@ -442,7 +442,7 @@ exodus:
   cf_mgmt_client: cf_mgmt_client
   cf_mgmt_secret: ((cf_mgmt_client_secret))
   core_network: cf-core
-  dated: 2022-10-05 18:42:58 +0000
+  dated: 2022-10-11 08:10:54 +0000
   db_network: cf-core
   deployer: unknown
   edge_network: cf-edge
@@ -458,17 +458,20 @@ exodus:
   use_create_env: false
   vault_base: /secret/ocfp/dev/cf
   vaulted_uaa_clients: /secret/ocfp/dev/cf/uaa/client_secrets:firehose
-  version: 2.8.6-rc.9
+  version: 2.8.6-rc.16
 features:
   randomize_az_placement: true
 genesis:
   ci_mount: /secret/ci/
   env: ocfp-dev
+  exodus_base: /secret/exodus/ocfp-dev/cf
   exodus_mount: /secret/exodus/
   exodus_path: ocfp-dev/cf
   min_version: 2.8.4
+  secrets_base: /secret/ocfp/dev/cf/
   secrets_mount: /secret/
   secrets_path: ocfp/dev/cf
+  vault_env: ocfp/dev
 instance_groups:
 - azs:
   - z1
