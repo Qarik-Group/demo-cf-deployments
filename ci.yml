@@ -13,6 +13,9 @@ pipeline:
     url:    https://10.4.1.7
     verify: no
     # run setup-approle from concourse-kit deployment ex. genesis do [env] -- setup-approle
+    # the following approle and secret are stored in concourse mount, it will be used by genesis to login to vault, with policy can acess all exodus data
+    #role: ((genesis-pipelines.role))
+    #secret: ((genesis-pipelines.secret))
 
   slack:
     channel: '#botspam'
